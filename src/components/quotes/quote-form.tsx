@@ -98,7 +98,7 @@ export function QuoteForm({ job, details, customer, business, today, quote, save
         items, exclusions, duration, paymentTerms: payment, validUntil, notes,
         salePrice: quote ? salePrice : null, acknowledgeRisk: acknowledged });
       if (!result.ok) { if (result.needsConfirmation) setConfirm(status); else { setError(result.error); setNeedsUpgrade(Boolean(result.needsUpgrade)); } return; }
-      setConfirm(null); router.push(`/jobs/${job.id}`); router.refresh();
+      setConfirm(null); router.push(`/quotes/${result.id}?saved=${status}`); router.refresh();
     } catch { setError(quote ? "Teklif kaydedilemedi." : "Teklif oluşturulamadı."); }
     finally { savingRef.current = false; setPending(false); }
   }

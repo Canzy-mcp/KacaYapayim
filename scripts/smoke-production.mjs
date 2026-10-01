@@ -5,6 +5,9 @@ const get=async path=>{const response=await fetch(new URL(path,base),{redirect:"
 const publicPages=["/","/ozellikler","/meslekler","/meslekler/boyaci","/meslekler/tesisatci","/meslekler/klimaci","/meslekler/elektrikci","/rehber/kar-marji-nasil-hesaplanir","/hesaplama-araclari/kar-marji","/metodoloji","/fiyatlandirma"];
 for(const path of publicPages){const {response,body}=await get(path);assert.equal(response.status,200,path);assert.match(body,/<h1[ >]/,path);assert.match(body,/<link rel="canonical"/,path);assert.match(body,/<meta property="og:title"/,path);assert.ok(response.headers.get("content-security-policy"),path);}
 const {response:privateResponse}=await get("/dashboard");assert.match(privateResponse.headers.get("x-robots-tag")||"",/noindex/);
+const {response:quoteDetailResponse}=await get("/quotes/00000000-0000-4000-8000-000000000000");
+assert.equal(quoteDetailResponse.status,307,"quote detail route should redirect unauthenticated visitors to login");
+assert.equal(quoteDetailResponse.headers.get("location"),"/login");
 const {response:quoteResponse}=await get("/t/00000000-0000-4000-8000-000000000000");assert.equal(quoteResponse.status,404);assert.match(quoteResponse.headers.get("x-robots-tag")||"",/noindex/);
 const {body:sitemap}=await get("/sitemap.xml");assert.match(sitemap,/<loc>/);for(const forbidden of ["/dashboard","/quotes","/jobs","/customers","/settings","/admin","/t/"])assert.ok(!sitemap.includes(forbidden),forbidden);
 const {body:robots}=await get("/robots.txt");assert.match(robots,/Sitemap:/);
