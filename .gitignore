@@ -11,3 +11,6 @@ apps/mobile/.env
 apps/mobile/.env.*
 !apps/mobile/.env.example
 .env
+.env.*
+!.env.example
+.vercel/
