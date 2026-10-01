@@ -1,0 +1,8 @@
+"use client";
+import Link from "next/link";
+import { useEffect } from "react";
+
+export function UpgradeModal({ title, description, onClose }: { title: string; description: string; onClose: () => void }) {
+  useEffect(() => { const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); }; window.addEventListener("keydown", closeOnEscape); return () => window.removeEventListener("keydown", closeOnEscape); }, [onClose]);
+  return <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-5" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><div role="dialog" aria-modal="true" aria-labelledby="upgrade-title" className="w-full rounded-t-[22px] bg-white p-6 shadow-2xl sm:max-w-[430px] sm:rounded-[22px] sm:p-7"><div className="mx-auto mb-5 h-1 w-10 rounded-full bg-[#d2d2d7] sm:hidden" /><p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#0071E3]">Paket Kullanımı</p><h2 id="upgrade-title" className="mt-2 text-[23px] font-semibold leading-tight tracking-[-0.035em]">{title}</h2><p className="mt-3 text-[14px] leading-6 text-[#6E6E73]">{description}</p><div className="mt-6 rounded-[13px] bg-[#f5f5f7] p-4"><p className="text-[14px] font-semibold">Usta paketi</p><p className="mt-1 text-[13px] text-[#6E6E73]">Sınırsız teklif ve müşteri · gelişmiş raporlar</p></div><div className="mt-6 flex flex-col gap-2"><Link href="/billing" className="inline-flex min-h-12 items-center justify-center rounded-[13px] bg-[#0071E3] px-5 text-[14px] font-semibold text-white">Paketleri Gör</Link><button type="button" onClick={onClose} className="min-h-11 text-[13px] font-semibold text-[#6E6E73]">Daha Sonra</button></div></div></div>;
+}

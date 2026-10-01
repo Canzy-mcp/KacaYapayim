@@ -1,0 +1,13 @@
+node_modules
+.npm-cache
+.next
+out
+.env*.local
+*.tsbuildinfo
+next-env.d.ts
+apps/mobile/.expo/
+apps/mobile/dist/
+apps/mobile/.env
+apps/mobile/.env.*
+!apps/mobile/.env.example
+.env

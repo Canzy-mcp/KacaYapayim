@@ -1,0 +1,3 @@
+export default function CustomerLoading() {
+  return <div className="mx-auto max-w-[960px] animate-pulse" aria-label="Müşteri yükleniyor"><div className="mb-5 h-8 w-32 rounded-lg bg-[#e7e7eb]" /><div className="rounded-[20px] border border-[#e7e7eb] bg-white p-6"><div className="flex items-center gap-4"><div className="size-16 rounded-full bg-[#e7e7eb]" /><div><div className="h-8 w-48 rounded-lg bg-[#e7e7eb]" /><div className="mt-2 h-5 w-28 rounded-lg bg-[#e7e7eb]" /></div></div><div className="mt-6 h-11 w-52 rounded-xl bg-[#e7e7eb]" /></div><div className="mt-5 grid gap-5 sm:grid-cols-2">{[0, 1].map((item) => <div key={item} className="h-52 rounded-[20px] border border-[#e7e7eb] bg-white" />)}</div></div>;
+}

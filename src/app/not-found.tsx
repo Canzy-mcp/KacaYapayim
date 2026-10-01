@@ -1,0 +1,3 @@
+import { BrandLogo } from "@/components/brand-logo";
+import Link from "next/link";
+export default function NotFound(){return <main className="flex min-h-screen flex-col items-center justify-center px-5 text-center"><div className="mb-8 text-xl"><BrandLogo size={60}/></div><p className="text-sm font-semibold text-[#0071e3]">404</p><h1 className="mt-4 text-4xl font-semibold tracking-tight">Aradığın sayfayı bulamadık.</h1><p className="mt-4 text-[#6e6e73]">Bağlantıyı kontrol edebilir veya ana sayfaya dönebilirsin.</p><Link href="/" className="marketing-primary mt-8">Ana Sayfaya Dön</Link></main>}
