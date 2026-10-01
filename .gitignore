@@ -14,3 +14,4 @@ apps/mobile/.env.*
 .env.*
 !.env.example
 .vercel/
+supabase/.temp/
