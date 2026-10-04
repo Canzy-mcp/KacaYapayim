@@ -5,8 +5,8 @@ import { todayInIstanbul } from "@/lib/quotes/defaults";
 import { isJobId } from "@/lib/jobs/service";
 import type { Customer, Quote, QuoteExclusion, QuoteItem, QuoteStatus } from "@/types/database";
 
-const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-export function isQuoteId(value: string) { return uuid.test(value); }
+import { isQuoteId } from "@/lib/quotes/id";
+export { isQuoteId } from "@/lib/quotes/id";
 
 export function effectiveQuoteStatus(quote: Pick<Quote, "status" | "valid_until">, today = todayInIstanbul()): QuoteStatus {
   return ["ready", "sent", "viewed"].includes(quote.status) && quote.valid_until < today ? "expired" : quote.status;

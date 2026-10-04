@@ -2,6 +2,15 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { suggestedPainterScope, addDaysToDateKey, todayInIstanbul } from "../src/lib/quotes/defaults.ts";
 import { toCustomerQuotePreview } from "../src/lib/quotes/public-preview.ts";
+import { isQuoteId } from "../src/lib/quotes/id.ts";
+
+test("quote routes accept real saved UUIDs and reject malformed identifiers", () => {
+  for (const id of ["15db25f9-998d-45aa-935a-f70adaffda79", "d70df7e3-03ad-4363-a0d4-b05be3a0afaa"])
+    assert.equal(isQuoteId(id), true);
+  assert.equal(isQuoteId("D70DF7E3-03AD-4363-A0D4-B05BE3A0AFAA"), true);
+  for (const id of ["", "new", "d70df7e3-03ad-4363-b05be3a0afaa", "d70df7e3-03ad-4363-a0d4-b05be3a0afaa/preview", "../quotes"])
+    assert.equal(isQuoteId(id), false);
+});
 
 const details = { wall_area: 120, ceiling_area: 80, wall_coats: 2, ceiling_coats: 2,
   primer_required: true, primer_coats: 1, putty_required: false, master_count: 1,
