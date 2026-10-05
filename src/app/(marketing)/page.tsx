@@ -5,6 +5,7 @@ import { ArrowRight, Check, ClipboardList, Eye, Monitor, PaintRoller, Send, Shie
 import { JsonLd, siteMetadata, siteOrigin } from "@/lib/marketing/seo";
 import { DeviceShowcase, HeroVisual, ProfessionCards } from "@/components/marketing/visuals";
 import { MarginExample, ProductDemo } from "@/components/marketing/product-demo";
+import { ProfessionRequest } from "@/components/marketing/profession-request";
 
 export const metadata: Metadata = siteMetadata("İşini doğru fiyatlandır", "Malzeme ve işçilik maliyetlerini gir. Gerçek maliyetini, kârını ve teklif fiyatını hesapla.", "/");
 
@@ -47,7 +48,7 @@ export default function Home() {
 
     <section className="landing-section profession-section"><div className="marketing-container">
       <div className="section-heading-row" data-reveal><div className="section-intro"><p className="marketing-eyebrow">İşini anlayan bir hesap</p><h2 className="marketing-heading">Senin mesleğin.<br/>Senin maliyetlerin.</h2></div><Link href="/meslekler" className="marketing-text-link">Meslekleri incele <ArrowRight size={17} aria-hidden="true"/></Link></div>
-      <ProfessionCards/><p className="visual-disclosure">Meslek görselleri temsili olarak hazırlanmıştır.</p>
+      <ProfessionCards/><p className="visual-disclosure">Meslek görselleri temsili olarak hazırlanmıştır.</p><ProfessionRequest/>
       <div className="inline-cta" data-reveal><p>Bir sonraki işine, hesabını bilerek fiyat ver.</p><Link href="/register" className="marketing-primary">Ücretsiz Başla <ArrowRight size={17} aria-hidden="true"/></Link></div>
     </div></section>
 
