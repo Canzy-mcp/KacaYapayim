@@ -10,8 +10,8 @@ export function passwordError(value: string) {
 
 export function marginErrors(target: number, minimum: number): FieldErrors {
   const errors: FieldErrors = {};
-  if (!Number.isFinite(target) || target < 0 || target > 90) errors.target = "Hedef marj 0–90 arasında olmalı.";
-  if (!Number.isFinite(minimum) || minimum < 0 || minimum > 90) errors.minimum = "Minimum marj 0–90 arasında olmalı.";
+  if (!Number.isFinite(target) || target < 1 || target > 90) errors.target = "Hedef marj 1–90 arasında olmalı.";
+  if (!Number.isFinite(minimum) || minimum < 0 || minimum > 89) errors.minimum = "Minimum marj 0–89 arasında olmalı.";
   if (!errors.target && !errors.minimum && minimum > target) errors.minimum = "Minimum marj hedef marjdan büyük olamaz.";
   return errors;
 }

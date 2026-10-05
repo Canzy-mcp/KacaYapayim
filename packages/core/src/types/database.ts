@@ -110,12 +110,15 @@ export type ActualJobCost = {
 };
 export type QuoteStatus = "draft" | "ready" | "sent" | "viewed" | "accepted" | "rejected" | "expired" | "cancelled";
 export type Quote = {
+  package_group_id?:string|null;
+  tax_rate?:number|null;
   id: string; business_id: string; job_id: string; customer_id: string | null; quote_number: string;
   status: QuoteStatus; title: string; description: string | null; sale_price: number;
   estimated_cost_snapshot: number; estimated_profit_snapshot: number; profit_margin_snapshot: number | null;
   target_margin_snapshot: number; minimum_margin_snapshot: number;
   currency: string; valid_until: string; estimated_duration_text: string | null;
   payment_terms: string | null; notes: string | null; public_token: string;
+  tax_mode?: "unspecified" | "included" | "excluded";
   revision_number: number; parent_quote_id: string | null;
   sent_at: string | null; viewed_at: string | null; accepted_at: string | null; rejected_at: string | null;
   view_count: number; last_viewed_at: string | null;
@@ -139,6 +142,18 @@ export type BillingEvent = { id: string; provider: string; provider_event_id: st
 export type Database = {
   public: {
     Tables: {
+      job_viewers: {Row:{can_add_notes:boolean;id:string;business_id:string;job_id:string;invited_email:string;user_id:string|null;token_hash:string|null;expires_at:string;created_at:string};Insert:{id?:string;business_id:string;job_id:string;invited_email:string;can_add_notes?:boolean;user_id?:string|null;token_hash?:string|null;expires_at?:string};Update:{can_add_notes?:boolean;user_id?:string|null;token_hash?:string|null;expires_at?:string};Relationships:[]};
+      business_preferences:{Row:{business_id:string;followup_reminders:boolean;decision_notifications:boolean;cost_reminders:boolean};Insert:{business_id:string;followup_reminders?:boolean;decision_notifications?:boolean;cost_reminders?:boolean};Update:{followup_reminders?:boolean;decision_notifications?:boolean;cost_reminders?:boolean};Relationships:[]};
+      quote_templates: {Row:{id:string;business_id:string;name:string;content:Record<string,unknown>;created_at:string};Insert:{business_id:string;name:string;content:Record<string,unknown>};Update:{name?:string;content?:Record<string,unknown>};Relationships:[]};
+      business_branding: {Row:{business_id:string;storage_path:string;updated_at:string};Insert:{business_id:string;storage_path:string;updated_at?:string};Update:{storage_path?:string;updated_at?:string};Relationships:[]};
+      product_usage_daily: { Row: {business_id:string;day:string;event_name:string}; Insert: {business_id:string;day:string;event_name:string}; Update: {event_name?:string}; Relationships: [] };
+      marketing_campaign_daily: { Row: {day:string;event_name:string;path:string;channel:string;medium:string;campaign:string;hits:number}; Insert: {day:string;event_name:string;path:string;channel:string;medium:string;campaign:string;hits?:number}; Update: {hits?:number}; Relationships: [] };
+      work_entries: {
+        Row: { id: string; business_id: string; job_id: string | null; quote_id: string | null; kind: 'followup' | 'visit' | 'note' | 'expense' | 'extra_work' | 'attachment' | 'revision_request'; title: string; note: string; amount: number | null; scheduled_at: string | null; status: 'open' | 'done' | 'approved' | 'declined'; metadata: Record<string, unknown>; created_at: string; updated_at: string };
+        Insert: { business_id: string; job_id?: string | null; quote_id?: string | null; kind: string; title: string; note?: string; amount?: number | null; scheduled_at?: string | null; status?: string; metadata?: Record<string, unknown> };
+        Update: { title?: string; note?: string; amount?: number | null; scheduled_at?: string | null; status?: string; metadata?: Record<string, unknown> };
+        Relationships: [];
+      };
       feedback: { Row: { id: string; business_id: string | null; user_id: string | null; type: "bug" | "idea" | "general"; message: string; page: string; created_at: string };
         Insert: { id?: string; business_id: string; user_id: string; type: "bug" | "idea" | "general"; message: string; page: string; created_at?: string };
         Update: never; Relationships: [] };
@@ -238,6 +253,21 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      create_service_packages:{Args:{p_quote_id:string;p_options:Array<{name:string;scope:string;cost:number;price:number}>;p_acknowledge_risk:boolean};Returns:Array<{id:string;name:string}>};
+      add_assigned_job_note: {Args:{p_job_id:string;p_title:string;p_note:string};Returns:string};
+      accept_job_invite:{Args:{p_token:string};Returns:boolean};
+      get_assigned_jobs:{Args:Record<string,never>;Returns:Array<Record<string,unknown>>};
+      publish_service_packages:{Args:{p_quote_id:string;p_acknowledge_risk:boolean};Returns:string};
+      respond_to_package_quote:{Args:{p_token:string;p_action:string;p_reason:string|null;p_note:string|null};Returns:string};
+      save_quote_with_tax_rate:{Args:Database['public']['Functions']['save_quote_details']['Args'] & {p_tax_rate:number|null};Returns:string};
+      save_quote_details: {Args: Database['public']['Functions']['save_quote']['Args'] & {p_tax_mode:string};Returns:string};
+      get_public_quote_details: {Args:{p_token:string};Returns:Record<string,unknown>|null};
+      record_campaign_event: { Args: {p_event:string;p_path:string;p_channel:string;p_medium:string;p_campaign:string}; Returns: undefined };
+      get_product_cohorts: {Args: Record<string,never>; Returns: Array<{cohort:string;businesses:number;activated:number;eligible7:number;repeated7:number;eligible30:number;repeated30:number}>};
+      search_my_quotes: { Args: { p_query: string; p_status: string; p_page: number }; Returns: { rows: Array<{ quote: Quote; customerName: string }>; count: number } };
+      save_manual_job: { Args: { p_job_id: string | null; p_customer_id: string | null; p_title: string; p_description: string | null; p_lines: Array<Record<string, unknown>> }; Returns: string };
+      copy_my_job: { Args: { p_job_id: string }; Returns: string };
+      copy_my_quote: { Args: { p_quote_id: string; p_revision: boolean }; Returns: string };
       consume_rate_limit: { Args: { p_scope: string; p_identity_hash: string; p_window_seconds: number; p_limit: number }; Returns: boolean };
       record_aggregate_event: { Args: { p_event: string; p_path: string; p_channel: string }; Returns: undefined };
       publish_profession_template: { Args: { p_admin_id: string; p_profession_id: string; p_version: number; p_template: Record<string, unknown> }; Returns: undefined };

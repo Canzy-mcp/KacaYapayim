@@ -1,0 +1,10 @@
+"use client";
+import { useEffect,useState } from "react";
+import { savePreferences } from "@/app/actions/preferences";
+import { createClient } from "@/lib/supabase/browser";
+export function NotificationPreferences({businessId}:{businessId:string}){
+ const [settings,setSettings]=useState({followup_reminders:true,decision_notifications:true,cost_reminders:true});const [busy,setBusy]=useState(false);const [message,setMessage]=useState('');
+ useEffect(()=>{let active=true;createClient().from('business_preferences').select('*').eq('business_id',businessId).maybeSingle().then(({data,error})=>{if(!active)return;if(error){setMessage('Bildirim ayarları yüklenemedi.');return;}if(data)setSettings({followup_reminders:data.followup_reminders,decision_notifications:data.decision_notifications,cost_reminders:data.cost_reminders});});return()=>{active=false;};},[businessId]);
+ const labels={followup_reminders:'Teklif takipleri ve keşif hatırlatmaları',decision_notifications:'Müşteri kararları ve revizyon talepleri',cost_reminders:'Eski maliyetleri kontrol etme hatırlatması'};
+ return <section className="mt-5 max-w-4xl rounded-2xl border border-[#e5e5e9] bg-white p-6"><h2 className="text-lg font-semibold">Bildirim tercihleri</h2><p className="mt-2 text-sm text-[#6E6E73]">Hatırlatmalar uygulamanın ana sayfasında gösterilir.</p><form onSubmit={async e=>{e.preventDefault();if(busy)return;setBusy(true);try{const r=await savePreferences(settings);setMessage(r.ok?'Tercihlerin kaydedildi.':'Tercihler kaydedilemedi.');}catch{setMessage('Bağlantı kurulamadı.');}finally{setBusy(false);}}} className="mt-4 space-y-3">{Object.entries(labels).map(([key,label])=><label key={key} className="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" checked={settings[key as keyof typeof settings]} onChange={e=>setSettings(s=>({...s,[key]:e.target.checked}))}/>{label}</label>)}<button disabled={busy} className="min-h-11 rounded-xl border border-[#e5e5e9] px-4 text-sm">{busy?'Kaydediliyor…':'Tercihleri Kaydet'}</button>{message&&<p role="status" className="text-sm">{message}</p>}</form></section>;
+}

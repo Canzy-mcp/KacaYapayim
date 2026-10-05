@@ -19,9 +19,11 @@ export type CustomerQuotePreview = {
   currency: string;
   paymentTerms: string | null;
   notes: string | null;
+  taxRate?:number|null;
+  taxMode?: "unspecified" | "included" | "excluded";
   showBranding?: boolean;
 };
-export type PublicQuote = CustomerQuotePreview & { status: QuoteStatus };
+export type PublicQuote = CustomerQuotePreview & { status: QuoteStatus;packageOptions?:Array<{token:string;title:string;description:string|null;salePrice:number;taxRate?:number|null;taxMode?:"unspecified"|"included"|"excluded";status:QuoteStatus}> };
 
 // Explicit projection prevents cost, profit, margin and internal cost lines from
 // entering the customer-facing component's props or future public DTO.
@@ -37,7 +39,7 @@ export function toCustomerQuotePreview(input: {
     title: quote.title, description: quote.description,
     items: items.map(({ name, description }) => ({ name, description })),
     exclusions: exclusions.map(({ text }) => text), estimatedDuration: quote.estimated_duration_text,
-    salePrice: quote.sale_price, currency: quote.currency,
+    taxRate:quote.tax_rate??null,taxMode: quote.tax_mode ?? "unspecified", salePrice: quote.sale_price, currency: quote.currency,
     paymentTerms: quote.payment_terms, notes: quote.notes, showBranding: input.showBranding ?? true,
   };
 }

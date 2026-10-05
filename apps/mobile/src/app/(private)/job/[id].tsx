@@ -74,7 +74,7 @@ export default function JobDetail() {
         {lines.map(line => <Row key={line.id} title={line.name} subtitle={`${line.quantity} × ${money(line.unit_cost)}`}
           right={money(line.total_cost)} />)}
       </Card>
-      <SectionTitle>Fiyatlandırma</SectionTitle>
+      <Button title="Saha Notları ve Giderler" quiet onPress={()=>router.push({pathname:"/work",params:{jobId:job.id}})}/><SectionTitle>Fiyatlandırma</SectionTitle>
       <Field label="Hedef kâr marjı (%)" value={target} onChangeText={setTarget} keyboardType="decimal-pad" />
       <Field label="Minimum kâr marjı (%)" value={minimum} onChangeText={setMinimum} keyboardType="decimal-pad" />
       <Field label="Müşteriye verilecek fiyat (TL)" value={sale} onChangeText={setSale} keyboardType="decimal-pad" />

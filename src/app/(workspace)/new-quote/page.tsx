@@ -1,3 +1,4 @@
+import { ManualJobForm } from "@/components/jobs/manual-job-form";
 import { notFound } from "next/navigation";
 import { ButtonLink, Card } from "@/components/ui";
 import { PainterJobWizard } from "@/components/jobs/painter-job-wizard";
@@ -10,7 +11,7 @@ import { requireCompletedViewer } from "@/lib/viewer";
 import type { PainterCalculation } from "@/lib/jobs/painter-calculation";
 import type { ProfessionTemplate } from "@/lib/professions/schema";
 export const metadata = { title: "Yeni Teklif" };
-export default async function NewQuotePage({ searchParams }: { searchParams: Promise<{ customer_id?: string; job_id?: string; step?: string }> }) {
+export default async function NewQuotePage({ searchParams }: { searchParams: Promise<{ customer_id?: string; job_id?: string; step?: string; from_calculator?: string }> }) {
   const viewer = await requireCompletedViewer();
   const params = await searchParams;
   if (params.job_id && !isJobId(params.job_id)) notFound();
@@ -22,12 +23,14 @@ export default async function NewQuotePage({ searchParams }: { searchParams: Pro
   const selected = bundle?.customer || (params.customer_id && isCustomerId(params.customer_id) ? await getCustomerById(params.customer_id) : null);
   const selectedCustomer = selected ? { id: selected.id, name: selected.name, company_name: selected.company_name, phone: selected.phone } : null;
   const customers = customerList.customers.slice(0, 20).map(({ id, name, company_name, phone }) => ({ id, name, company_name, phone }));
+  if (params.from_calculator === '1' && !bundle) return <ManualJobForm customers={customers} selectedCustomer={selectedCustomer} fromCalculator />;
+  if (bundle?.job.input_data.manual === true || (!template && viewer.business?.profession !== 'Boyacı')) return <ManualJobForm customers={customers} selectedCustomer={selectedCustomer} job={bundle?.job} />;
   if (viewer.business?.profession !== "Boyacı" || (template && !bundle?.details && !!process.env.SUPABASE_SERVICE_ROLE_KEY)) {
     if (!template) return <div className="mx-auto max-w-[720px]"><Card className="p-8 text-center"><h1 className="text-[24px] font-semibold">Meslek şablonu bulunamadı</h1><p className="mt-2 text-[14px] leading-6 text-[#6E6E73]">Bu meslek için yayınlanmış bir iş formu henüz yok.</p><ButtonLink href="/dashboard" className="mt-6">Ana Sayfaya Dön</ButtonLink></Card></div>;
     if (bundle && !bundle.job.template_snapshot) notFound();
     return <ProfessionJobForm template={bundle?.job.template_snapshot ? bundle.job.template_snapshot as unknown as ProfessionTemplate : template}
       costs={costData.costs} settings={bundle?.job.settings_snapshot as Record<string, number> || costData.settings} customers={customers}
-      job={bundle?.job} selectedCustomerId={selectedCustomer?.id} />;
+      job={bundle?.job} selectedCustomerId={selectedCustomer?.id} selectedCustomer={selectedCustomer} />;
   }
   if (bundle && !bundle.details) notFound();
   const breakdown = bundle?.breakdown || [];

@@ -1,3 +1,4 @@
+import {readJsonBody} from "@/lib/security/body";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getSupabaseConfig } from "@/lib/supabase/config";
@@ -26,7 +27,8 @@ export async function POST(request: NextRequest) {
     });
     const { data: userData, error: authError } = await auth.auth.getUser(token);
     if (authError || !userData.user) return NextResponse.json({ error: "Oturum geçersiz." }, { status: 401 });
-    const payload: unknown = await request.json();
+    const {value:payload,tooLarge}=await readJsonBody(request,32000);
+    if(tooLarge)return NextResponse.json({error:"İş bilgileri çok büyük."},{status:413});
     if (!payload || typeof payload !== "object" || Array.isArray(payload))
       return NextResponse.json({ error: "İş bilgileri geçersiz." }, { status: 400 });
     const input = payload as Record<string, unknown>;

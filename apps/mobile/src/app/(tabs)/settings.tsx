@@ -1,3 +1,4 @@
+import {clearDeviceReminders} from "@/src/lib/reminders";
 import { useCallback, useState } from "react";
 import { Linking, Text } from "react-native";
 import Constants from "expo-constants";
@@ -63,10 +64,10 @@ export default function Settings() {
       <Row title="Gizlilik" onPress={() => openWeb("/gizlilik")} />
       <Row title="Kullanım koşulları" onPress={() => openWeb("/kullanim-kosullari")} />
       <Row title="Şifremi sıfırla" onPress={() => router.push("/(auth)/forgot")} /></Card>
-    <Notice>Bildirim izni istenmiyor. Teklif ve iş durumlarını uygulamayı açtığında güncel olarak görürsün.</Notice>
+    <Button title="İş Takibi ve Hatırlatmalar" quiet onPress={()=>router.push("/work")}/><Notice>İş takibi ekranından bu cihaz için tarihli hatırlatma kurabilirsin. Bildirim izni yalnızca o düğmeye bastığında istenir.</Notice>
     <Button title="Geri Bildirim Gönder" quiet onPress={() => router.push("/feedback")} />
     <Button title="Hesabımı Sil" quiet onPress={() => router.push("/account/delete")} />
-    <Button title="Çıkış Yap" quiet onPress={async () => { await db().auth.signOut(); router.replace("/"); }} />
+    <Button title="Çıkış Yap" quiet onPress={async () => { await clearDeviceReminders().catch(()=>{});await db().auth.signOut(); router.replace("/"); }} />
     <Text style={{ color: palette.muted, textAlign: "center", fontSize: 12, marginTop: 20 }}>
       KaçaYapayım v{Constants.expoConfig?.version || "1.0.0"}
     </Text>

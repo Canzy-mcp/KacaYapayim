@@ -11,3 +11,5 @@ apps/mobile/.env
 apps/mobile/.env.*
 !apps/mobile/.env.example
 .env
+supabase/.temp/
+tmp/

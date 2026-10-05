@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: "Kendi maliyetlerini hesapla, hedef kârını gör ve müşterine profesyonel teklif gönder.",
   applicationName: "KaçaYapayım",
   verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "5YHiKGyRlhZoPmBvxTmYVWfHZypE79zmrB3wgaJmciI",
     other: process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION ? { "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION } : undefined,
   },
 };

@@ -21,7 +21,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     body.note != null && (typeof body.note !== "string" || body.note.length > 1000))
     return Response.json({ error: "Geçersiz yanıt." }, { status: 400, headers: { "Cache-Control": "no-store" } });
   const supabase = createServiceClient();
-  const { data, error } = await supabase.rpc("respond_to_quote", {
+  const { data, error } = await supabase.rpc("respond_to_package_quote", {
     p_token: token, p_action: body.action,
     p_reason: body.action === "reject" ? body.reason || null : null,
     p_note: body.action === "reject" ? body.note?.trim() || null : null,

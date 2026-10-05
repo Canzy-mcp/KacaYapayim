@@ -1,0 +1,10 @@
+import { TeamNoteForm } from '@/components/work/team-note-form';
+import Link from 'next/link';
+import {requireViewer} from '@/lib/viewer';
+import {createClient} from '@/lib/supabase/server';
+type AssignedJob={id:string;title:string;description:string|null;status:string;businessName:string;canAddNotes:boolean;notes:Array<{title:string;note:string;date:string}>;visits:Array<{title:string;scheduledAt:string|null;status:string}>};
+export default async function Page(){
+ await requireViewer();const client=await createClient();const {data,error}=await client.rpc('get_assigned_jobs',{});if(error)throw new Error('Atanmış işler yüklenemedi.');
+ const jobs=(data??[]) as AssignedJob[];const labels:Record<string,string>={draft:'Taslak',calculated:'Hesaplandı',quoted:'Teklif hazırlandı',accepted:'Kabul edildi',in_progress:'Devam ediyor',completed:'Tamamlandı',cancelled:'İptal edildi'};
+ return <main className="mx-auto max-w-3xl px-5 py-12"><Link href="/dashboard" className="text-sm text-[#0071E3]">Kendi çalışma alanım</Link><h1 className="mt-5 text-3xl font-semibold">Bana atanmış işler</h1><p className="mt-3 text-sm text-[#6E6E73]">İş sahibi izin verdiyse saha notu ekleyebilirsin. Fiyat ve müşteri iletişim bilgileri bu alanda paylaşılmaz.</p><div className="mt-7 space-y-4">{jobs.length?jobs.map(j=><article key={j.id} className="rounded-2xl border border-[#e5e5e9] bg-white p-5"><p className="text-sm text-[#6E6E73]">{j.businessName} · {labels[j.status]??'Kayıtlı'}</p><h2 className="mt-2 text-xl font-semibold">{j.title}</h2>{j.description&&<p className="mt-3 whitespace-pre-wrap text-sm">{j.description}</p>}{j.visits.map((v,i)=><p key={i} className="mt-3 text-sm">{v.title}{v.scheduledAt&&` · ${new Date(v.scheduledAt).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul'})}`}</p>)}{j.notes?.map((n,i)=><div key={i} className="mt-3 rounded-xl bg-gray-50 p-3 text-sm"><p className="font-semibold">{n.title}</p><p className="whitespace-pre-wrap">{n.note}</p></div>)}{j.canAddNotes&&<TeamNoteForm jobId={j.id}/>}</article>):<p className="rounded-2xl bg-white p-5 text-sm">Henüz sana atanmış bir iş yok. Davet bağlantısını açıp kabul et.</p>}</div></main>;
+}

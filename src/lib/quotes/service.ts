@@ -67,3 +67,12 @@ export async function getQuotesForCustomer(customerId: string) {
   if (error) { logFailure("Customer quote list failed"); throw new Error("Teklifler yüklenemedi."); }
   return (data || []) as Quote[];
 }
+
+export async function searchQuotes(query = '', status = 'all', page = 1) {
+  await requireCompletedViewer();
+  const client = await createClient();
+  const safePage = Number.isSafeInteger(page) && page > 0 ? Math.min(page, 100000) : 1;
+  const { data, error } = await client.rpc('search_my_quotes', { p_query: query.trim().slice(0,80), p_status: status, p_page: safePage });
+  if (error || !data) throw new Error('Teklifler yüklenemedi.');
+  return { ...data, page: safePage, pageSize: 30 };
+}

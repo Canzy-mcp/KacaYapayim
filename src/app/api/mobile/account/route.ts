@@ -1,3 +1,4 @@
+import {readJsonBody} from "@/lib/security/body";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getSupabaseConfig } from "@/lib/supabase/config";
@@ -12,7 +13,9 @@ export async function DELETE(request: NextRequest) {
   if (Number(request.headers.get("content-length") || 0) > 1000)
     return NextResponse.json({ error: "İstek geçersiz." }, { status: 413 });
   try {
-    const body = await request.json() as { confirmation?: unknown };
+    const {value:body,tooLarge}=await readJsonBody(request,1024);
+    if(tooLarge)return NextResponse.json({error:"İstek çok büyük."},{status:413});
+    if(!body)return NextResponse.json({error:"İstek geçersiz."},{status:400});
     if (body?.confirmation !== "HESABIMI SIL") return NextResponse.json({ error: "Silme onayı eksik." }, { status: 400 });
     const { url, key } = getSupabaseConfig();
     const { data, error } = await createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } })

@@ -1,3 +1,4 @@
+import {quoteAmounts,taxLabels} from "@kacayapayim/core/quote-tax";
 import { brandImageDataUri } from "@/src/lib/brand";
 import { useCallback, useState } from "react";
 import { Linking, Share, Text } from "react-native";
@@ -37,11 +38,8 @@ export default function QuoteDetail() {
   async function share() {
     if (!quote || !publicUrl) { setError("Public web adresi ayarlanmamış."); return; }
     try {
-      const result = await Share.share({ title: "KaçaYapayım Teklif", message: `${quote.title}\n${publicUrl}`, url: publicUrl });
-      if (result.action === Share.sharedAction) {
-        const { error: markError } = await db().rpc("mark_quote_sent", { p_quote_id: quote.id });
-        if (markError) setError("Paylaşım açıldı ancak gönderildi durumu kaydedilemedi."); else await reload();
-      }
+      await Share.share({ title: "KaçaYapayım Teklif", message: `${quote.title}\n${publicUrl}`, url: publicUrl });
+
     } catch { setError("Paylaşım açılamadı."); }
   }
   async function pdf() {
@@ -56,8 +54,8 @@ export default function QuoteDetail() {
         <p>Müşteri: ${escape(customer?.name || "")}</p>
         ${quote.description ? `<p>${escape(quote.description)}</p>` : ""}
         <h2>İş kapsamı</h2>${items.map(item => `<div class="line"><strong>${escape(item.name)}</strong><br/>${escape(item.description || "")}</div>`).join("")}
-        <p class="price">${escape(money(quote.sale_price))}</p>
-        <p>Geçerlilik: ${escape(date(quote.valid_until))}</p>
+        <p class="price">${escape(money(quoteAmounts(quote.sale_price,quote.tax_mode,quote.tax_rate??null).total))}</p>
+        <p>${escape(taxLabels[quote.tax_mode??"unspecified"])}${quote.tax_rate!=null?` · KDV %${quote.tax_rate}: ${escape(money(quoteAmounts(quote.sale_price,quote.tax_mode,quote.tax_rate).tax))}`:""}</p><p>Geçerlilik: ${escape(date(quote.valid_until))}</p>
         ${quote.estimated_duration_text ? `<p>Süre: ${escape(quote.estimated_duration_text)}</p>` : ""}
         ${quote.payment_terms ? `<p>Ödeme: ${escape(quote.payment_terms)}</p>` : ""}
         ${quote.notes ? `<p>Not: ${escape(quote.notes)}</p>` : ""}
@@ -81,7 +79,7 @@ export default function QuoteDetail() {
       {Boolean(quote.payment_terms) && <><SectionTitle>Ödeme koşulları</SectionTitle><Card><Text>{quote.payment_terms}</Text></Card></>}
       {quote.status !== "draft" && <>
         <Button title="Teklifi Paylaş" onPress={() => { void share(); }} />
-        <Button title="PDF Paylaş" quiet onPress={() => { void pdf(); }} />
+        <Button title="Gönderdim, İşaretle" quiet onPress={async()=>{const {error:markError}=await db().rpc("mark_quote_sent",{p_quote_id:quote.id});if(markError)setError("Gönderildi durumu kaydedilemedi.");else await reload();}}/><Button title="PDF Paylaş" quiet onPress={() => { void pdf(); }} />
         {Boolean(publicUrl) && <Button title="Müşteri Görünümünü Aç" quiet onPress={() => { if (publicUrl) void Linking.openURL(publicUrl); }} />}
       </>}
       {Boolean(quote.viewed_at) && <Notice>Teklif {date(quote.viewed_at)} tarihinde görüntülendi.</Notice>}

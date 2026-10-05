@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import type { Job } from "@kacayapayim/core/types";
-import { Button, Card, Field, Notice, Screen, SectionTitle } from "@/src/components/ui";
+import {quoteAmounts,taxLabels,type TaxMode} from "@kacayapayim/core/quote-tax";
+import { Button, Card, Choice, Field, Notice, Screen, SectionTitle } from "@/src/components/ui";
 import { useAppSession } from "@/src/lib/session";
 import { db, secureStorage } from "@/src/lib/supabase";
 import { money } from "@/src/lib/format";
@@ -15,6 +16,7 @@ export default function NewQuote() {
   const [duration, setDuration] = useState(""); const [payment, setPayment] = useState("");
   const [validUntil, setValidUntil] = useState(() => { const value = new Date(); value.setDate(value.getDate() + 14); return value.toISOString().slice(0, 10); });
   const [notes, setNotes] = useState(""); const [error, setError] = useState(""); const [busy, setBusy] = useState(false);
+  const [taxMode,setTaxMode]=useState<TaxMode>("unspecified");const [taxRateText,setTaxRateText]=useState("");
   const [ready, setReady] = useState(false);
   const draftTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
@@ -49,8 +51,11 @@ export default function NewQuote() {
       !items.length || items.some(item => !item.name.trim()) || !/^\d{4}-\d{2}-\d{2}$/.test(validUntil)) {
       setError("Teklif bilgilerini, müşteriyi ve fiyatı kontrol et."); return;
     }
+    const taxRate=taxRateText.trim()?Number(taxRateText.replace(",",".")):null;
+    if(taxMode!=="unspecified"&&(taxRate===null||!Number.isFinite(taxRate)||taxRate<0||taxRate>100)){setError("0–100 arasında KDV oranı gir.");return;}
     setBusy(true); setError("");
-    const { data: id, error: saveError } = await db().rpc("save_quote", {
+    const { data: id, error: saveError } = await db().rpc("save_quote_with_tax_rate", {
+      p_tax_mode:taxMode,p_tax_rate:taxRate,
       p_quote_id: null, p_job_id: job.id, p_status: "ready", p_title: title.trim(),
       p_description: description.trim() || null, p_items: items.map(item => ({ name: item.name.trim(), description: item.description.trim() })),
       p_exclusions: [], p_duration: duration.trim() || null, p_payment_terms: payment.trim() || null,
@@ -77,7 +82,7 @@ export default function NewQuote() {
           i === index ? { ...row, description: value } : row))} />
       </Card>)}
       <Button title="Kapsam Maddesi Ekle" quiet onPress={() => setItems(current => [...current, { name: "", description: "" }])} />
-      <SectionTitle>Koşullar</SectionTitle>
+      <SectionTitle>KDV ve toplam</SectionTitle>{Object.entries(taxLabels).map(([k,label])=><Choice key={k} title={label} selected={taxMode===k} onPress={()=>setTaxMode(k as TaxMode)}/>)}{taxMode!=="unspecified"&&<Field label="KDV oranı (%)" value={taxRateText} onChangeText={setTaxRateText} keyboardType="decimal-pad"/>}<Notice>Fiyat vergisiz tutardır. Müşteri toplamı: {money(quoteAmounts(job.selected_sale_price??0,taxMode,taxRateText.trim()?Number(taxRateText.replace(",",".")):null).total)}</Notice><SectionTitle>Koşullar</SectionTitle>
       <Field label="Tahmini süre" value={duration} onChangeText={setDuration} placeholder="Örnek: 3 iş günü" />
       <Field label="Ödeme koşulları" value={payment} onChangeText={setPayment} multiline />
       <Field label="Geçerlilik tarihi (YYYY-AA-GG)" value={validUntil} onChangeText={setValidUntil} />

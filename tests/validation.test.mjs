@@ -2,15 +2,18 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { emailError, marginErrors, parseMargin, passwordError } from "../src/lib/validation.ts";
 
-test("profit margins accept the inclusive 0–90 range", () => {
-  assert.deepEqual(marginErrors(0, 0), {});
-  assert.deepEqual(marginErrors(90, 90), {});
+test("business margins match the pricing limits without silent coercion", () => {
+  assert.deepEqual(marginErrors(1, 0), {});
+  assert.deepEqual(marginErrors(90, 89), {});
   assert.deepEqual(marginErrors(30, 20), {});
 });
 
 test("profit margins reject missing, out-of-range and inverted values", () => {
   assert.ok(marginErrors(parseMargin(null), 20).target);
   assert.ok(marginErrors(91, 20).target);
+  assert.ok(marginErrors(0, 0).target);
+  assert.ok(marginErrors(0.5, 0).target);
+  assert.ok(marginErrors(90, 90).minimum);
   assert.ok(marginErrors(30, -1).minimum);
   assert.ok(marginErrors(20, 30).minimum);
 });

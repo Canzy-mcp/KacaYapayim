@@ -21,8 +21,8 @@ export async function middleware(request: NextRequest) {
     response.headers.set("X-Content-Type-Options", "nosniff");
     return response;
   }
-  const privatePath = ["/dashboard", "/quotes", "/jobs", "/customers", "/costs", "/settings", "/admin", "/billing", "/onboarding", "/login", "/register", "/forgot-password", "/reset-password", "/demo"].some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`));
-  const authPath = privatePath || pathname.startsWith("/auth/") || pathname.startsWith("/api/quotes/");
+  const privatePath = ["/dashboard", "/quotes", "/jobs", "/customers", "/costs", "/settings", "/work", "/team-work", "/team-invite", "/admin", "/billing", "/onboarding", "/login", "/register", "/forgot-password", "/reset-password", "/demo"].some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`));
+  const authPath = privatePath || pathname.startsWith("/auth/") || pathname.startsWith("/api/quotes/") || pathname.startsWith("/api/work/") || pathname.startsWith("/api/export/");
   const response = authPath ? await updateSession(request) : NextResponse.next();
   if (privatePath || process.env.DEPLOYMENT_ENV === "staging") response.headers.set("X-Robots-Tag", "noindex, nofollow");
   if (privatePath) response.headers.set("Cache-Control", "private, no-store");

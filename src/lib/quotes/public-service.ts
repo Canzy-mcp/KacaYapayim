@@ -23,7 +23,7 @@ export async function getPublicQuote(token: string): Promise<PublicQuote | null>
   if (!isPublicToken(token) || !isSupabaseConfigured() || !process.env.SUPABASE_SERVICE_ROLE_KEY) return null;
   if (!await consumeRateLimit("public-quote-lookup", 60, 60)) return null;
   const supabase = createServiceClient();
-  const { data, error } = await supabase.rpc("get_public_quote", { p_token: token });
+  const { data, error } = await supabase.rpc("get_public_quote_details", { p_token: token });
   if (error) { logFailure("public_quote_lookup"); return null; }
   return isPublicQuote(data) ? data : null;
 }

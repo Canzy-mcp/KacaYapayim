@@ -13,7 +13,7 @@ export type QuoteSaveInput = {
   quoteId: string | null; jobId: string; status: "draft" | "ready";
   title: string; description: string; items: Array<{ name: string; description: string }>;
   exclusions: string[]; duration: string; paymentTerms: string; validUntil: string; notes: string;
-  salePrice: number | null; acknowledgeRisk?: boolean;
+  salePrice: number | null; acknowledgeRisk?: boolean; taxMode?: "unspecified" | "included" | "excluded";taxRate?:number|null;
 };
 export type QuoteSaveResult = { ok: true; id: string } | { ok: false; error: string; field?: string; needsConfirmation?: boolean; needsUpgrade?: boolean };
 
@@ -41,9 +41,12 @@ export async function saveQuote(input: QuoteSaveInput): Promise<QuoteSaveResult>
   if (input.salePrice !== null && (!Number.isFinite(input.salePrice) || input.salePrice < 0 ||
       input.salePrice > 99999999999999.99 || Math.abs(Math.round(input.salePrice * 100) - input.salePrice * 100) > 1e-6))
     return { ok: false, error: "Teklif fiyatını kontrol et.", field: "salePrice" };
+  if (input.taxMode && !["unspecified","included","excluded"].includes(input.taxMode)) return {ok:false,error:"KDV durumunu kontrol et."};
+  if(input.taxRate!=null&&(!Number.isFinite(input.taxRate)||input.taxRate<0||input.taxRate>100||Math.abs(input.taxRate*100-Math.round(input.taxRate*100))>1e-6))return {ok:false,error:"KDV oranını kontrol et."};
   const supabase = await createClient();
-  const { data: id, error } = await supabase.rpc("save_quote", {
-    p_quote_id: input.quoteId, p_job_id: input.jobId, p_status: input.status,
+  const { data: id, error } = await supabase.rpc("save_quote_with_tax_rate", {
+    p_tax_rate: input.taxRate??null,
+    p_tax_mode: input.taxMode || "unspecified", p_quote_id: input.quoteId, p_job_id: input.jobId, p_status: input.status,
     p_title: input.title.trim(), p_description: input.description.trim() || null,
     p_items: input.items.map((item) => ({ name: item.name.trim(), description: item.description.trim() })),
     p_exclusions: input.exclusions.map((item) => item.trim()),

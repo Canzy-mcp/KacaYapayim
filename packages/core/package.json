@@ -10,6 +10,7 @@
     "./professions/expression": "./src/professions/expression.ts",
     "./professions/engine": "./src/professions/engine.ts",
     "./professions/templates": "./src/professions/templates.ts",
-    "./jobs/painter-calculation": "./src/jobs/painter-calculation.ts"
+    "./jobs/painter-calculation": "./src/jobs/painter-calculation.ts",
+    "./quote-tax": "./src/quote-tax.ts"
   }
 }

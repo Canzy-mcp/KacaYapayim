@@ -1,3 +1,4 @@
+import { taxLabels,quoteAmounts } from "@/lib/quotes/tax";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import fontkit from "@pdf-lib/fontkit";
@@ -5,6 +6,8 @@ import { PDFDocument, rgb, type PDFFont, type PDFPage } from "pdf-lib";
 import type { CustomerQuotePreview } from "@/lib/quotes/public-preview";
 import { formatMoney } from "@/lib/costs/format";
 import { formatQuoteDate } from "@/lib/quotes/defaults";
+import { createServiceClient } from "@/lib/supabase/admin";
+import sharp from "sharp";
 
 const W = 595.28, H = 841.89, M = 48, contentW = W - M * 2;
 const ink = rgb(0.11, 0.11, 0.12), muted = rgb(0.43, 0.43, 0.46), line = rgb(0.87, 0.87, 0.89);
@@ -54,6 +57,24 @@ export async function renderQuotePdf(quote: CustomerQuotePreview): Promise<Uint8
     ensure(33); y -= 5; page.drawLine({ start: { x: M, y }, end: { x: W - M, y }, thickness: 0.7, color: line });
     y -= 15; draw(label.toLocaleUpperCase("tr-TR"), 9, bold, muted); y -= 3;
   };
+  // Resolve only our private storage mapping; never fetch an arbitrary logo URL.
+  const businessId = quote.business.logoUrl?.match(/^\/api\/business\/logo\/([0-9a-f-]{36})(?:\?|$)/i)?.[1];
+  if (businessId && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    try {
+      const client = createServiceClient();
+      const { data } = await client.from("business_branding").select("storage_path").eq("business_id", businessId).maybeSingle();
+      if (data) {
+        const file = await client.storage.from("business-assets").download(data.storage_path);
+        if (file.data && file.data.size <= 2 * 1024 * 1024) {
+          const png = await sharp(Buffer.from(await file.data.arrayBuffer()), { limitInputPixels: 16000000 }).resize(400, 160, { fit: "inside", withoutEnlargement: true }).png().toBuffer();
+          const logo = await pdf.embedPng(png);
+          const scale = Math.min(150 / logo.width, 55 / logo.height);
+          page.drawImage(logo, { x: M, y: y - logo.height * scale, width: logo.width * scale, height: logo.height * scale });
+          y -= logo.height * scale + 12;
+        }
+      }
+    } catch { /* A missing or damaged logo must not block the quote PDF. */ }
+  }
   draw(quote.business.name, 19, bold); y -= 2;
   text([quote.business.phone, quote.business.city].filter(Boolean).join(" · "), 9, regular, muted);
   y -= 12;
@@ -78,7 +99,9 @@ export async function renderQuotePdf(quote: CustomerQuotePreview): Promise<Uint8
   }
   if (quote.estimatedDuration) { section("Tahmini süre"); text(quote.estimatedDuration, 11, bold); }
   section("Toplam teklif");
-  y -= 11; text(formatMoney(quote.salePrice), 24, bold);
+  y -= 11; text(formatMoney(quoteAmounts(quote.salePrice,quote.taxMode,quote.taxRate??null).total), 24, bold);
+  text(taxLabels[quote.taxMode ?? "unspecified"], 9, regular, muted);
+  if(quote.taxRate!=null&&quote.taxMode!=="unspecified"){const a=quoteAmounts(quote.salePrice,quote.taxMode,quote.taxRate);text(`Vergisiz: ${formatMoney(a.subtotal)} · KDV %${a.rate}: ${formatMoney(a.tax)}`,9,regular,muted);}
   section("Ödeme koşulları");
   text(quote.paymentTerms || "Belirtilmedi");
   section("Geçerlilik");
