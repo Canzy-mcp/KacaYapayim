@@ -55,7 +55,7 @@ export default function QuoteDetail() {
         ${quote.description ? `<p>${escape(quote.description)}</p>` : ""}
         <h2>İş kapsamı</h2>${items.map(item => `<div class="line"><strong>${escape(item.name)}</strong><br/>${escape(item.description || "")}</div>`).join("")}
         <p class="price">${escape(money(quoteAmounts(quote.sale_price,quote.tax_mode,quote.tax_rate??null).total))}</p>
-        <p>${escape(taxLabels[quote.tax_mode??"unspecified"])}${quote.tax_rate!=null?` · KDV %${quote.tax_rate}: ${escape(money(quoteAmounts(quote.sale_price,quote.tax_mode,quote.tax_rate).tax))}`:""}</p><p>Geçerlilik: ${escape(date(quote.valid_until))}</p>
+        <p>${escape(quote.tax_rate!=null&&quote.tax_mode!=="unspecified"?"Toplam tutara KDV dahildir":taxLabels[quote.tax_mode??"unspecified"])}${quote.tax_rate!=null?` · KDV %${quote.tax_rate}: ${escape(money(quoteAmounts(quote.sale_price,quote.tax_mode,quote.tax_rate).tax))}`:""}</p><p>Geçerlilik: ${escape(date(quote.valid_until))}</p>
         ${quote.estimated_duration_text ? `<p>Süre: ${escape(quote.estimated_duration_text)}</p>` : ""}
         ${quote.payment_terms ? `<p>Ödeme: ${escape(quote.payment_terms)}</p>` : ""}
         ${quote.notes ? `<p>Not: ${escape(quote.notes)}</p>` : ""}

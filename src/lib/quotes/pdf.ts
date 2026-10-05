@@ -100,7 +100,7 @@ export async function renderQuotePdf(quote: CustomerQuotePreview): Promise<Uint8
   if (quote.estimatedDuration) { section("Tahmini süre"); text(quote.estimatedDuration, 11, bold); }
   section("Toplam teklif");
   y -= 11; text(formatMoney(quoteAmounts(quote.salePrice,quote.taxMode,quote.taxRate??null).total), 24, bold);
-  text(taxLabels[quote.taxMode ?? "unspecified"], 9, regular, muted);
+  text(quote.taxRate != null && quote.taxMode !== "unspecified" ? "Toplam tutara KDV dahildir" : taxLabels[quote.taxMode ?? "unspecified"], 9, regular, muted);
   if(quote.taxRate!=null&&quote.taxMode!=="unspecified"){const a=quoteAmounts(quote.salePrice,quote.taxMode,quote.taxRate);text(`Vergisiz: ${formatMoney(a.subtotal)} · KDV %${a.rate}: ${formatMoney(a.tax)}`,9,regular,muted);}
   section("Ödeme koşulları");
   text(quote.paymentTerms || "Belirtilmedi");

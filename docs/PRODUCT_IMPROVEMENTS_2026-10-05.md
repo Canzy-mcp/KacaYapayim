@@ -4,7 +4,7 @@
 
 Ödeme sağlayıcısı, tahsilat, abonelik satın alma ve mağaza ödeme doğrulaması bu çalışmanın dışında tutuldu. Web uygulamasının mevcut müşteri, hesaplama, teklif ve saha takibi akışları geliştirildi. Ücretli bir dış hizmet kurulmadı.
 
-Uygulama kaynakları hazırlandı; bu sürüm henüz hosting ortamına yayınlanmadı. Bağlı KaçaYapayım Supabase projesine aşağıdaki ek migration'lar uygulandı. Gerçek oturum kontrolleri için oluşturulan geçici hesap, kayıtları ve yüklenen dosya temizlendi. E-posta veya WhatsApp mesajı gönderilmedi.
+Uygulama kaynakları hazırlandı ve mevcut Vercel üretim ortamına yayınlandı. Canlı kontroller ve dış bağımlılıklar `docs/RELEASE_2026-10-05.md` dosyasında kayıtlıdır. Bağlı KaçaYapayım Supabase projesine aşağıdaki ek migration'lar uygulandı. Kontroller için oluşturulan geçici hesaplar, kayıtları ve yüklenen dosyalar temizlendi. E-posta veya WhatsApp mesajı gönderilmedi.
 
 ## Denetimdeki hatalar
 
