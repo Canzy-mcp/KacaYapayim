@@ -65,9 +65,11 @@ Hizmeti sunan kişi kullanıcı bilgisine göre Ercan Yumuşak. Adres eklenmedi.
 | Şema karşılaştırması | İlk beş geçiş öncesinde 820 uygulama nesnesi okundu. Yerel temel şema eşleşiyor; 30 mevcut fonksiyonun gövdesi eşleşirken sağlayıcının `service_role` izinleri farklı, `rls_auto_enable` ise sağlayıcı platform yardımcısı. `update_my_settings` üzerindeki anonim çalıştırma izni gereksizdi; migration bunu kaldırıyor. Eşleşme raporu `tmp/live-schema-differences.json` içinde. |
 | Geçiş provası | Altı audit migration gerçek yedek kopyasında çalıştı; yalnızca pg_cron workerı stub ile temsil edildi. Ürün ve audit SQL senaryoları test verisini transaction sonunda geri aldı. |
 | Canlı ilk adım | 9 canlı geçmiş sürümü ve yalnızca yeni ilk beş dosyayı içeren geçici CLI manifesti kullanıldı. `db push --dry-run` yalnızca beş beklenen geçişi gösterdi; ardından aynı beş geçiş canlıya uygulandı. Son Storage migration bilinçli olarak uygulanmadı. |
-| Vercel ayarları | Production ortamına `NEXT_PUBLIC_LEGAL_ENTITY_NAME=Ercan Yumuşak`, `NEXT_PUBLIC_SUPPORT_EMAIL=destek@kacayapayim.com`, `LEGAL_REVIEW_APPROVED=true` (kullanıcının bildirdiği hukuk incelemesi) ve `DEPLOYMENT_ENV=production` eklendi. Mevcut URL/anahtar/sır değerleri okunmadı veya dışa aktarılmadı. Yeni deploy henüz alınmadığından bu ayarlar üretim build'ine girmedi. |
+| Vercel ayarları | Production ortamına `NEXT_PUBLIC_LEGAL_ENTITY_NAME=Ercan Yumuşak`, `NEXT_PUBLIC_SUPPORT_EMAIL=destek@kacayapayim.com`, `LEGAL_REVIEW_APPROVED=true` (kullanıcının bildirdiği hukuk incelemesi) ve `DEPLOYMENT_ENV=production` eklendi. Mevcut URL/anahtar/sır değerleri okunmadı veya dışa aktarılmadı. |
+| Üretim yayını | Kullanıcı onayından sonra `6dc5bb7` commit'i `main` dalına gönderildi; Vercel `kaca-yapayim` Production deploy'u Ready oldu. |
+| Canlı duman testi | Ana sayfa, `/gizlilik`, `/kullanim-kosullari`, `/demo` ve `/api/health` HTTP 200 yanıtladı. Güvenlik başlıkları/CSP görüldü. Auth gerektiren gerçek dosya yüklemesi ve MFA oturumu bu salt-okunur kontrolde denenmedi. |
 
-Canlı veritabanı ve Vercel değişikliği Supabase migration geçmişinden ve Vercel ayar kaydından doğrulandı. Önceki otomatik onay reddi, kullanıcı açık onayını aldıktan ve yedek/geri yükleme doğrulandıktan sonra burada tekrar oluşmadı.
+Canlı veritabanı, Vercel ayarları ve `6dc5bb7` üretim deploy'u panel durumundan doğrulandı. Önceki otomatik onay reddi, kullanıcı açık onayını aldıktan ve yedek/geri yükleme doğrulandıktan sonra burada tekrar oluşmadı.
 
 ## Bu turdaki doğrulamalar
 
@@ -86,15 +88,15 @@ Canlı veritabanı ve Vercel değişikliği Supabase migration geçmişinden ve 
 
 Geçici tarayıcı inceleme sayfası kontrollerden sonra kaldırıldı. Gerçek müşteri verisiyle tarayıcı testi yapılmadı. 200% zoom, ekran okuyucu, fiziksel klavye/telefon klavyesi, gerçek MFA sağlayıcı akışı ve bütün yeni ekranların görsel kabulü henüz tamamlanmadı. GitHub Actions dosyası hazır; uzak workflow çalışması yapılmadı.
 
-## Canlıya geçişin somut kapsamı ve sırası
+## Canlı geçişin kapsamı ve kalan işler
 
 Hedef mevcut `ryspkilfryezliaobnyv` Supabase projesidir. Kullanıcıdan onay istenecek değişiklikler:
 
 1. **Tamamlandı.** Yedek/geri yükleme provası ve şema eşlemesinin ardından ilk beş migration canlıya uygulandı.
-2. Vercel Production ortam ayarları kaydedildi. Auth minimum parola, güvenli parola değişimi ve kayıt hook'u **henüz Supabase Auth ayarlarında etkinleştirilmedi**; mobil ve Auth e-posta smoke testinden sonra ayrıca doğrulanacak. Kayıtlar açık bırakıldı. Ücretli sızdırılmış parola koruması yükseltmesi yapılmadı.
-3. **Bekliyor.** Audit kodunu `main` üretim dalına gönderip yeni Vercel deploy'unu almak; gerçek URL üzerinde yasal sayfalar, Auth/MFA ve dosya akışları smoke testini yapmak.
-4. **Bekliyor.** Yeni sunucu upload akışı çalıştıktan sonra altıncı Storage lockdown migration'ını uygulamak.
-5. **Bekliyor.** Gerçek pg_cron workerı ve retention temizliğini ayrı takip etmek. Native dağıtım ve fiziksel cihaz kabulü ayrıca yapılmalı.
+2. **Tamamlandı.** Vercel Production ayarları kaydedildi, `6dc5bb7` üretime dağıtıldı ve kamuya açık sayfalar ile sağlık uç noktası smoke testinden geçti.
+3. **Bekliyor.** Supabase Auth minimum parola, güvenli parola değişimi ve kayıt hook'u panelinde etkinleştirilip test edilecek. Auth paneli bu oturumda bağlantısız göründüğünden canlı değerler doğrulanamadı. Kayıtlar açık; ücretli sızdırılmış parola koruması yükseltmesi yapılmadı.
+4. **Bekliyor.** Altıncı Storage lockdown migration'ını, Auth ile giriş yapıp gerçek upload akışını doğruladıktan sonra uygula. Yeni uygulama sunucu upload'u kullanıyor; ancak gerçek üretim upload smoke testi yapılmadı.
+5. **Bekliyor.** Gerçek pg_cron workerı ve retention temizliğini ayrı takip et. Native dağıtım ve fiziksel cihaz kabulü ayrıca yapılmalı.
 
 | Sıra | Migration |
 |---|---|
@@ -107,4 +109,4 @@ Hedef mevcut `ryspkilfryezliaobnyv` Supabase projesidir. Kullanıcıdan onay ist
 
 Bakım görevi günlük 02:17 UTC, İstanbul'da 05:17'dir. 48 saat/90 gün eşikleri günlük çalışmada değerlendirilir; tam eşik anında silme değildir. Silinen retention kayıtları geri alınamaz; daha eski yedeği geri yüklemek daha yeni müşteri işlemlerini kaybettirebilir. İlk beş migration yeni veriye uyumlu düzeltmeyle ilerleme gerektirebilir; kör bir ters migration hazırlanmadı. `supabase/config.toml` sağlayıcıdan alınmış bütün ayarları içerdiği için dosyanın tamamını kontrolsüz push etmek yerine yalnızca hedeflenen Auth farkları incelenmeli. Kayıtlı yönlendirmeler ve mobil deep link'ler ayrıca korunmalı.
 
-**Otomatik onay incelemesinin gerekçesi:** İlk canlı geçiş, şema/fonksiyon/erişim değişiklikleri, teklif davranışı ve veri silen zamanlanmış işi birlikte içeriyordu; genel “tamamını yap” talebi bu üretim etkilerinin açık onayı sayılmadı. Canlı DB değişmedi. Bu belge ve migration'lar sonraki onay için somut pakettir.
+**Sınırlar:** Supabase'in ücretsiz planında sağlayıcı günlük yedeklemesi yok; canlı yedek ve geri yükleme provası bu yüzden ayrıca alındı. Security Advisor'da kapalı RLS tabloları, MFA/owner denetimli `SECURITY DEFINER` RPC'leri ve ücretli plana bağlı sızdırılmış parola koruması uyarıları kaldı; ayrıntılar audit raporunda. Bu rapor hukuki tavsiye değildir; metin onayı kullanıcı tarafından bildirildi.
