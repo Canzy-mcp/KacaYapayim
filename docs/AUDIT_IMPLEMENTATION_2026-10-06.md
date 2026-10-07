@@ -1,6 +1,6 @@
 # 6 Ekim güvenlik ve ürün geliştirmeleri
 
-Bu belge, [inceleme raporundaki](DETAILED_AUDIT_2026-10-06.md) maddelerin uygulama durumunu gösterir. Kod ve altı migration yerelde hazırlandı. Onay sonrası 7 Ekim 2026'da güncel Supabase yedeği alınıp ayrı PostgreSQL 17 örneğine geri yüklendi; ilk beş migration canlıya uygulandı. Yeni web sürümü, yayın ortam ayarları ve Storage kilidi henüz etkin değil.
+Bu belge, [inceleme raporundaki](DETAILED_AUDIT_2026-10-06.md) maddelerin uygulama durumunu gösterir. Onay sonrası 7 Ekim 2026'da canlı Supabase yedeği alınıp ayrı PostgreSQL 17 örneğine geri yüklendi; ilk beş migration canlıya uygulandı. Yeni web sürümü Production'a alındı; hedefli Auth parola ayarları ve kayıt hook'u etkinleştirildi. Son Storage upload kilidi, canlı oturumla gerçek dosya akışı sınanmadan beklemede.
 
 Hizmeti sunan kişi kullanıcı bilgisine göre Ercan Yumuşak. Adres eklenmedi. Ödeme sağlayıcısı bulunmadığı için tahsilat yalnızca elle kayıttır. Gizlilik içeriği teknik veri akışlarına göre düzenlendi; `LEGAL_REVIEW_APPROVED` yayın kontrolü kaldırılmadı veya kendiliğinden onaylanmadı.
 
@@ -66,10 +66,11 @@ Hizmeti sunan kişi kullanıcı bilgisine göre Ercan Yumuşak. Adres eklenmedi.
 | Geçiş provası | Altı audit migration gerçek yedek kopyasında çalıştı; yalnızca pg_cron workerı stub ile temsil edildi. Ürün ve audit SQL senaryoları test verisini transaction sonunda geri aldı. |
 | Canlı ilk adım | 9 canlı geçmiş sürümü ve yalnızca yeni ilk beş dosyayı içeren geçici CLI manifesti kullanıldı. `db push --dry-run` yalnızca beş beklenen geçişi gösterdi; ardından aynı beş geçiş canlıya uygulandı. Son Storage migration bilinçli olarak uygulanmadı. |
 | Vercel ayarları | Production ortamına `NEXT_PUBLIC_LEGAL_ENTITY_NAME=Ercan Yumuşak`, `NEXT_PUBLIC_SUPPORT_EMAIL=destek@kacayapayim.com`, `LEGAL_REVIEW_APPROVED=true` (kullanıcının bildirdiği hukuk incelemesi) ve `DEPLOYMENT_ENV=production` eklendi. Mevcut URL/anahtar/sır değerleri okunmadı veya dışa aktarılmadı. |
-| Üretim yayını | Kullanıcı onayından sonra `6dc5bb7` commit'i `main` dalına gönderildi; Vercel `kaca-yapayim` Production deploy'u Ready oldu. |
-| Canlı duman testi | Ana sayfa, `/gizlilik`, `/kullanim-kosullari`, `/demo` ve `/api/health` HTTP 200 yanıtladı. Güvenlik başlıkları/CSP görüldü. Auth gerektiren gerçek dosya yüklemesi ve MFA oturumu bu salt-okunur kontrolde denenmedi. |
+| Üretim yayını | Kullanıcı onayından sonra `6dc5bb7` commit'i `main` dalına gönderildi; Vercel Production deploy'u Ready oldu. Durum raporu `a3f868a` ile ayrıca yayınlandı. |
+| Canlı duman testi | Ana sayfa, `/gizlilik`, `/kullanim-kosullari`, `/demo` ve `/api/health` HTTP 200 yanıtladı. Güvenlik başlıkları/CSP görüldü. Auth gerektiren gerçek dosya yüklemesi denenmedi. |
+| Auth güvenlik ayarları | Supabase Email Auth için minimum parola 8 karaktere ayarlandı ve secure password change açıldı; mevcut parola şartı boş bırakıldı. `before_user_created` PostgreSQL hook'u etkinleştirildi. Kullanıcı kayıtları açık kaldı. |
 
-Canlı veritabanı, Vercel ayarları ve `6dc5bb7` üretim deploy'u panel durumundan doğrulandı. Önceki otomatik onay reddi, kullanıcı açık onayını aldıktan ve yedek/geri yükleme doğrulandıktan sonra burada tekrar oluşmadı.
+Canlı veritabanı, Vercel ayarları/deploy'u ve Supabase Auth ayarları panellerinden doğrulandı. Önceki otomatik onay reddi, kullanıcı açık onayını aldıktan ve yedek/geri yükleme doğrulandıktan sonra burada tekrar oluşmadı.
 
 ## Bu turdaki doğrulamalar
 
@@ -94,8 +95,8 @@ Hedef mevcut `ryspkilfryezliaobnyv` Supabase projesidir. Kullanıcıdan onay ist
 
 1. **Tamamlandı.** Yedek/geri yükleme provası ve şema eşlemesinin ardından ilk beş migration canlıya uygulandı.
 2. **Tamamlandı.** Vercel Production ayarları kaydedildi, `6dc5bb7` üretime dağıtıldı ve kamuya açık sayfalar ile sağlık uç noktası smoke testinden geçti.
-3. **Bekliyor.** Supabase Auth minimum parola, güvenli parola değişimi ve kayıt hook'u panelinde etkinleştirilip test edilecek. Auth paneli bu oturumda bağlantısız göründüğünden canlı değerler doğrulanamadı. Kayıtlar açık; ücretli sızdırılmış parola koruması yükseltmesi yapılmadı.
-4. **Bekliyor.** Altıncı Storage lockdown migration'ını, Auth ile giriş yapıp gerçek upload akışını doğruladıktan sonra uygula. Yeni uygulama sunucu upload'u kullanıyor; ancak gerçek üretim upload smoke testi yapılmadı.
+3. **Tamamlandı.** Supabase Auth minimum parola 8, secure password change ve `before_user_created` hook'u kaydedildi/etkinleşti. Kayıtlar açık; ücretli sızdırılmış parola koruması yükseltmesi yapılmadı. Gerçek kayıt/MFA e-posta akışı uçtan uca sınanmadı.
+4. **Bekliyor.** Altıncı Storage lockdown migration'ını, canlı oturumla gerçek upload akışını doğruladıktan sonra uygula. Yeni uygulama sunucu upload'u kullanıyor; ancak üretimde upload smoke testi yapılmadı.
 5. **Bekliyor.** Gerçek pg_cron workerı ve retention temizliğini ayrı takip et. Native dağıtım ve fiziksel cihaz kabulü ayrıca yapılmalı.
 
 | Sıra | Migration |
