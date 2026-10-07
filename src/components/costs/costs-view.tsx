@@ -1,5 +1,6 @@
 "use client";
 
+import { CostFavorites } from "./favorites";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronRight, Info, Plus, RotateCcw, X } from "lucide-react";
@@ -85,6 +86,7 @@ export function CostsView({ costs, painterSettings, isPainter, hasTemplate }: Pr
       <Button className="min-h-12 w-full shrink-0 sm:w-auto" onClick={() => open("new")}><Plus size={18} />Maliyet Ekle</Button>
     </header>
     <div className="mb-9 flex gap-3 rounded-[20px] border border-[#d7e8fa] bg-[#edf5ff] px-5 py-5 sm:px-6"><Info size={20} className="mt-0.5 shrink-0 text-[#0071E3]" /><div><p className="font-semibold">Bu değerler yalnızca sana ait.</p><p className="mt-1 text-[14px] leading-6 text-[#4d5968]">Malzeme ve işçilik fiyatların değiştiğinde buradan güncelleyebilirsin. Yeni teklifler güncel maliyetlerini kullanır.</p></div></div>
+    <CostFavorites costs={costs}/>
     {!costs.length && <Card className="px-5 py-10 text-center sm:px-10"><h2 className="text-[21px] font-semibold tracking-tight">Maliyetlerini oluşturalım.</h2><p className="mx-auto mt-2 max-w-md text-[14px] leading-6 text-[#6E6E73]">İşlerinin gerçek maliyetini hesaplayabilmemiz için kullandığın malzeme ve işçilik fiyatlarını ekle.</p>{!hasTemplate && <p className="mt-3 text-[13px] text-[#6E6E73]">Henüz hazır meslek şablonun yok. Kendi maliyetlerini eklemeye başlayabilirsin.</p>}<div className="mt-6 flex flex-col justify-center gap-2 sm:flex-row">{hasTemplate && <Button onClick={() => setConfirmation("restore")}>Hazır Şablonu Kullan</Button>}<Button variant={hasTemplate ? "secondary" : "primary"} onClick={() => open("new")}>Kendim Ekle</Button></div></Card>}
     {costs.length > 0 && groups.map((group) => {
       const items = costs.filter((item) => group.categories.includes(item.category));

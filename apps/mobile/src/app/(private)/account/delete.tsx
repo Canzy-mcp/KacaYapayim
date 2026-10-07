@@ -6,6 +6,7 @@ import { db } from "@/src/lib/supabase";
 
 export default function DeleteAccount() {
   const [confirmation, setConfirmation] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState(""); const [busy, setBusy] = useState(false);
   function confirm() {
     if (confirmation !== "HESABIMI SIL") { setError("Onay metnini aynen yaz."); return; }
@@ -22,7 +23,7 @@ export default function DeleteAccount() {
       if (!data.session) throw new Error("Oturum sona erdi.");
       const response = await fetch(`${origin.replace(/\/$/, "")}/api/mobile/account`, {
         method: "DELETE", headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session.access_token}` },
-        body: JSON.stringify({ confirmation }),
+        body: JSON.stringify({ confirmation, password }),
       });
       const result = await response.json() as { ok?: boolean; error?: string };
       if (!response.ok || !result.ok) throw new Error(result.error || "Hesap silinemedi.");
@@ -33,6 +34,7 @@ export default function DeleteAccount() {
   return <Screen title="Hesabımı Sil" subtitle="Bu işlem kalıcıdır. İşlerini ve tekliflerini kaybedersin.">
     <Notice>Aktif ücretli aboneliğin varsa önce iptal edilmesi gerekir. Hesap silme işlemi bunu kontrol eder.</Notice>
     <Field label="Onaylamak için HESABIMI SIL yaz" value={confirmation} onChangeText={setConfirmation} autoCapitalize="characters" />
+    <Field label="Güncel parolan" value={password} onChangeText={setPassword} secureTextEntry autoCapitalize="none" />
     {Boolean(error) && <Notice error>{error}</Notice>}
     <Button title={busy ? "Siliniyor..." : "Hesabımı Kalıcı Olarak Sil"} danger disabled={busy || confirmation !== "HESABIMI SIL"} onPress={confirm} />
     <Button title="Vazgeç" quiet onPress={() => router.back()} />

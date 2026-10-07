@@ -1,3 +1,4 @@
+import { quoteAccess } from "@/lib/quotes/public-access";
 import { createServiceClient } from "@/lib/supabase/admin";
 import { isPublicToken } from "@/lib/quotes/public-service";
 import { consumeRateLimit } from "@/lib/security/rate-limit";
@@ -10,6 +11,7 @@ export async function POST(request:Request,{params}:{params:Promise<{token:strin
  const {token}=await params;if(!isPublicToken(token))return new Response(null,{status:404});
  const {value:body,tooLarge}=await readJsonBody(request,2048);if(tooLarge)return new Response(null,{status:413});
  if(!body||typeof body.note!=='string'||body.note.trim().length<5||body.note.length>1000)return Response.json({error:'Değişiklik isteğinizi 5–1000 karakterle yazın.'},{status:400});
+  if ((await quoteAccess(token)).state !== "allowed") return new Response(null,{status:403});
  const service=createServiceClient();const {data:q,error}=await service.from('quotes').select('id,business_id,job_id,status,valid_until,quote_number').eq('public_token',token).maybeSingle();
  if(error)return new Response(null,{status:503});if(!q||q.status==='draft')return new Response(null,{status:404});
  if(!['ready','sent','viewed'].includes(q.status)||q.valid_until<todayInIstanbul())return Response.json({error:'Bu teklif artık değişiklik talebine açık değil.'},{status:409});

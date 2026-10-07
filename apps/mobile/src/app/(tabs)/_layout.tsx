@@ -8,9 +8,10 @@ const icon = (glyph: string) => {
   return TabIcon;
 };
 export default function TabLayout() {
-  const { session, business, loading } = useAppSession();
+  const { session, business, loading, requiresMfa } = useAppSession();
   if (loading) return <Loading />;
   if (!session) return <Redirect href="/(auth)/login" />;
+  if (requiresMfa) return <Redirect href="/mfa" />;
   if (!business?.onboarding_completed) return <Redirect href="/onboarding" />;
   return <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: palette.blue,
     tabBarStyle: { height: 62, paddingTop: 5, backgroundColor: "white" },

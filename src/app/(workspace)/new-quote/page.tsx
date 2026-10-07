@@ -1,3 +1,4 @@
+import { createClient } from "@/lib/supabase/server";
 import { ManualJobForm } from "@/components/jobs/manual-job-form";
 import { notFound } from "next/navigation";
 import { ButtonLink, Card } from "@/components/ui";
@@ -11,7 +12,7 @@ import { requireCompletedViewer } from "@/lib/viewer";
 import type { PainterCalculation } from "@/lib/jobs/painter-calculation";
 import type { ProfessionTemplate } from "@/lib/professions/schema";
 export const metadata = { title: "Yeni Teklif" };
-export default async function NewQuotePage({ searchParams }: { searchParams: Promise<{ customer_id?: string; job_id?: string; step?: string; from_calculator?: string }> }) {
+export default async function NewQuotePage({ searchParams }: { searchParams: Promise<{ customer_id?: string; job_id?: string; step?: string; from_calculator?: string; from_extra_work?: string }> }) {
   const viewer = await requireCompletedViewer();
   const params = await searchParams;
   if (params.job_id && !isJobId(params.job_id)) notFound();
@@ -20,11 +21,19 @@ export default async function NewQuotePage({ searchParams }: { searchParams: Pro
     viewer.business?.profession_id ? getPublishedTemplate(viewer.business.profession_id) : Promise.resolve(null),
   ]);
   if (params.job_id && !bundle) notFound();
+  if(params.from_extra_work){
+    if(!isJobId(params.from_extra_work)||params.job_id)notFound();
+    const client=await createClient();const entry=await client.from("work_entries").select("id,title,note,job_id,metadata").eq("id",params.from_extra_work).eq("business_id",viewer.business!.id).eq("kind","extra_work").eq("status","approved").maybeSingle();
+    if(entry.error)throw new Error("Ek iş yüklenemedi.");if(!entry.data?.job_id)notFound();
+    if(typeof entry.data.metadata.related_job_id==='string'&&isJobId(entry.data.metadata.related_job_id)){const {redirect}=await import("next/navigation");redirect(`/jobs/${entry.data.metadata.related_job_id}`);}
+    const source=await getJobBundle(entry.data.job_id);if(!source)notFound();const customer=source.customer;
+    return <><p className="mb-5 rounded-xl bg-blue-50 p-4 text-sm">Onaylı ek iş için ayrı teklif hazırlanıyor. Önce bu işin maliyetini gir, ardından satış fiyatını belirle. Mevcut kabul edilmiş teklif değişmez; gelir kendiliğinden eklenmez.</p><ManualJobForm sourceExtraId={entry.data.id} initialTitle={entry.data.title} initialDescription={entry.data.note} costs={costData.costs} customers={customerList.customers.slice(0,20)} selectedCustomer={customer?{id:customer.id,name:customer.name,phone:customer.phone,company_name:customer.company_name}:null}/></>;
+  }
   const selected = bundle?.customer || (params.customer_id && isCustomerId(params.customer_id) ? await getCustomerById(params.customer_id) : null);
   const selectedCustomer = selected ? { id: selected.id, name: selected.name, company_name: selected.company_name, phone: selected.phone } : null;
   const customers = customerList.customers.slice(0, 20).map(({ id, name, company_name, phone }) => ({ id, name, company_name, phone }));
-  if (params.from_calculator === '1' && !bundle) return <ManualJobForm customers={customers} selectedCustomer={selectedCustomer} fromCalculator />;
-  if (bundle?.job.input_data.manual === true || (!template && viewer.business?.profession !== 'Boyacı')) return <ManualJobForm customers={customers} selectedCustomer={selectedCustomer} job={bundle?.job} />;
+  if (params.from_calculator === '1' && !bundle) return <ManualJobForm costs={costData.costs} customers={customers} selectedCustomer={selectedCustomer} fromCalculator />;
+  if (bundle?.job.input_data.manual === true || (!template && viewer.business?.profession !== 'Boyacı')) return <ManualJobForm costs={costData.costs} customers={customers} selectedCustomer={selectedCustomer} job={bundle?.job} />;
   if (viewer.business?.profession !== "Boyacı" || (template && !bundle?.details && !!process.env.SUPABASE_SERVICE_ROLE_KEY)) {
     if (!template) return <div className="mx-auto max-w-[720px]"><Card className="p-8 text-center"><h1 className="text-[24px] font-semibold">Meslek şablonu bulunamadı</h1><p className="mt-2 text-[14px] leading-6 text-[#6E6E73]">Bu meslek için yayınlanmış bir iş formu henüz yok.</p><ButtonLink href="/dashboard" className="mt-6">Ana Sayfaya Dön</ButtonLink></Card></div>;
     if (bundle && !bundle.job.template_snapshot) notFound();

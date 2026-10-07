@@ -10,6 +10,9 @@ export const getViewer = cache(async () => {
   const { data: claims, error } = await supabase.auth.getClaims();
   const userId = claims?.claims?.sub;
   if (error || !userId) return null;
+  const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (assurance.error) throw new Error("Oturum güvenliği kontrol edilemedi.");
+  if (assurance.data.nextLevel === "aal2" && assurance.data.currentLevel !== "aal2") redirect("/mfa");
   const [profileResult, businessResult] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
     supabase.from("businesses").select("*").eq("owner_id", userId).maybeSingle(),

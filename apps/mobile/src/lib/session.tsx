@@ -4,10 +4,11 @@ import type { Business, Profile } from "@kacayapayim/core/types";
 import { supabase } from "./supabase";
 
 type AppSession = { session: Session | null; business: Business | null; profile: Profile | null;
-  loading: boolean; refresh: () => Promise<void> };
+  loading: boolean; requiresMfa: boolean; refresh: () => Promise<void> };
 const Context = createContext<AppSession | null>(null);
 
 export function SessionProvider({ children }: { children: ReactNode }) {
+  const [requiresMfa,setRequiresMfa]=useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [business, setBusiness] = useState<Business | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -16,7 +17,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     if (!supabase) { setLoading(false); return; }
     const { data: sessionData } = await supabase.auth.getSession();
     setSession(sessionData.session);
-    if (!sessionData.session?.user) { setBusiness(null); setProfile(null); setLoading(false); return; }
+    if (!sessionData.session?.user) { setRequiresMfa(false); setBusiness(null); setProfile(null); setLoading(false); return; }
+    const assurance=await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    const needs=Boolean(assurance.error || assurance.data.nextLevel==="aal2" && assurance.data.currentLevel!=="aal2");
+    setRequiresMfa(needs);
+    if(needs){setBusiness(null);setProfile(null);setLoading(false);return;}
     const id = sessionData.session.user.id;
     const [businessResult, profileResult] = await Promise.all([
       supabase.from("businesses").select("*").eq("owner_id", id).maybeSingle(),
@@ -35,7 +40,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     });
     return () => { clearTimeout(timer); listener?.data.subscription.unsubscribe(); };
   }, [refresh]);
-  return <Context.Provider value={{ session, business, profile, loading, refresh }}>{children}</Context.Provider>;
+  return <Context.Provider value={{ session, business, profile, loading, requiresMfa, refresh }}>{children}</Context.Provider>;
 }
 
 export function useAppSession() {

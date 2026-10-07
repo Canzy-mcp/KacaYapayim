@@ -18,3 +18,19 @@ export async function markQuoteSent(id: string): Promise<{ ok: boolean; error?: 
   await recordEvent("quote_shared", "/quotes");
   return { ok: true };
 }
+
+export async function manageQuoteLink(id: string, action: "rotate" | "revoke") {
+  await requireCompletedViewer();
+  if (!isQuoteId(id) || !["rotate", "revoke"].includes(action)) return { ok: false, error: "Geçersiz teklif." };
+  const client = await createClient();
+  const { data, error } = await client.rpc("manage_quote_link", { p_quote_id: id, p_action: action });
+  if (error || !data) return { ok: false, error: "Bağlantı değiştirilemedi. Eski revizyonları yeniden paylaşamazsın." };
+  revalidatePath(`/quotes/${id}`);
+  return { ok: true, token: data };
+}
+export async function setQuoteAccessCode(id:string,code:string|null){
+ await requireCompletedViewer();
+ if(!isQuoteId(id)||code!==null&&!/^\d{6}$/.test(code))return {ok:false,error:"6 haneli kod gir."};
+ const r=await (await createClient()).rpc("set_quote_access_code",{p_quote_id:id,p_code:code});
+ revalidatePath(`/quotes/${id}`);return r.error?{ok:false,error:"Erişim kodu kaydedilemedi."}:{ok:true};
+}

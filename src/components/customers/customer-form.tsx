@@ -12,7 +12,7 @@ import type { Customer } from "@/types/database";
 import { UpgradeModal } from "@/components/billing/upgrade-modal";
 
 function ErrorText({ message }: { message?: string }) { return message ? <p role="alert" className="mt-1 text-[12px] text-[#c7352d]">{message}</p> : null; }
-const textareaStyle = "min-h-28 w-full resize-y rounded-[13px] border border-[#D2D2D7] bg-white px-4 py-3 text-[16px] outline-none placeholder:text-[#9d9da3] focus:border-[#0071E3] focus:ring-3 focus:ring-[#0071E3]/15";
+const textareaStyle = "min-h-28 w-full resize-y rounded-[13px] border border-[#D2D2D7] bg-white px-4 py-3 text-[16px] outline-none placeholder:text-[#6e6e73] focus:border-[#0071E3] focus:ring-3 focus:ring-[#0071E3]/15";
 
 export function CustomerForm({ customer, onCreated, onCancel }: { customer?: Customer; onCreated?: (customer: { id: string; name: string; company_name: string | null; phone: string | null }) => void; onCancel?: () => void }) {
   const router = useRouter();

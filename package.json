@@ -13,6 +13,8 @@
     "start": "next start -p 3005",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "test:database": "node scripts/test-database.mjs",
+    "verify": "npm test && npm run test:database && npm run typecheck && npm run mobile:typecheck && npm run lint -w @kacayapayim/mobile && npm run build",
     "smoke": "node scripts/smoke-production.mjs",
     "mobile": "npm run start -w @kacayapayim/mobile",
     "mobile:typecheck": "npm run typecheck -w @kacayapayim/mobile"
@@ -32,6 +34,7 @@
     "uuid": "11.1.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
     "@tailwindcss/postcss": "^4.1.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",

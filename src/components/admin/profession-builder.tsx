@@ -27,6 +27,23 @@ const categories = ["material","labor","transport","consumable","overhead","othe
 const units = ["piece","liter","kilogram","meter","square_meter","hour","day","kilometer","fixed","percent"];
 const formulaTypes = ["quantity","cost","duration","derived_value","warning"];
 
+function sampleFieldValues(template: ProfessionTemplate, values: Record<string, string>) {
+  return Object.fromEntries(template.fields.map((field) => {
+    const raw = values[field.key];
+    if (raw === undefined) return [field.key, field.defaultValue ?? null];
+    if (raw.trim() === "") return [field.key, null];
+    if (["number", "currency", "integer", "percentage", "quantity"].includes(field.fieldType)) {
+      const number = Number(raw);
+      return [field.key, Number.isFinite(number) ? number : null];
+    }
+    if (["checkbox", "toggle"].includes(field.fieldType)) {
+      return [field.key, raw === "true" ? true : raw === "false" ? false : null];
+    }
+    if (field.fieldType === "multi_select") return [field.key, raw.split(",").map(value => value.trim()).filter(Boolean)];
+    return [field.key, raw];
+  }));
+}
+
 function CollectionControls({ kind, template, change }: { kind: CollectionKey; template: ProfessionTemplate;
   change: (key: CollectionKey, value: unknown[]) => void }) {
   const source = (template[kind] || []) as unknown[];
@@ -99,9 +116,7 @@ export function ProfessionBuilder({ initial, professionId, isActive = false, has
       const sampleCosts = parsed.template.costs.map((cost) => ({ id: cost.key, business_id: "preview", template_id: cost.key,
         key: cost.key, name: cost.name, category: cost.category, unit: cost.unit, unit_cost: cost.defaultValue,
         metadata: {}, is_active: true, sort_order: cost.sortOrder, created_at: "", updated_at: "" })) as BusinessCostItem[];
-      const fields = Object.fromEntries(parsed.template.fields.map((field) => [field.key,
-        sampleValues[field.key] === undefined || sampleValues[field.key] === "" ? field.defaultValue ?? null :
-          ["number","currency","integer","percentage","quantity"].includes(field.fieldType) ? Number(sampleValues[field.key]) : sampleValues[field.key]]));
+      const fields = sampleFieldValues(parsed.template, sampleValues);
       return calculateProfessionJob({ template: parsed.template, fieldValues: fields, businessCosts: sampleCosts });
     } catch { return null; }
   }, [parsed, sampleValues]);
@@ -113,7 +128,7 @@ export function ProfessionBuilder({ initial, professionId, isActive = false, has
       if (!saved.ok) { setMessage(saved.error); return; }
       setId(saved.professionId!);
       if (publish) {
-        const result = await publishProfessionDraft(saved.professionId!);
+        const result = await publishProfessionDraft(saved.professionId!, sampleFieldValues(parsed.template, sampleValues));
         setMessage(result.ok ? `Sürüm ${result.version} yayınlandı.` : result.error);
       } else setMessage("Taslak kaydedildi.");
       router.replace(`/admin/professions?id=${saved.professionId}`); router.refresh();

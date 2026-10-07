@@ -7,5 +7,5 @@ export async function GET(_:Request,{params}:{params:Promise<{id:string}>}){
  const path=data?.metadata.path;if(error||typeof path!=='string'||!path.startsWith(viewer.id+'/'))return new Response(null,{status:404});
  const signed=await client.storage.from('business-assets').createSignedUrl(path,60);
  if(signed.error||!signed.data)return new Response(null,{status:503});
- return Response.redirect(signed.data.signedUrl,302);
+ return new Response(null,{status:302,headers:{Location:signed.data.signedUrl,'Cache-Control':'private, no-store','Referrer-Policy':'no-referrer','X-Robots-Tag':'noindex, nofollow'}});
 }

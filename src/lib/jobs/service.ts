@@ -2,7 +2,7 @@ import { logFailure } from "@/lib/observability/log";
 import { createClient } from "@/lib/supabase/server";
 import { requireCompletedViewer } from "@/lib/viewer";
 import { isCustomerId } from "@/lib/customers/service";
-import type { ActualJobCost, Customer, Job, JobCostBreakdown, PainterJobDetail, Quote } from "@/types/database";
+import type { ActualJobCost, Customer, Job, JobStatus, JobCostBreakdown, PainterJobDetail, Quote } from "@/types/database";
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export function isJobId(value: string) { return uuidPattern.test(value); }
@@ -46,6 +46,21 @@ export async function getRecentJobs(limit = 50) {
     .order("created_at", { ascending: false }).limit(Math.max(1, Math.min(limit, 50)));
   if (error) { logFailure("Job list failed"); throw new Error("İşler yüklenemedi."); }
   return (data || []) as Job[];
+}
+
+export async function searchJobs({ status = "all", query = "", page = 1, from = "", to = "" }) {
+  const viewer = await requireCompletedViewer();
+  const client = await createClient();
+  let request = client.from("jobs").select("*", { count: "exact" }).eq("business_id", viewer.business!.id);
+  if (["draft", "calculated", "quoted", "accepted", "scheduled", "in_progress", "completed", "cancelled"].includes(status)) request = request.eq("status", status as JobStatus);
+  const term = query.trim().slice(0, 100).replace(/[%_\\]/g, "");
+  if (term) request = request.ilike("title", `%${term}%`);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(from) && Number.isFinite(Date.parse(from)) && new Date(from).toISOString().slice(0,10) === from) request = request.gte("created_at", `${from}T00:00:00+03:00`);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(to) && Number.isFinite(Date.parse(to)) && new Date(to).toISOString().slice(0,10) === to) request = request.lte("created_at", `${to}T23:59:59.999999+03:00`);
+  const safePage = Number.isSafeInteger(page) && page > 0 ? Math.min(page, 100000) : 1;
+  const { data, error, count } = await request.order("created_at", { ascending: false }).order("id", { ascending: false }).range((safePage - 1) * 25, safePage * 25 - 1);
+  if (error) throw new Error("İşler yüklenemedi.");
+  return { jobs: (data || []) as Job[], count: count || 0, page: safePage };
 }
 
 export async function getJobsForCustomer(customerId: string, limit = 5) {

@@ -4,6 +4,7 @@ import { toCustomerQuotePreview } from "@/lib/quotes/public-preview";
 import { renderQuotePdf } from "@/lib/quotes/pdf";
 import { sanitizePdfFilename } from "@/lib/quotes/share";
 import { getEffectivePlan } from "@/lib/billing/service";
+import { consumeRateLimit } from "@/lib/security/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,6 +12,7 @@ export const dynamic = "force-dynamic";
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const viewer = await getViewer();
   if (!viewer?.business?.onboarding_completed) return new Response(null, { status: 401 });
+  if (!await consumeRateLimit("private-pdf", 30, 3600, viewer.id)) return new Response(null, { status: 429 });
   const { id } = await params;
   if (!isQuoteId(id)) return new Response(null, { status: 404 });
   const bundle = await getQuoteBundle(id);

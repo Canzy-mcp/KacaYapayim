@@ -1,3 +1,4 @@
+import { requireAdminMfa } from "@/lib/account/mfa";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Card } from "@/components/ui";
@@ -12,6 +13,7 @@ export default async function AdminProfessionsPage({ searchParams }: { searchPar
   const service = createServiceClient();
   const { data: admin } = await service.from("platform_admins").select("user_id").eq("user_id", viewer.id).maybeSingle();
   if (!admin) redirect("/dashboard");
+  try { await requireAdminMfa(); } catch { return <Card className="p-6"><h1 className="text-xl font-semibold">Yönetici doğrulaması gerekli</h1><p className="mt-3 text-sm">Ayarlardan iki aşamalı doğrulamayı etkinleştir ve güncel kodla giriş yap.</p><Link className="mt-4 inline-flex min-h-11 items-center text-[#0071e3]" href="/settings">Güvenlik ayarlarına git</Link></Card>; }
   const { id } = await searchParams;
   const { data: professions } = await service.from("professions").select("id,name,slug,current_version,is_active")
     .order("sort_order").order("name");

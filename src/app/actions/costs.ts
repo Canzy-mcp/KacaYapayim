@@ -11,6 +11,13 @@ import type { CostCategory, CostUnit } from "@/types/database";
 export type CostActionResult = { ok: boolean; error?: string; fieldErrors?: Record<string, string> };
 const failed = "Bu maliyet kaydedilemedi. Tekrar dene.";
 
+export async function setCostFavorite(id:string,favorite:boolean){
+ const viewer=await requireCompletedViewer();
+ if(!/^[0-9a-f-]{36}$/i.test(id)||typeof favorite!=="boolean")return {ok:false};
+ const r=await (await createClient()).from("business_cost_items").update({is_favorite:favorite}).eq("id",id).eq("business_id",viewer.business!.id).select("id").maybeSingle();
+ revalidatePath("/costs");revalidatePath("/new-quote");return {ok:!r.error&&!!r.data};
+}
+
 function parseItem(form: FormData) {
   const name = String(form.get("name") || "").trim();
   const category = String(form.get("category") || "") as CostCategory;

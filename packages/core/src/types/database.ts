@@ -50,7 +50,7 @@ export type ProfessionCostTemplate = {
 export type BusinessCostItem = {
   id: string; business_id: string; template_id: string | null; key: string; name: string;
   category: CostCategory; unit: CostUnit; unit_cost: number; metadata: Record<string, unknown>;
-  is_active: boolean; sort_order: number; created_at: string; updated_at: string;
+  is_active: boolean; is_favorite?: boolean; sort_order: number; created_at: string; updated_at: string;
 };
 
 export type BusinessProfessionSettings = {
@@ -117,7 +117,7 @@ export type Quote = {
   estimated_cost_snapshot: number; estimated_profit_snapshot: number; profit_margin_snapshot: number | null;
   target_margin_snapshot: number; minimum_margin_snapshot: number;
   currency: string; valid_until: string; estimated_duration_text: string | null;
-  payment_terms: string | null; notes: string | null; public_token: string;
+  payment_terms: string | null; notes: string | null; public_token: string; sharing_disabled?: boolean;
   tax_mode?: "unspecified" | "included" | "excluded";
   revision_number: number; parent_quote_id: string | null;
   sent_at: string | null; viewed_at: string | null; accepted_at: string | null; rejected_at: string | null;
@@ -142,6 +142,12 @@ export type BillingEvent = { id: string; provider: string; provider_event_id: st
 export type Database = {
   public: {
     Tables: {
+      account_deletion_requests:{Row:{user_id:string;created_at:string};Insert:never;Update:never;Relationships:[]};
+      signup_settings: {Row:{id:boolean;enabled:boolean};Insert:never;Update:never;Relationships:[]};
+      quote_access_controls: {Row:{quote_id:string;code_hash:string;version:string};Insert:never;Update:never;Relationships:[]};
+      notifications: {Row:{id:string;business_id:string;event_key:string;quote_id:string|null;title:string;read_at:string|null;created_at:string};Insert:never;Update:{read_at:string|null};Relationships:[]};
+      storage_upload_reservations: {Row:{path:string;user_id:string;bytes:number;created_at:string};Insert:{path:string;user_id:string;bytes:number;created_at?:string};Update:never;Relationships:[]};
+      job_payments: {Row:{id:string;business_id:string;job_id:string;amount:number;paid_at:string;method:string;note:string;created_at:string};Insert:{id?:string;business_id:string;job_id:string;amount:number;paid_at:string;method:string;note?:string;created_at?:string};Update:never;Relationships:[]};
       job_viewers: {Row:{can_add_notes:boolean;id:string;business_id:string;job_id:string;invited_email:string;user_id:string|null;token_hash:string|null;expires_at:string;created_at:string};Insert:{id?:string;business_id:string;job_id:string;invited_email:string;can_add_notes?:boolean;user_id?:string|null;token_hash?:string|null;expires_at?:string};Update:{can_add_notes?:boolean;user_id?:string|null;token_hash?:string|null;expires_at?:string};Relationships:[]};
       business_preferences:{Row:{business_id:string;followup_reminders:boolean;decision_notifications:boolean;cost_reminders:boolean};Insert:{business_id:string;followup_reminders?:boolean;decision_notifications?:boolean;cost_reminders?:boolean};Update:{followup_reminders?:boolean;decision_notifications?:boolean;cost_reminders?:boolean};Relationships:[]};
       quote_templates: {Row:{id:string;business_id:string;name:string;content:Record<string,unknown>;created_at:string};Insert:{business_id:string;name:string;content:Record<string,unknown>};Update:{name?:string;content?:Record<string,unknown>};Relationships:[]};
@@ -193,7 +199,7 @@ export type Database = {
       business_cost_items: {
         Row: BusinessCostItem;
         Insert: { id?: string; business_id: string; template_id?: string | null; key: string; name: string; category: CostCategory; unit: CostUnit; unit_cost?: number; metadata?: Record<string, unknown>; is_active?: boolean; sort_order?: number; created_at?: string; updated_at?: string };
-        Update: { template_id?: string | null; key?: string; name?: string; category?: CostCategory; unit?: CostUnit; unit_cost?: number; metadata?: Record<string, unknown>; is_active?: boolean; sort_order?: number; updated_at?: string };
+        Update: { template_id?: string | null; key?: string; name?: string; category?: CostCategory; unit?: CostUnit; unit_cost?: number; metadata?: Record<string, unknown>; is_active?: boolean; is_favorite?:boolean; sort_order?: number; updated_at?: string };
         Relationships: [{ foreignKeyName: "business_cost_items_business_id_fkey"; columns: ["business_id"]; isOneToOne: false; referencedRelation: "businesses"; referencedColumns: ["id"] }, { foreignKeyName: "business_cost_items_template_id_fkey"; columns: ["template_id"]; isOneToOne: false; referencedRelation: "profession_cost_templates"; referencedColumns: ["id"] }];
       };
       business_profession_settings: {
@@ -253,6 +259,17 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      get_my_archive_page:{Args:{p_table:string;p_cursor:string|null;p_cutoff:string};Returns:Array<{key:string;record:Record<string,unknown>}>};
+      save_approved_extra_job:{Args:{p_entry_id:string;p_title:string;p_description:string;p_lines:Array<{name:string;category:string;quantity:number;unit_cost:number}>};Returns:string};
+      set_my_logo:{Args:{p_path:string|null;p_url:string|null};Returns:string|null};
+      begin_account_deletion:{Args:{p_user_id:string};Returns:boolean};
+      get_my_expense_total:{Args:{p_job_id:string};Returns:number};
+      set_quote_access_code:{Args:{p_quote_id:string;p_code:string|null};Returns:boolean};
+      verify_quote_access_code:{Args:{p_token:string;p_code:string};Returns:boolean};
+      get_my_payment_total: {Args:{p_job_id:string};Returns:number};
+      reserve_upload: {Args:{p_user_id:string;p_path:string;p_bytes:number};Returns:boolean};
+      manage_quote_link: {Args:{p_quote_id:string;p_action:string};Returns:string};
+      run_data_retention: {Args:Record<string,never>;Returns:undefined};
       create_service_packages:{Args:{p_quote_id:string;p_options:Array<{name:string;scope:string;cost:number;price:number}>;p_acknowledge_risk:boolean};Returns:Array<{id:string;name:string}>};
       add_assigned_job_note: {Args:{p_job_id:string;p_title:string;p_note:string};Returns:string};
       accept_job_invite:{Args:{p_token:string};Returns:boolean};

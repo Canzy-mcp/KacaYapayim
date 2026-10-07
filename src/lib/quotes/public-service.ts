@@ -3,8 +3,10 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import type { PublicQuote } from "@/lib/quotes/public-preview";
 import { consumeRateLimit } from "@/lib/security/rate-limit";
 import { logFailure } from "@/lib/observability/log";
+import { quoteAccess } from "@/lib/quotes/public-access";
+import { isPublicToken } from "@/lib/quotes/id";
 
-export const isPublicToken = (value: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+export { isPublicToken } from "@/lib/quotes/id";
 
 function isPublicQuote(value: unknown): value is PublicQuote {
   if (!value || typeof value !== "object") return false;
@@ -22,6 +24,7 @@ function isPublicQuote(value: unknown): value is PublicQuote {
 export async function getPublicQuote(token: string): Promise<PublicQuote | null> {
   if (!isPublicToken(token) || !isSupabaseConfigured() || !process.env.SUPABASE_SERVICE_ROLE_KEY) return null;
   if (!await consumeRateLimit("public-quote-lookup", 60, 60)) return null;
+  if ((await quoteAccess(token)).state !== "allowed") return null;
   const supabase = createServiceClient();
   const { data, error } = await supabase.rpc("get_public_quote_details", { p_token: token });
   if (error) { logFailure("public_quote_lookup"); return null; }

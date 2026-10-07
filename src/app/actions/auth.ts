@@ -44,6 +44,10 @@ export async function loginAction(form: FormData): Promise<AuthResult> {
 export async function registerAction(form: FormData): Promise<AuthResult> {
   if (process.env.PUBLIC_SIGNUPS_ENABLED === "false") return { ok: false, error: "Yeni hesap açılışı şu anda kapalı." };
   if (!await consumeRateLimit("auth-register", 5, 3600)) return { ok: false, error: "Çok fazla deneme yapıldı. Daha sonra tekrar dene." };
+  if (isSupabaseConfigured()) {
+    const setting=await (await createClient()).from("signup_settings").select("enabled").eq("id",true).maybeSingle();
+    if(setting.error||!setting.data?.enabled)return {ok:false,error:"Yeni hesap açılışı şu anda kapalı."};
+  }
   const firstName = cleanText(form.get("firstName"), 100);
   const lastName = cleanText(form.get("lastName"), 100);
   const email = cleanText(form.get("email"), 254).toLowerCase();

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { siteMetadata } from "./seo";
-export const legalName=process.env.NEXT_PUBLIC_LEGAL_ENTITY_NAME?.trim();
+export const legalName=process.env.NEXT_PUBLIC_LEGAL_ENTITY_NAME?.trim() || "Ercan Yumuşak";
 import { supportEmail } from "./contact";
 export { supportEmail } from "./contact";
 export const legalReady=Boolean(legalName&&supportEmail&&process.env.LEGAL_REVIEW_APPROVED==="true");

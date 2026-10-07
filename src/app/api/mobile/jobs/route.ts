@@ -27,6 +27,10 @@ export async function POST(request: NextRequest) {
     });
     const { data: userData, error: authError } = await auth.auth.getUser(token);
     if (authError || !userData.user) return NextResponse.json({ error: "Oturum geçersiz." }, { status: 401 });
+    if (!await consumeRateLimit("mobile-job-save-user",30,60,userData.user.id))return NextResponse.json({error:"Çok fazla kayıt denemesi yaptın."},{status:429});
+    const claims=await auth.auth.getClaims(token);
+    if(claims.error || !claims.data)return NextResponse.json({error:"Oturum doğrulanamadı."},{status:401});
+    if(userData.user.factors?.some(f=>f.status==="verified") && claims.data.claims.aal!=="aal2")return NextResponse.json({error:"İki aşamalı doğrulama gerekli."},{status:403});
     const {value:payload,tooLarge}=await readJsonBody(request,32000);
     if(tooLarge)return NextResponse.json({error:"İş bilgileri çok büyük."},{status:413});
     if (!payload || typeof payload !== "object" || Array.isArray(payload))

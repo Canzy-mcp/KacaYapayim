@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
-if (process.env.DEPLOYMENT_ENV === "production") {
+if (process.env.DEPLOYMENT_ENV && !["local", "staging", "production"].includes(process.env.DEPLOYMENT_ENV)) throw new Error("DEPLOYMENT_ENV local, staging veya production olmalı.");
+
+if ((process.env.DEPLOYMENT_ENV === "production" || process.env.VERCEL_ENV === "production")) {
   const required = ["APP_URL", "NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY", "RATE_LIMIT_HMAC_KEY", "NEXT_PUBLIC_LEGAL_ENTITY_NAME", "NEXT_PUBLIC_SUPPORT_EMAIL"];
   const missing = required.filter(key => !process.env[key]);
   if (missing.length) throw new Error(`Production ayarları eksik: ${missing.join(", ")}`);
@@ -8,6 +10,8 @@ if (process.env.DEPLOYMENT_ENV === "production") {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.startsWith("https://")) throw new Error("Production Supabase URL HTTPS olmalı.");
   if ((process.env.RATE_LIMIT_HMAC_KEY?.length || 0) < 32) throw new Error("RATE_LIMIT_HMAC_KEY en az 32 karakter olmalı.");
   if (process.env.LEGAL_REVIEW_APPROVED !== "true") throw new Error("Hukuki sayfalar onaylanmadan production build yapılamaz.");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "")) throw new Error("Production destek e-postası geçerli olmalı.");
+  if (/placeholder|example|yer tutucu|yayın öncesi/i.test(process.env.NEXT_PUBLIC_LEGAL_ENTITY_NAME || "")) throw new Error("Production hizmet sahibi gerçek bilgi içermeli.");
 }
 
 const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin : "";

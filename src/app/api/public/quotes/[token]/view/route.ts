@@ -1,3 +1,4 @@
+import { quoteAccess } from "@/lib/quotes/public-access";
 import { createServiceClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { isPublicToken } from "@/lib/quotes/public-service";
@@ -15,6 +16,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   if(tooLarge)return new Response(null,{status:413});
   if (!body || typeof body.eventId !== "string" || !isPublicToken(body.eventId))
     return new Response(null, { status: 400 });
+  if ((await quoteAccess(token)).state !== "allowed") return new Response(null,{status:403});
   const supabase = createServiceClient();
   const { data, error } = await supabase.rpc("mark_quote_viewed", { p_token: token, p_event_id: body.eventId });
   if (error) return new Response(null, { status: 503, headers: { "Cache-Control": "no-store" } });

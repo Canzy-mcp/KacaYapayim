@@ -5,7 +5,7 @@ const buttonStyles = {
   primary: "bg-[#0071E3] text-white hover:bg-[#0065cc] active:bg-[#005bb8]",
   secondary: "border border-[#D2D2D7] bg-white text-[#1D1D1F] hover:bg-[#f7f7f9]",
   ghost: "text-[#1D1D1F] hover:bg-black/5",
-  danger: "bg-[#FF3B30] text-white hover:bg-[#e82f25]",
+  danger: "bg-[#B42318] text-white hover:bg-[#912018]",
 };
 
 type ButtonVariant = keyof typeof buttonStyles;
@@ -36,8 +36,8 @@ export function Avatar({ size = "normal", initials = "MY" }: { size?: "normal" |
   return <span aria-label="Kullanıcı avatarı" className={`inline-flex shrink-0 items-center justify-center rounded-full bg-[#e9e9ed] font-semibold text-[#515159] ${size === "small" ? "size-9 text-[12px]" : "size-10 text-[13px]"}`}>{initials}</span>;
 }
 
-export function Input({ label, id, className = "", ...props }: InputHTMLAttributes<HTMLInputElement> & { label: string; id: string }) {
-  return <label htmlFor={id} className="block text-[14px] font-medium"><span className="mb-2 block">{label}</span><input id={id} className={`h-12 w-full rounded-[13px] border border-[#D2D2D7] bg-white px-4 text-[16px] outline-none placeholder:text-[#9d9da3] focus:border-[#0071E3] focus:ring-3 focus:ring-[#0071E3]/15 ${className}`} {...props} /></label>;
+export function Input({ label, id, error, className = "", ...props }: InputHTMLAttributes<HTMLInputElement> & { label: string; id: string; error?: string }) {
+  return <label htmlFor={id} className="block text-[14px] font-medium"><span className="mb-2 block">{label}</span><input id={id} aria-invalid={error ? true : undefined} aria-describedby={error ? `${id}-error` : undefined} className={`h-12 w-full rounded-[13px] border border-[#D2D2D7] bg-white px-4 text-[16px] outline-none placeholder:text-[#6e6e73] focus:border-[#0071E3] focus:ring-3 focus:ring-[#0071E3]/15 ${className}`} {...props} />{error && <span id={`${id}-error`} className="mt-2 block text-sm text-[#b42318]">{error}</span>}</label>;
 }
 
 export function Select({ label, id, children, className = "", ...props }: SelectHTMLAttributes<HTMLSelectElement> & { label: string; id: string; children: ReactNode }) {

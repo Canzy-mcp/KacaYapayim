@@ -8,6 +8,8 @@ import { PublicViewTracker } from "@/components/quotes/public-view-tracker";
 import { PublicQuoteDecision } from "@/components/quotes/public-quote-decision";
 import { todayInIstanbul } from "@/lib/quotes/defaults";
 import { getPublicQuote } from "@/lib/quotes/public-service";
+import { quoteAccess } from "@/lib/quotes/public-access";
+import { PublicAccessForm } from "@/components/quotes/public-access-form";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -23,6 +25,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function PublicQuotePage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
+  const access=await quoteAccess(token);
+  if(access.state==="locked")return <PublicAccessForm token={token}/>;
+  if(access.state==="unavailable")notFound();
   const quote = await getPublicQuote(token);
   if (!quote) notFound();
   const expired = quote.validUntil < todayInIstanbul() || quote.status === "expired";

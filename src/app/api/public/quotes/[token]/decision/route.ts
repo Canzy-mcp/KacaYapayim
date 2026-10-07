@@ -1,3 +1,4 @@
+import { quoteAccess } from "@/lib/quotes/public-access";
 import { createServiceClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { isPublicToken } from "@/lib/quotes/public-service";
@@ -20,6 +21,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     body.reason != null && (typeof body.reason !== "string" || !isRejectionReason(body.reason)) ||
     body.note != null && (typeof body.note !== "string" || body.note.length > 1000))
     return Response.json({ error: "Geçersiz yanıt." }, { status: 400, headers: { "Cache-Control": "no-store" } });
+  if ((await quoteAccess(token)).state !== "allowed") return new Response(null,{status:403});
   const supabase = createServiceClient();
   const { data, error } = await supabase.rpc("respond_to_package_quote", {
     p_token: token, p_action: body.action,

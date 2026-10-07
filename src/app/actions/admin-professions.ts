@@ -3,8 +3,11 @@ import { logFailure } from "@/lib/observability/log";
 
 import { revalidatePath } from "next/cache";
 import { requireViewer } from "@/lib/viewer";
+import { requireAdminMfa } from "@/lib/account/mfa";
 import { createServiceClient } from "@/lib/supabase/admin";
-import { compileTemplate } from "@/lib/professions/engine";
+import { compileTemplate, calculateProfessionJob } from "@/lib/professions/engine";
+import type { FieldValues } from "@/lib/professions/schema";
+import type { BusinessCostItem } from "@/types/database";
 import { TemplateError, type ProfessionTemplate } from "@/lib/professions/schema";
 
 async function requirePlatformAdmin() {
@@ -12,6 +15,7 @@ async function requirePlatformAdmin() {
   const service = createServiceClient();
   const { data, error } = await service.from("platform_admins").select("user_id").eq("user_id", viewer.id).maybeSingle();
   if (error || !data) throw new Error("Yönetici erişimi gerekli.");
+  await requireAdminMfa();
   return { viewer, service };
 }
 
@@ -59,7 +63,7 @@ export async function saveProfessionDraft(input: { professionId: string | null; 
   }
 }
 
-export async function publishProfessionDraft(professionId: string) {
+export async function publishProfessionDraft(professionId: string, sampleValues: FieldValues) {
   try {
     const { viewer, service } = await requirePlatformAdmin();
     const { data: profession } = await service.from("professions").select("id,current_version").eq("id", professionId).single();
@@ -70,6 +74,10 @@ export async function publishProfessionDraft(professionId: string) {
     if (!draft) return { ok: false, error: "Önce taslağı kaydet." } as const;
     const template = draft.template as ProfessionTemplate;
     validateTemplate(template);
+    if(!sampleValues || typeof sampleValues!=='object' || Array.isArray(sampleValues))return {ok:false,error:"Yayınlamadan önce örnek işi tamamla."} as const;
+    const sampleCosts=template.costs.map(cost=>({id:cost.key,business_id:"preview",template_id:cost.key,key:cost.key,name:cost.name,category:cost.category,unit:cost.unit,unit_cost:cost.defaultValue,metadata:{},is_active:true,sort_order:cost.sortOrder,created_at:"",updated_at:""})) as BusinessCostItem[];
+    const calculation=calculateProfessionJob({template,fieldValues:sampleValues,businessCosts:sampleCosts});
+    if(calculation.totalCost<=0 || !calculation.costBreakdown.length)return {ok:false,error:"Örnek işte sıfırdan büyük maliyet hesaplanmalı."} as const;
     const { error } = await service.rpc("publish_profession_template", { p_admin_id: viewer.id,
       p_profession_id: professionId, p_version: version, p_template: template as unknown as Record<string, unknown> });
     if (error) { logFailure("Profession publish failed"); return { ok: false, error: "Şablon yayınlanamadı. Maliyet birimlerini ve alanları kontrol et." } as const; }

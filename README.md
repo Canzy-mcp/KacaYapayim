@@ -2,12 +2,12 @@
 
 Next.js tabanlı usta uygulaması: müşteri ve maliyet yönetimi, meslek hesabı veya genel iş hesabı, fiyatlandırma, profesyonel teklif, revizyon, iş takibi, özel dosyalar ve atanmış iş görüntüleme.
 
-5 Ekim 2026 geliştirme teslimi ve doğrulamalar [PRODUCT_IMPROVEMENTS_2026-10-05.md](docs/PRODUCT_IMPROVEMENTS_2026-10-05.md) içinde. Ödeme ve tahsilat bu çalışmanın dışında tutuldu; yeni web sürümü henüz hosting ortamına yayınlanmadı.
+6 Ekim güvenlik ve ürün geliştirmeleri [AUDIT_IMPLEMENTATION_2026-10-06.md](docs/AUDIT_IMPLEMENTATION_2026-10-06.md) içinde. Elle tahsilat takibi eklendi; ödeme sağlayıcısı bağlı değil. Bu paketin canlı veritabanı geçişi ve web yayını henüz yapılmadı.
 
 ## Supabase projesini bağlama
 
 1. Supabase'de yeni bir proje oluşturun. Proje URL'sini, **anon/publishable** anahtarını ve sunucuda kullanılacak **service role** anahtarını `.env.example` dosyasını `.env.local` olarak kopyalayıp ilgili alanlara yazın. Service role anahtarını tarayıcı koduna veya `NEXT_PUBLIC_` değişkenine koymayın. `APP_URL` yerelde `http://localhost:3005`, yayında uygulamanın gerçek adresi olmalı.
-2. Supabase CLI ile projeyi bağlayın: `supabase login`, `supabase link --project-ref <proje-ref>`, ardından `supabase db push --dry-run` ve `supabase db push`. Bu işlem `supabase/migrations` içindeki tüm migration'ları tarih sırasıyla uygular. 012, sürümlü meslek şablonlarını ve genel iş kaydını; 017, hesap silme için ilişkili kayıtların silinmesini ekler. Mevcut veritabanında uygulamadan önce staging yedeğiyle denetleyin.
+2. Supabase CLI ile projeyi bağlayın. Mevcut canlı projede depo ve migration kayıt geçmişi farklı olduğu için toplu `db push` yapmayın, eski migration'ları yeniden uygulamayın. Önce [yayın sırasını](docs/AUDIT_IMPLEMENTATION_2026-10-06.md) ve staging şema eşlemesini tamamlayın. Boş ortamın migration zinciri `npm run test:database` ile izole PostgreSQL üzerinde doğrulanır; bu, canlı geçmişi otomatik hizalamaz.
 3. Supabase Auth URL ayarlarında Site URL'yi uygulama adresine ayarlayın; izinli yönlendirme adreslerine `http://localhost:3005/auth/callback` ve yayın adresindeki `/auth/callback` yolunu ekleyin.
 4. E-posta doğrulaması açıksa **Confirm signup** şablonundaki bağlantıyı `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email` olarak ayarlayın. **Reset password** şablonundaki bağlantıyı `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery` olarak ayarlayın. Böylece sunucu oturumu cookie içine güvenle yazabilir.
 5. Değişkenleri ekledikten sonra uygulamayı yeniden derleyin veya geliştirme sunucusunu yeniden başlatın: `npm run dev`.
@@ -26,7 +26,7 @@ Mobil yapılandırma için `apps/mobile/.env.example` dosyasını `apps/mobile/.
 
 Boyacı, elektrikçi, tesisatçı ve klimacı şablonları 012 migration'ında yayınlanır. Yeni meslekler `/admin/professions` üzerinden sürümlü taslak olarak oluşturulup yayınlanabilir. Yönetici erişimi için, yönetici hesabı oluşturulduktan sonra SQL Editor'de `insert into public.platform_admins(user_id) values ('YÖNETİCİ_AUTH_UUID');` işlemini uygulayın. Bu tabloya uygulama kullanıcılarının yazma izni yoktur. Şablon yayımlama işlemi sürümü ve yayınlayan kullanıcıyı saklar; eski işlerin şablon ve hesap özetleri değişmez. Yeni meslek işleri sunucuda hesaplanıp service role ile tek veritabanı işlemi içinde kaydedilir. Ödeme sağlayıcısı gibi bu anahtar da yalnızca sunucuda tutulur.
 
-Supabase bağlı değilken `/demo/professions` dört mesleğin etkileşimli iş formunu ve örnek maliyet hesabını gösterir. Demo kayıt yapmaz.
+`/demo/professions` dört mesleğin etkileşimli iş formunu ve örnek maliyet hesabını gösterir. Demo Supabase bağlı olduğunda da açıktır ve gerçek işletme kayıtlarını kullanmaz. Yeni meslek yayını yönetici MFA doğrulaması ve sunucuda başarılı örnek iş hesabı gerektirir.
 
 ## Paketler ve ödeme bağlantısı
 
@@ -40,12 +40,12 @@ Supabase projesi bağlıdır, ödeme sağlayıcısı bağlı değildir. Ücretli
 
 Giriş yapmamış kullanıcılar çalışma alanından `/login` sayfasına; ilk kurulumu bitirmemiş kullanıcılar `/onboarding` sayfasına yönlendirilir. Dashboard dönem filtresi teklifleri oluşturulma, kabul ve red tarihine; tamamlanan işleri tamamlanma tarihine; aktif işleri kabul tarihine göre hesaplar. Güncel iş durumları döneme bağlı değildir ve bu ayrım ekranda belirtilir. Tutarlar veritabanında `numeric` olarak toplanır; işletme kimliği oturum sahibinden belirlenir.
 
-Supabase henüz bağlı değilse `/login` sayfası **Şifresiz Demoya Gir** bağlantısını gösterir. `/demo` içindeki ana sayfa, teklifler, müşteriler, maliyetler, paketler ve ayarlar yalnızca örnek verilerle çalışır; kayıt işlemi yapmaz. Supabase yapılandırıldığında demo yolu kapanır ve gerçek giriş akışı açılır.
+`/demo` içindeki ana sayfa, teklifler, müşteriler, maliyetler, paketler ve ayarlar yalnızca örnek verilerle çalışır; kayıt işlemi yapmaz. Public demo gerçek giriş akışından bağımsızdır.
 
 ## İş takibi ve ekip
 
 `/work` takip, keşif, saha notu, gider ve ek iş kayıtlarını gösterir. İş dosyaları özel depolamadadır. İş detayında e-posta ile bağlı bir görüntüleyici daveti oluşturulur; `/team-invite/[token]` doğrulanmış hesapla kabul edilir, `/team-work` yalnızca atanmış işin sınırlı görünümünü sunar. Davet bağlantısı kullanıcı tarafından paylaşılır; otomatik mesaj gönderilmez.
 
-KDV seçimi bilgi amaçlıdır ve tutarı değiştirmez. Hizmet paketleri üç ayrı taslak oluşturur ve teklif kotasına dahildir. Gider kayıtları gerçekleşen maliyete otomatik eklenmez. İşletme logosunun gösterimi mevcut paket özelliğine bağlıdır.
+KDV seçimi müşteri toplamını değiştirir; vergi kâra eklenmez. Hizmet paketleri üç ayrı taslak oluşturur, tek seçenek kabul edilir ve teklif kotasına dahildir. İşe bağlı saha giderleri gerçekleşen maliyete otomatik eklenir; tamamlama formunda aynı gider tekrar girilmemelidir. İşletme logosunun gösterimi mevcut paket özelliğine bağlıdır. `/team-access` işlere verilen ekip yetkilerini topluca gösterir. Onaylı ek iş ayrı bir maliyet ve teklif kaydı oluşturur; kabul edilmiş teklif ve gelir kendiliğinden değişmez.
 
 `ANALYTICS_ENABLED` varsayılan olarak kapalıdır. Açıldığında public kampanya ölçümünden önce ziyaretçi tercihi alınır. `/admin/analytics` yalnızca platform yöneticilerine açıktır ve sunucu anahtarı gerektirir.
