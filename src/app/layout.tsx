@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { AnalyticsConsent } from "@/components/marketing/analytics-consent";
+import { GoogleAnalytics } from "@/components/marketing/google-analytics";
 import "./globals.css";
 
 const siteUrl = process.env.APP_URL || "http://localhost:3005";
@@ -15,5 +17,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="tr"><body>{children}</body></html>;
+  return <html lang="tr"><body><GoogleAnalytics/><AnalyticsConsent/>{children}</body></html>;
 }
