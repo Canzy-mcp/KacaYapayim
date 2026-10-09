@@ -4,7 +4,7 @@ import { hasAnalyticsConsent } from "@/lib/analytics/attribution";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const measurementId = "G-T73M9QZQZ5";
+const measurementId = "G-T73M9QZQ5J";
 
 declare global {
   interface Window {
