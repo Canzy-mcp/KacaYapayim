@@ -22,6 +22,12 @@ Mobil yapılandırma için `apps/mobile/.env.example` dosyasını `apps/mobile/.
 
 `npm run mobile` Expo geliştirme sunucusunu açar. `npm run mobile:typecheck` mobil tip kontrolünü yapar. Mobil sürüm ve mağaza hazırlığının kalan adımları [MOBILE_RELEASE_CHECKLIST.md](docs/MOBILE_RELEASE_CHECKLIST.md) içinde yer alır. KaçaYapayım Supabase projesi bağlı. Yeni web akışları geçici hesapla doğrulandı; fiziksel mobil cihaz, ortak veri ve mağaza testleri [MOBILE_RELEASE_CHECKLIST.md](docs/MOBILE_RELEASE_CHECKLIST.md) üzerinden ayrıca tamamlanmalı.
 
+## Usta rehberi ve hizmet talepleri
+
+Web’de `/usta-bul` usta rehberini, `/talepler` müşteri hesabını ve `/usta-talepleri` usta panelindeki hizmet işlerini açar. Expo uygulamasında aynı akışlar Hizmet Merkezi’ndedir. Müşteri doğrudan çağrı gönderebilir veya bölgesindeki ustalara ilan açabilir. Yayımlanan usta profili kategori ve hizmet bölgelerini belirler. Teklif kabul edildiğinde iş, ustanın mevcut iş takibinde de görünür.
+
+Yayımdan önce hizmet platformu migration’ını staging veritabanına uygula. Bireysel müşteri ve iki usta hesabıyla ilan, özel çağrı, teklif seçimi, randevu, mesaj ve tamamlanma akışını doğrula. Moderasyon ekranı `/admin/talepler`; erişim mevcut platform yöneticisi kaydını ve iki aşamalı oturum doğrulamasını gerektirir. Bildirimler uygulama içi kutudadır. Usta tahsilatı panelden kaydedebilir. Çevrimiçi tahsilat bir ödeme sağlayıcısı gerektirir.
+
 ## Dinamik meslekler
 
 Boyacı, elektrikçi, tesisatçı ve klimacı şablonları 012 migration'ında yayınlanır. Yeni meslekler `/admin/professions` üzerinden sürümlü taslak olarak oluşturulup yayınlanabilir. Yönetici erişimi için, yönetici hesabı oluşturulduktan sonra SQL Editor'de `insert into public.platform_admins(user_id) values ('YÖNETİCİ_AUTH_UUID');` işlemini uygulayın. Bu tabloya uygulama kullanıcılarının yazma izni yoktur. Şablon yayımlama işlemi sürümü ve yayınlayan kullanıcıyı saklar; eski işlerin şablon ve hesap özetleri değişmez. Yeni meslek işleri sunucuda hesaplanıp service role ile tek veritabanı işlemi içinde kaydedilir. Ödeme sağlayıcısı gibi bu anahtar da yalnızca sunucuda tutulur.

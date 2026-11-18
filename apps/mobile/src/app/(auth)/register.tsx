@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import * as Linking from "expo-linking";
-import { Button, Field, Notice, Screen } from "@/src/components/ui";
+import { Button, Choice, Field, Notice, Screen } from "@/src/components/ui";
 import { db } from "@/src/lib/supabase";
 import { errorText } from "@/src/lib/format";
 import { useAppSession } from "@/src/lib/session";
 
 export default function Register() {
   const { refresh } = useAppSession();
+  const { hesap } = useLocalSearchParams<{ hesap?: string }>();
+  const [account, setAccount] = useState<"customer" | "provider">(hesap === "musteri" ? "customer" : "provider");
   const [first, setFirst] = useState(""); const [last, setLast] = useState("");
   const [email, setEmail] = useState(""); const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState(""); const [message, setMessage] = useState("");
@@ -20,14 +22,16 @@ export default function Register() {
     setBusy(true);
     try {
       const { data, error: authError } = await db().auth.signUp({ email: email.trim().toLowerCase(), password,
-        options: { data: { first_name: first.trim(), last_name: last.trim() },
+        options: { data: { first_name: first.trim(), last_name: last.trim(), account_preference: account },
           emailRedirectTo: Linking.createURL("auth/callback") } });
       if (authError) throw authError;
-      if (data.session) { await refresh(); router.replace("/onboarding"); }
+      if (data.session) { await refresh(); router.replace("/"); }
       else setMessage("Hesabını doğrulamak için e-posta kutunu kontrol et.");
     } catch (cause) { setError(errorText(cause)); } finally { setBusy(false); }
   }
   return <Screen title="Ücretsiz başla." subtitle="Web hesabın varsa aynı e-posta ile giriş yap.">
+    <Choice title="Hizmet alacağım" selected={account === "customer"} onPress={() => setAccount("customer")} />
+    <Choice title="Ustayım" selected={account === "provider"} onPress={() => setAccount("provider")} />
     <Field label="Ad" value={first} onChangeText={setFirst} textContentType="givenName" />
     <Field label="Soyad" value={last} onChangeText={setLast} textContentType="familyName" />
     <Field label="E-posta" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />

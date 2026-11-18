@@ -43,6 +43,7 @@ export default function Settings() {
   return <Screen title="Ayarlar" subtitle={profile?.email || business?.name || ""}>
     <Card><Row title="Profil" subtitle={[profile?.first_name, profile?.last_name].filter(Boolean).join(" ")}
       onPress={() => router.push("/profile")} /></Card>
+    <Card><Row title="Hizmet Merkezi" subtitle="Usta rehberi, çağrılar ve ilanlar" onPress={() => router.push("/hizmet")} /></Card>
     <Card><Row title="Maliyetlerim" subtitle="Malzeme, işçilik ve diğer birim fiyatlar" onPress={() => router.push("/costs")} />
       <Row title="Yardım ve rehber" onPress={() => openWeb("/rehber")} /></Card>
     <SectionTitle>İşletme</SectionTitle>

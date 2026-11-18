@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/browser";
 import { Button, Input } from "@/components/ui";
-export function Mfa({ challenge = false }: { challenge?: boolean }) {
+export function Mfa({ challenge = false, destination }: { challenge?: boolean; destination?: string }) {
   const [factors, setFactors] = useState<Array<{ id: string; friendly_name?: string }>>([]);
   const [setup, setSetup] = useState<{ id: string; qr: string; secret: string } | null>(null);
   const [factor, setFactor] = useState(""); const [code, setCode] = useState(""); const [busy,setBusy] = useState(false);const [error,setError]=useState("");
@@ -16,7 +16,7 @@ export function Mfa({ challenge = false }: { challenge?: boolean }) {
     setBusy(true);setError("");
     try { const client=createClient(); const c=await client.auth.mfa.challenge({factorId:setup?.id||factor});if(c.error)throw c.error;
       const v=await client.auth.mfa.verify({factorId:setup?.id||factor,challengeId:c.data.id,code});if(v.error)throw v.error;
-      setSetup(null);setCode("");window.location.assign(challenge?"/dashboard":"/settings");
+      setSetup(null);setCode("");window.location.assign(destination ?? (challenge ? "/dashboard" : "/settings"));
     }catch{setError("Kod doğrulanamadı. Uygulamandaki güncel 6 haneli kodu gir.");}finally{setBusy(false);}
   }
   return <section className="mt-6 rounded-2xl border bg-white p-6"><h2 className="text-lg font-semibold">İki aşamalı doğrulama</h2><p className="mt-2 text-sm text-[#6e6e73]">Authenticator uygulamanla hesabını koru. Kurulumu bitirdikten sonra girişlerde 6 haneli kod gerekir. Cihazını kaybedersen hesabına erişemeyebilirsin; ikinci bir doğrulama cihazı ekleyebilirsin.</p>

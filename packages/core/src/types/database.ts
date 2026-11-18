@@ -259,6 +259,10 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      market_directory: { Args: { p_filters?: Record<string, string> }; Returns: unknown };
+      market_read: { Args: { p_view: string; p_id?: string; p_page?: number }; Returns: unknown };
+      market_write: { Args: { p_action: string; p_payload: Record<string, string | string[] | boolean> }; Returns: string | null };
+      market_archive: { Args: { p_table: string; p_cursor: string | null; p_cutoff: string }; Returns: Array<{ key: string; record: Record<string, unknown> }> };
       get_my_archive_page:{Args:{p_table:string;p_cursor:string|null;p_cutoff:string};Returns:Array<{key:string;record:Record<string,unknown>}>};
       save_approved_extra_job:{Args:{p_entry_id:string;p_title:string;p_description:string;p_lines:Array<{name:string;category:string;quantity:number;unit_cost:number}>};Returns:string};
       set_my_logo:{Args:{p_path:string|null;p_url:string|null};Returns:string|null};

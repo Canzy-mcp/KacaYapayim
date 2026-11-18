@@ -4,7 +4,7 @@ import Link from "next/link";
 import { professionRequestHref, supportEmail, supportHref } from "@/lib/marketing/contact";
 import { CookieSettingsButton } from "@/components/marketing/cookie-settings-button";
 
-const nav = [["Nasıl Çalışır?", "/#nasil-calisir"], ["Meslekler", "/meslekler"], ["Rehber", "/rehber"], ["Fiyatlandırma", "/fiyatlandirma"]] as const;
+const nav = [["Usta Bul", "/usta-bul"], ["İş İlanı Ver", "/talepler/yeni"], ["Meslekler", "/meslekler"], ["Rehber", "/rehber"], ["Fiyatlandırma", "/fiyatlandirma"]] as const;
 
 export function MarketingHeader() {
   return <header className="marketing-header"><div className="marketing-header-inner"><Link href="/" className="marketing-brand" aria-label="KaçaYapayım ana sayfa"><BrandLogo size={34}/></Link><nav aria-label="Ana menü" className="marketing-desktop-nav">{nav.map(([text, href]) => <Link key={href} href={href}>{text}</Link>)}</nav><div className="marketing-header-actions"><Link href="/login" className="marketing-login-link">Giriş Yap</Link><Link href="/register" className="marketing-primary">Ücretsiz Başla</Link><details className="marketing-mobile-menu"><summary aria-label="Mobil menüyü aç">Menü</summary><nav aria-label="Mobil menü">{nav.map(([text, href]) => <Link key={href} href={href}>{text}</Link>)}<Link href="/login">Giriş Yap</Link></nav></details></div></div></header>;

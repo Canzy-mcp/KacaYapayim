@@ -7,6 +7,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { cleanText, emailError, passwordError, type FieldErrors } from "@/lib/validation";
 import { consumeRateLimit } from "@/lib/security/rate-limit";
 import { recordEvent } from "@/lib/analytics/events";
+import { accountHome, requestReturnPath } from "@/lib/account/home";
 
 type AuthResult = { ok: boolean; error?: string; fieldErrors?: FieldErrors; next?: string; message?: string };
 const setupError = "Supabase bağlantısı henüz yapılandırılmadı.";
@@ -34,11 +35,15 @@ export async function loginAction(form: FormData): Promise<AuthResult> {
   if (remember) cookieStore.delete("ky_session_preference");
   else cookieStore.set("ky_session_preference", "session", { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/" });
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data: session, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { ok: false, error: "E-posta veya şifre hatalı." };
+  const next = requestReturnPath(form.get("next"));
+  const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (assurance.data?.nextLevel === "aal2" && assurance.data.currentLevel !== "aal2")
+    return { ok: true, next: next ? `/mfa?next=${encodeURIComponent(next)}` : "/mfa" };
   const { data } = await supabase.from("businesses").select("onboarding_completed").maybeSingle();
   revalidatePath("/", "layout");
-  return { ok: true, next: data?.onboarding_completed ? "/dashboard" : "/onboarding" };
+  return { ok: true, next: next ?? accountHome(data, session.user.user_metadata.account_preference) };
 }
 
 export async function registerAction(form: FormData): Promise<AuthResult> {
@@ -62,14 +67,16 @@ export async function registerAction(form: FormData): Promise<AuthResult> {
   if (Object.keys(fieldErrors).length) return { ok: false, fieldErrors };
   if (!isSupabaseConfigured()) return { ok: false, error: setupError };
   const supabase = await createClient();
+  const preference = form.get("account") === "customer" ? "customer" : "provider";
+  const next = requestReturnPath(form.get("next")) ?? accountHome(null, preference);
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { first_name: firstName, last_name: lastName }, emailRedirectTo: `${await siteOrigin()}/auth/callback?next=/onboarding` },
+    options: { data: { first_name: firstName, last_name: lastName, account_preference: preference }, emailRedirectTo: `${await siteOrigin()}/auth/callback?next=${encodeURIComponent(next)}` },
   });
   if (error) return { ok: false, error: "Hesap oluşturulamadı. Bilgilerini kontrol edip tekrar dene." };
   await recordEvent("signup_completed", "/register");
-  if (data.session) return { ok: true, next: "/onboarding" };
+  if (data.session) return { ok: true, next };
   return { ok: true, message: "Hesabını doğrulamak için e-posta kutunu kontrol et." };
 }
 

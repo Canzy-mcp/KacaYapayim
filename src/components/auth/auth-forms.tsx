@@ -56,17 +56,17 @@ function AuthForm({ onSubmit, children, message, success, pending, label, busy }
   return <form onSubmit={onSubmit} noValidate className="space-y-5">{children}<Feedback message={message} success={success} /><SubmitButton pending={pending} label={label} busy={busy} /></form>;
 }
 
-export function LoginForm({ notice }: { notice?: string }) {
+export function LoginForm({ notice, next }: { notice?: string; next?: string }) {
   const state = useSubmit(loginAction);
   return <AuthForm onSubmit={(event) => state.submit(event, (data) => {
     const errors: FieldErrors = {};
     if (emailError(String(data.get("email") || ""))) errors.email = emailError(String(data.get("email") || ""));
     if (!data.get("password")) errors.password = "Şifreni gir.";
     return errors;
-  })} {...state} label="Giriş Yap" busy="Giriş yapılıyor...">{notice && <p role="status" className="rounded-[12px] bg-[#edf5ff] px-4 py-3 text-[13px] text-[#1265b8]">{notice}</p>}<Field id="email" name="email" label="E-posta" type="email" autoComplete="email" inputMode="email" error={state.fieldErrors.email} /><Field id="password" name="password" label="Şifre" type="password" autoComplete="current-password" error={state.fieldErrors.password} /><div className="flex items-center justify-between gap-3 text-[13px]"><label className="flex min-h-11 items-center gap-2 text-[#55555d]"><input type="checkbox" name="remember" defaultChecked className="size-4 accent-[#0071E3]" />Beni hatırla</label><Link href="/forgot-password" className="font-medium text-[#0071E3] hover:underline">Şifremi unuttum</Link></div></AuthForm>;
+  })} {...state} label="Giriş Yap" busy="Giriş yapılıyor...">{next && <input type="hidden" name="next" value={next} />}{notice && <p role="status" className="rounded-[12px] bg-[#edf5ff] px-4 py-3 text-[13px] text-[#1265b8]">{notice}</p>}<Field id="email" name="email" label="E-posta" type="email" autoComplete="email" inputMode="email" error={state.fieldErrors.email} /><Field id="password" name="password" label="Şifre" type="password" autoComplete="current-password" error={state.fieldErrors.password} /><div className="flex items-center justify-between gap-3 text-[13px]"><label className="flex min-h-11 items-center gap-2 text-[#55555d]"><input type="checkbox" name="remember" defaultChecked className="size-4 accent-[#0071E3]" />Beni hatırla</label><Link href="/forgot-password" className="font-medium text-[#0071E3] hover:underline">Şifremi unuttum</Link></div></AuthForm>;
 }
 
-export function RegisterForm() {
+export function RegisterForm({ account, next }: { account: "customer" | "provider"; next?: string }) {
   const state = useSubmit(registerAction);
   return <AuthForm onSubmit={(event) => state.submit(event, (data) => {
     const errors: FieldErrors = {};
@@ -76,7 +76,7 @@ export function RegisterForm() {
     if (passwordError(String(data.get("password") || ""))) errors.password = passwordError(String(data.get("password") || ""));
     if (data.get("password") !== data.get("confirm")) errors.confirm = "Şifreler eşleşmiyor.";
     return errors;
-  })} {...state} label="Ücretsiz Hesap Oluştur" busy="Hesap oluşturuluyor..."><div className="grid grid-cols-2 gap-3"><Field id="firstName" name="firstName" label="Ad" autoComplete="given-name" error={state.fieldErrors.firstName} /><Field id="lastName" name="lastName" label="Soyad" autoComplete="family-name" error={state.fieldErrors.lastName} /></div><Field id="email" name="email" label="E-posta" type="email" autoComplete="email" inputMode="email" error={state.fieldErrors.email} /><Field id="password" name="password" label="Şifre" type="password" autoComplete="new-password" error={state.fieldErrors.password} /><Field id="confirm" name="confirm" label="Şifre tekrar" type="password" autoComplete="new-password" error={state.fieldErrors.confirm} /><p className="text-[12px] text-[#77777e]">Şifren en az 8 karakter olmalı.</p></AuthForm>;
+  })} {...state} label="Ücretsiz Hesap Oluştur" busy="Hesap oluşturuluyor...">{next && <input type="hidden" name="next" value={next} />}<fieldset className="grid grid-cols-2 gap-2"><legend className="mb-2 text-sm font-semibold">KaçaYapayım’ı nasıl kullanacaksın?</legend><label className="flex min-h-11 items-center gap-2 rounded-xl border border-[#e2e2e6] px-3 text-sm"><input type="radio" name="account" value="customer" defaultChecked={account === "customer"} />Hizmet alacağım</label><label className="flex min-h-11 items-center gap-2 rounded-xl border border-[#e2e2e6] px-3 text-sm"><input type="radio" name="account" value="provider" defaultChecked={account === "provider"} />Ustayım</label></fieldset><div className="grid grid-cols-2 gap-3"><Field id="firstName" name="firstName" label="Ad" autoComplete="given-name" error={state.fieldErrors.firstName} /><Field id="lastName" name="lastName" label="Soyad" autoComplete="family-name" error={state.fieldErrors.lastName} /></div><Field id="email" name="email" label="E-posta" type="email" autoComplete="email" inputMode="email" error={state.fieldErrors.email} /><Field id="password" name="password" label="Şifre" type="password" autoComplete="new-password" error={state.fieldErrors.password} /><Field id="confirm" name="confirm" label="Şifre tekrar" type="password" autoComplete="new-password" error={state.fieldErrors.confirm} /><p className="text-[12px] text-[#77777e]">Şifren en az 8 karakter olmalı.</p></AuthForm>;
 }
 
 export function ForgotPasswordForm({ notice }: { notice?: string }) {

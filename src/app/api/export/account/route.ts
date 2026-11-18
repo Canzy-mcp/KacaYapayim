@@ -1,15 +1,17 @@
 import {createClient} from "@/lib/supabase/server";
-import {requireCompletedViewer} from "@/lib/viewer";
+import {requireViewer} from "@/lib/viewer";
 import {hasExportGrant} from "@/lib/account/export-access";
 import {consumeRateLimit} from "@/lib/security/rate-limit";
 export const dynamic="force-dynamic";
-const tables=["profiles","businesses","business_preferences","business_branding","business_profession_settings","business_cost_items","customers","jobs","painter_job_details","job_cost_breakdown","actual_job_costs","quotes","quote_items","quote_exclusions","quote_templates","service_package_groups","quote_decision_history","work_entries","job_payments","notifications","job_viewers","subscriptions"];
+const businessTables=["businesses","business_preferences","business_branding","business_profession_settings","business_cost_items","customers","jobs","painter_job_details","job_cost_breakdown","actual_job_costs","quotes","quote_items","quote_exclusions","quote_templates","service_package_groups","quote_decision_history","work_entries","job_payments","notifications","job_viewers","subscriptions"];
+const marketTables=["market_profile","market_requests","market_offers","market_messages","market_reviews","market_favorites","market_notices","market_reports"];
 export async function GET(){
- const viewer=await requireCompletedViewer();if(!await hasExportGrant(viewer.id))return new Response("Ayarlar ekranında güncel parolanı doğrula.",{status:403,headers:{"Cache-Control":"no-store"}});
+ const viewer=await requireViewer();if(!await hasExportGrant(viewer.id))return new Response("Ayarlar ekranında güncel parolanı doğrula.",{status:403,headers:{"Cache-Control":"no-store"}});
  if(!await consumeRateLimit("account-archive",3,3600,viewer.id))return new Response("Arşiv indirme sınırına ulaştın.",{status:429});
+ const tables=["profiles",...(viewer.business ? businessTables : []),...marketTables];
  const client=await createClient();const cutoff=new Date().toISOString();let index=0,cursor:string|null=null,pages=0,cancelled=false;
  const encoder=new TextEncoder();
- async function read(){const result=await client.rpc("get_my_archive_page",{p_table:tables[index],p_cursor:cursor,p_cutoff:cutoff});if(result.error)throw new Error("Arşiv tamamlanamadı.");return result.data||[];}
+ async function read(){const table=tables[index];const args={p_table:table,p_cursor:cursor,p_cutoff:cutoff};const result=table.startsWith("market_")?await client.rpc("market_archive",args):await client.rpc("get_my_archive_page",args);if(result.error)throw new Error("Arşiv tamamlanamadı.");return result.data||[];}
  let first;try{first=await read();}catch{return new Response("Arşiv hazırlanamadı.",{status:503});}
  let next:typeof first|null=first;
  const stream=new ReadableStream<Uint8Array>({

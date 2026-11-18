@@ -18,7 +18,8 @@ export const getViewer = cache(async () => {
     supabase.from("businesses").select("*").eq("owner_id", userId).maybeSingle(),
   ]);
   if (profileResult.error || businessResult.error) throw new Error("Bilgiler yüklenemedi.");
-  return { id: userId, profile: profileResult.data as Profile | null, business: businessResult.data as Business | null };
+  const metadata = claims.claims.user_metadata as { account_preference?: unknown } | undefined;
+  return { id: userId, profile: profileResult.data as Profile | null, business: businessResult.data as Business | null, preference: metadata?.account_preference };
 });
 
 export async function requireViewer() {

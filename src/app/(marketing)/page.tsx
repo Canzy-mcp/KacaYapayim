@@ -7,18 +7,18 @@ import { DeviceShowcase, HeroVisual, ProfessionCards } from "@/components/market
 import { MarginExample, ProductDemo } from "@/components/marketing/product-demo";
 import { ProfessionRequest } from "@/components/marketing/profession-request";
 
-export const metadata: Metadata = siteMetadata("İşini doğru fiyatlandır", "Malzeme ve işçilik maliyetlerini gir. Gerçek maliyetini, kârını ve teklif fiyatını hesapla.", "/");
+export const metadata: Metadata = siteMetadata("Usta bul, teklif al ve işini yönet", "İşin için usta bul veya ilan açıp teklif al. Ustalar için maliyet hesabı, profesyonel teklifler ve iş takibi.", "/");
 
 export default function Home() {
   return <>
-    <JsonLd data={[{ "@context": "https://schema.org", "@type": "Organization", name: "KaçaYapayım", url: siteOrigin, logo: `${siteOrigin}/brand/logo.png` }, { "@context": "https://schema.org", "@type": "WebSite", name: "KaçaYapayım", url: siteOrigin }, { "@context": "https://schema.org", "@type": "WebApplication", name: "KaçaYapayım", applicationCategory: "BusinessApplication", operatingSystem: "Web", description: "Ustalar için maliyet, kâr ve teklif hesaplama uygulaması.", url: siteOrigin }]} />
+    <JsonLd data={[{ "@context": "https://schema.org", "@type": "Organization", name: "KaçaYapayım", url: siteOrigin, logo: `${siteOrigin}/brand/logo.png` }, { "@context": "https://schema.org", "@type": "WebSite", name: "KaçaYapayım", url: siteOrigin }, { "@context": "https://schema.org", "@type": "WebApplication", name: "KaçaYapayım", applicationCategory: "BusinessApplication", operatingSystem: "Web", description: "Usta arama, iş ilanı, teklif ve iş yönetimi uygulaması.", url: siteOrigin }]} />
     <section className="landing-hero"><div className="marketing-container hero-grid">
-      <div className="hero-copy"><p className="hero-eyebrow"><span aria-hidden="true"/> Ustalar için, işin hesabı.</p>
-        <h1>İşini kaça yapacağını artık <span>tahmin etme.</span></h1>
-        <p className="hero-description">Maliyetini hesapla, kârını gör, doğru fiyatı bul. Müşterine güven veren bir teklif gönder.</p>
-        <div className="hero-actions"><Link className="marketing-primary" href="/register">Ücretsiz Başla <ArrowRight size={18} aria-hidden="true"/></Link>
-          <a className="marketing-secondary" href="#nasil-calisir">Nasıl Çalışır?</a></div>
-        <p className="hero-assurance"><ShieldCheck size={16} aria-hidden="true"/> Kendi maliyetlerine göre. Her işin hesabı ayrı.</p>
+      <div className="hero-copy">
+        <h1>İşin için <span>usta bul.</span></h1>
+        <p className="hero-description">Bölgendeki ustalara çağrı gönder veya ilan verip teklifleri karşılaştır. Ustaysan maliyetini hesapla, tekliflerini ve işlerini tek yerden yönet.</p>
+        <div className="hero-actions"><Link className="marketing-primary" href="/usta-bul">Usta Bul <ArrowRight size={18} aria-hidden="true"/></Link>
+          <Link className="marketing-secondary" href="/talepler/yeni">İş İlanı Ver</Link></div>
+        <Link className="hero-assurance hover:underline" href="/onboarding?usta=1"><ShieldCheck size={16} aria-hidden="true"/> Usta Paneli</Link>
       </div><HeroVisual/>
     </div></section>
     <div className="audience-line marketing-container" aria-label="Ürün kullanım alanları"><span><PaintRoller size={18} aria-hidden="true"/> Boyacı, elektrikçi, tesisatçı ve klimacılar için</span>

@@ -5,12 +5,14 @@ import { useAppSession } from "@/src/lib/session";
 import { isConfigured } from "@/src/lib/supabase";
 
 export default function Index() {
-  const { loading, session, business } = useAppSession();
+  const { loading, session, business, requiresMfa } = useAppSession();
   if (!isConfigured) return <Screen title="KaçaYapayım" subtitle="Mobil kurulum bekleniyor.">
     <Text>Supabase projesi oluşturulduğunda mobil ortam ayarlarını ekleyin. Hesap ve işleriniz aynı veritabanında açılacak.</Text>
   </Screen>;
   if (loading) return <Loading />;
   if (!session) return <Redirect href="/(auth)/login" />;
+  if (requiresMfa) return <Redirect href="/mfa" />;
+  if (!business?.onboarding_completed && session.user.user_metadata.account_preference === "customer") return <Redirect href="/hizmet" />;
   if (!business?.onboarding_completed) return <Redirect href="/onboarding" />;
   return <Redirect href="/(tabs)" />;
 }

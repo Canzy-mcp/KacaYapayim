@@ -3,6 +3,7 @@ import { Alert, Text } from "react-native";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import type { Job, JobCostBreakdown, Quote } from "@kacayapayim/core/types";
 import { calculatePricingSummary, validateMargins } from "@kacayapayim/core/pricing";
+import { validMarketId } from "@kacayapayim/core/marketplace";
 import { Button, Card, Field, Notice, Row, Screen, SectionTitle, palette } from "@/src/components/ui";
 import { useAppSession } from "@/src/lib/session";
 import { db } from "@/src/lib/supabase";
@@ -66,6 +67,7 @@ export default function JobDetail() {
     const { error: startError } = await db().rpc("start_job", { p_job_id: job.id });
     if (startError) setError("İş başlatılamadı."); else await reload();
   }
+  const marketRequest = job?.input_data?.market_request;
   return <Screen title={job?.title || "İş"} subtitle={job ? `${date(job.created_at)} · ${job.status}` : "Yükleniyor..."}>
     {Boolean(error) && <Notice error>{error}</Notice>}
     {!job ? <Notice>İş bulunamadı veya yüklenemedi.</Notice> : <>
@@ -74,7 +76,12 @@ export default function JobDetail() {
         {lines.map(line => <Row key={line.id} title={line.name} subtitle={`${line.quantity} × ${money(line.unit_cost)}`}
           right={money(line.total_cost)} />)}
       </Card>
-      <Button title="Saha Notları ve Giderler" quiet onPress={()=>router.push({pathname:"/work",params:{jobId:job.id}})}/><SectionTitle>Fiyatlandırma</SectionTitle>
+      <Button title="Saha Notları ve Giderler" quiet onPress={()=>router.push({pathname:"/work",params:{jobId:job.id}})}/>
+      {validMarketId(marketRequest) ? <Card>
+        <Text style={{ color: palette.text }}>Platformda kabul edilen fiyat {money(job.selected_sale_price)}</Text>
+        <Button title="Talebi ve randevuyu aç" onPress={() => router.push({ pathname: "/hizmet/talep/[id]", params: { id: marketRequest } })} />
+        {job.status === "completed" && <Button title="Gerçek maliyeti kaydet" quiet onPress={() => router.push({ pathname: "/job/complete", params: { id: job.id } })} />}
+      </Card> : <><SectionTitle>Fiyatlandırma</SectionTitle>
       <Field label="Hedef kâr marjı (%)" value={target} onChangeText={setTarget} keyboardType="decimal-pad" />
       <Field label="Minimum kâr marjı (%)" value={minimum} onChangeText={setMinimum} keyboardType="decimal-pad" />
       <Field label="Müşteriye verilecek fiyat (TL)" value={sale} onChangeText={setSale} keyboardType="decimal-pad" />
@@ -91,7 +98,7 @@ export default function JobDetail() {
         onPress={() => router.push({ pathname: "/quote/[id]", params: { id: quote.id } })} />)}</Card></>}
       {job.status === "accepted" && <Button title="İşi Başlat" onPress={() => { void start(); }} />}
       {job.status === "in_progress" && <Button title="Gerçek Maliyet ve Tamamlama" onPress={() =>
-        router.push({ pathname: "/job/complete", params: { id: job.id } })} />}
+        router.push({ pathname: "/job/complete", params: { id: job.id } })} />}</>}
       {job.status === "completed" && <Card><Text style={{ color: palette.muted }}>Gerçek kâr</Text>
         <Text style={{ color: palette.green, fontSize: 27, fontWeight: "700" }}>{money(job.actual_profit)}</Text></Card>}
       <Button title="İşlere Dön" quiet onPress={() => router.replace("/(tabs)/jobs")} />

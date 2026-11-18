@@ -21,6 +21,7 @@ const csp = [
   "font-src 'self' data:", `connect-src 'self' ${supabaseOrigin} ${supabaseOrigin.replace(/^http/, "ws")} https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com`.trim(),
 ].join("; ");
 const nextConfig: NextConfig = {
+  transpilePackages: ["@kacayapayim/core"],
   experimental: { serverActions: { bodySizeLimit: "6mb" } },
   trailingSlash: false,
   async redirects() { return [

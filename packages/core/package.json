@@ -6,6 +6,7 @@
   "exports": {
     "./types": "./src/types/database.ts",
     "./pricing": "./src/pricing/engine.ts",
+    "./marketplace": "./src/marketplace.ts",
     "./professions/schema": "./src/professions/schema.ts",
     "./professions/expression": "./src/professions/expression.ts",
     "./professions/engine": "./src/professions/engine.ts",

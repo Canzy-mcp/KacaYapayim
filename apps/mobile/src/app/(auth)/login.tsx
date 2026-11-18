@@ -17,11 +17,11 @@ export default function Login() {
       const { error: authError } = await db().auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
       if (authError) throw new Error("E-posta veya şifre hatalı.");
       await refresh();
-      const destination = next && /^\/(job|quote)\/[0-9a-f-]{36}$/i.test(next) ? next : "/";
+      const destination = next && (next === "/hizmet" || /^\/(job|quote)\/[0-9a-f-]{36}$/i.test(next)) ? next : "/";
       router.replace(destination as never);
     } catch (cause) { setError(errorText(cause)); } finally { setBusy(false); }
   }
-  return <Screen title="Hoş geldin." subtitle="İşlerini kaldığın yerden yönet.">
+  return <Screen title="Hoş geldin." subtitle="Taleplerini, tekliflerini ve işlerini yönet.">
     <Field label="E-posta" value={email} onChangeText={setEmail} keyboardType="email-address"
       autoCapitalize="none" textContentType="emailAddress" />
     <Field label="Şifre" value={password} onChangeText={setPassword} secureTextEntry textContentType="password" />
@@ -30,5 +30,6 @@ export default function Login() {
     <Button title="Şifremi Unuttum" quiet onPress={() => router.push("/(auth)/forgot")} />
     <Text style={{ textAlign: "center", marginTop: 26, color: "#6E6E73" }}>Henüz hesabın yok mu?</Text>
     <Button title="Ücretsiz Başla" quiet onPress={() => router.push("/(auth)/register")} />
+    <Button title="Usta Rehberini İncele" quiet onPress={() => router.push("/hizmet")} />
   </Screen>;
 }

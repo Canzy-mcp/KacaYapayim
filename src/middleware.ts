@@ -28,8 +28,8 @@ export async function middleware(request: NextRequest) {
     response.headers.set("X-Content-Type-Options", "nosniff");
     return decorate(response);
   }
-  const privatePath = ["/mfa", "/dashboard", "/quotes", "/jobs", "/customers", "/costs", "/settings", "/work", "/team-access", "/team-work", "/team-invite", "/admin", "/billing", "/onboarding", "/login", "/register", "/forgot-password", "/reset-password", "/demo"].some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`));
-  const authPath = privatePath || pathname.startsWith("/auth/") || pathname.startsWith("/api/quotes/") || pathname.startsWith("/api/work/") || pathname.startsWith("/api/export/");
+  const privatePath = ["/talepler", "/usta-talepleri", "/mfa", "/dashboard", "/quotes", "/jobs", "/customers", "/costs", "/settings", "/work", "/team-access", "/team-work", "/team-invite", "/admin", "/billing", "/onboarding", "/login", "/register", "/forgot-password", "/reset-password", "/demo"].some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`));
+  const authPath = privatePath || pathname.startsWith("/usta-bul/") || pathname.startsWith("/auth/") || pathname.startsWith("/api/quotes/") || pathname.startsWith("/api/work/") || pathname.startsWith("/api/export/");
   const response = authPath ? await updateSession(request,forwardedHeaders) : NextResponse.next({request:{headers:forwardedHeaders}});
   if (privatePath || process.env.DEPLOYMENT_ENV === "staging") response.headers.set("X-Robots-Tag", "noindex, nofollow");
   if (privatePath) response.headers.set("Cache-Control", "private, no-store");
