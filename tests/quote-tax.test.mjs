@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {quoteAmounts} from '../src/lib/quotes/tax.ts';
+import {quoteAmounts} from '../packages/core/src/quote-tax.ts';
 test('tax is added to customer total without changing pre-tax revenue',()=>{
  assert.deepEqual(quoteAmounts(4300,'included',20),{subtotal:4300,tax:860,total:5160,rate:20});
  assert.deepEqual(quoteAmounts(4300,'excluded',20),{subtotal:4300,tax:860,total:5160,rate:20});

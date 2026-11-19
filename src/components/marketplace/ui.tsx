@@ -2,10 +2,10 @@ import Link from "next/link";
 import { ArrowRight, MapPin, Star } from "lucide-react";
 import { marketStateLabels, type MarketCategory, type MarketProvider, type MarketRequest } from "@kacayapayim/core/marketplace";
 
-export const panel = "rounded-2xl border border-[#e0e5ee] bg-white p-5 sm:p-6";
-export const linkButton = "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#075fc7] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0652ac]";
-export const plainButton = "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#d9dce3] bg-white px-4 py-2 text-sm font-semibold text-[#18335a] hover:bg-[#eff6ff]";
-export const input = "block min-h-11 w-full rounded-xl border border-[#d9dce3] bg-white px-3 py-2.5 text-sm text-[#172235] focus:border-[#0071e3] focus:outline-none focus:ring-2 focus:ring-[#0071e3]/25";
+export const panel = "min-w-0 rounded-3xl border border-[#e4e4e9] bg-white p-5 sm:p-6";
+export const linkButton = "inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#075fc7] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#0652ac] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#075fc7]";
+export const plainButton = "inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#d9dce3] bg-white px-5 py-2 text-sm font-semibold text-[#18335a] transition-colors hover:bg-[#eff6ff] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#075fc7]";
+export const input = "block min-h-11 w-full min-w-0 rounded-xl border border-[#d9dce3] bg-[#fafafc] px-3 py-2.5 text-base text-[#172235] focus:border-[#0071e3] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0071e3]/25 sm:text-sm";
 export const money = new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY" });
 const dateTime = new Intl.DateTimeFormat("tr-TR", { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Istanbul" });
 const calendarDate = new Intl.DateTimeFormat("tr-TR", { dateStyle: "long", timeZone: "UTC" });
@@ -34,7 +34,7 @@ export function MarketPagination({ page, more, href }: { page: number; more: boo
   if (page === 1 && !more) return null;
   return <nav aria-label="Sayfalama" className="mt-5 flex items-center gap-3">
     {page > 1 && <Link className={plainButton} href={href(page - 1)}>Önceki</Link>}
-    <span className="text-sm text-slate-600">Sayfa {page}</span>
+    <span aria-current="page" className="text-sm text-slate-600">Sayfa {page}</span>
     {more && page < 101 && <Link className={plainButton} href={href(page + 1)}>Sonraki</Link>}
   </nav>;
 }
@@ -42,17 +42,17 @@ export function MarketPagination({ page, more, href }: { page: number; more: boo
 export function ProviderCard({ provider, categories, children }: {
   provider: MarketProvider; categories: MarketCategory[]; children?: React.ReactNode;
 }) {
-  return <article className={`${panel} flex flex-col gap-3`}>
+  return <article className={`${panel} flex flex-col gap-3 shadow-[0_6px_24px_#20334e08]`}>
     <div className="flex items-start gap-3">
       <span aria-hidden="true" className="grid size-12 shrink-0 place-items-center rounded-xl bg-[#eaf3ff] font-bold text-[#075fc7]">{provider.display_name.slice(0, 2).toLocaleUpperCase("tr-TR")}</span>
-      <div className="min-w-0"><h2 className="break-words text-lg font-semibold text-[#112046]">{provider.display_name}</h2>
-        <p className="flex items-center gap-1 text-sm text-slate-600"><MapPin size={14} />{provider.city}{provider.districts.length > 0 && ` · ${provider.districts.join(", ")}`}</p></div>
+      <div className="min-w-0"><h3 className="break-words text-lg font-semibold text-[#112046]">{provider.display_name}</h3>
+        <p className="flex items-start gap-1 text-sm text-slate-600"><MapPin size={14} className="mt-0.5 shrink-0" aria-hidden="true" /><span className="min-w-0 break-words">{provider.city}{provider.districts.length > 0 && ` · ${provider.districts.join(", ")}`}</span></p></div>
     </div>
-    {provider.rating != null && <p className="flex items-center gap-1.5 text-sm font-medium text-slate-700"><Star size={15} className="fill-amber-400 text-amber-500" />{provider.rating} / 5 · {provider.review_count} değerlendirme</p>}
+    {provider.rating != null && <p className="flex items-center gap-1.5 text-sm font-medium text-slate-700"><Star size={15} className="fill-amber-400 text-amber-500" aria-hidden="true" />{provider.rating.toLocaleString("tr-TR")} / 5 · {provider.review_count} değerlendirme</p>}
     <ul className="flex flex-wrap gap-1.5">{categories.filter((item) => provider.categories.includes(item.slug)).map((item) =>
       <li key={item.slug} className="rounded-full bg-[#f0f5fb] px-2.5 py-1 text-xs font-medium text-[#18335a]">{item.name}</li>)}</ul>
     {provider.bio && <p className="line-clamp-3 break-words text-sm text-slate-600">{provider.bio}</p>}
-    <div className="mt-auto flex flex-wrap gap-2 pt-2"><Link href={`/usta-bul/${provider.id}`} className={plainButton}>Profili gör <ArrowRight size={15} /></Link>{children}</div>
+    <div className="mt-auto flex flex-wrap gap-2 pt-2"><Link href={`/usta-bul/${provider.id}`} aria-label={`${provider.display_name} profilini gör`} className={plainButton}>Profili gör <ArrowRight size={15} aria-hidden="true" /></Link>{children}</div>
   </article>;
 }
 

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, Check, PaintRoller, PlugZap, Wrench, Wind } from "lucide-react";
+import { ArrowUpRight, PaintRoller, PlugZap, Wrench, Wind } from "lucide-react";
 import { professions } from "@/lib/marketing/content";
 
 export const professionVisuals: Record<string, { image: string; alt: string; icon: typeof Wrench; detail: string }> = {
@@ -12,15 +12,12 @@ export const professionVisuals: Record<string, { image: string; alt: string; ico
 
 export function HeroVisual() {
   return <figure className="hero-scene">
-    <div className="hero-photo"><Image src="/images/marketing/painter.webp" alt={professionVisuals.boyaci.alt}
+    <div className="hero-photo"><Image src="/images/marketing/plumber.webp" alt={professionVisuals.tesisatci.alt}
       fill priority sizes="(min-width: 1024px) 530px, (min-width: 640px) 650px, 100vw" /></div>
-    <div className="hero-metric hero-cost"><span className="metric-icon"><PaintRoller size={17} aria-hidden="true" /></span>
-      <div><span>Gerçek maliyet</span><strong>57.510 <small>TL</small></strong></div><span className="example-chip">Örnek iş</span></div>
-    <div className="hero-metric hero-price"><span>Kaça yapmalısın?</span><strong>82.200 <small>TL</small></strong>
-      <div><span>Hedef kâr marjı</span><b>%30</b></div></div>
-    <div className="hero-metric hero-sent"><span className="success-icon"><Check size={17} aria-hidden="true" /></span>
-      <div><strong>Teklif paylaşıldı</strong><span>Müşteriyle tek bağlantıda</span></div></div>
-    <figcaption>Temsili görsel · Örnek boyama işi</figcaption>
+    <Link href="/usta-bul?category=tesisat" className="absolute inset-x-4 bottom-4 flex min-h-16 items-center gap-3 rounded-2xl bg-white/95 p-3 pr-5 text-sm font-semibold text-[#1d1d1f] shadow-lg backdrop-blur hover:bg-white sm:inset-x-6 sm:bottom-6">
+      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#eaf3ff] text-[#075fc7]"><Wrench size={19} aria-hidden="true" /></span>
+      Su tesisatçılarını gör <ArrowUpRight size={19} className="ml-auto shrink-0" aria-hidden="true" />
+    </Link>
   </figure>;
 }
 

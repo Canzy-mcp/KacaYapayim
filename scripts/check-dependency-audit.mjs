@@ -1,19 +1,37 @@
-import {spawnSync} from 'node:child_process';
-import fs from 'node:fs/promises';
-// Only these two current toolchain advisories are recorded exceptions, not all high alerts.
-const known=new Map([
- ['https://github.com/advisories/GHSA-vfj7-8cjw-p6xm',{name:'braces',severity:'high'}],
- ['https://github.com/advisories/GHSA-86w9-cpqp-85rv',{name:'node-forge',severity:'high'}],
-]);
-const command=process.platform==='win32'?'npm.cmd':'npm';
-const result=spawnSync(command,['audit','--json'],{encoding:'utf8',shell:process.platform==='win32',maxBuffer:4*1024*1024});
-let report;try{report=JSON.parse(result.stdout);if(report.error||!report.vulnerabilities)throw new Error('Audit unavailable');}catch{console.error('Dependency audit unavailable; verification cannot pass.');process.exit(1);}
-await fs.mkdir('tmp',{recursive:true});await fs.writeFile('tmp/dependency-audit.json',JSON.stringify(report,null,2));
-const failures=[];
-for(const [name,v] of Object.entries(report.vulnerabilities))for(const via of v.via){
- if(typeof via==='string')continue;
- const exception=known.get(via.url);
- if(!exception||exception.name!==name||exception.severity!==via.severity||Date.now()>Date.parse('2026-11-06T00:00:00Z'))failures.push(`${name}: ${via.url} (${via.severity})`);
+import { spawnSync } from "node:child_process";
+import fs from "node:fs/promises";
+
+const args = ["audit", "--json", "--package-lock-only", "--fetch-retries=1", "--fetch-timeout=15000"];
+const options = { encoding: "utf8", maxBuffer: 4 * 1024 * 1024, timeout: 45000 };
+const result = process.platform === "win32"
+  ? spawnSync("cmd.exe", ["/d", "/c", "npm.cmd", ...args], options)
+  : spawnSync("npm", args, options);
+
+let report;
+try {
+  report = JSON.parse(result.stdout);
+  if (result.error || ![0, 1].includes(result.status) || report.error
+      || !report.vulnerabilities || Array.isArray(report.vulnerabilities)
+      || typeof report.vulnerabilities !== "object"
+      || !Number.isInteger(report.metadata?.vulnerabilities?.total)) {
+    throw new Error("Invalid audit report");
+  }
+} catch {
+  console.error("Dependency audit unavailable. Verification failed.");
+  process.exit(1);
 }
-if(failures.length){console.error('Unreviewed dependency advisories:\n'+failures.join('\n'));process.exitCode=1;}
-else console.log(`Only two documented mobile build-chain advisories remain (${report.metadata.vulnerabilities.total} affected packages). Re-review exceptions by 2026-11-06.`);
+
+await fs.mkdir("tmp", { recursive: true });
+await fs.writeFile("tmp/dependency-audit.json", JSON.stringify(report, null, 2));
+
+const advisories = Object.entries(report.vulnerabilities).flatMap(([name, issue]) =>
+  issue.via.filter((cause) => typeof cause !== "string")
+    .map((cause) => `${name}: ${cause.url} (${cause.severity})`),
+);
+
+if (result.status !== 0 || report.metadata.vulnerabilities.total > 0 || Object.keys(report.vulnerabilities).length > 0) {
+  console.error(advisories.length ? `Dependency advisories:\n${advisories.join("\n")}` : "Dependency audit failed. See tmp/dependency-audit.json.");
+  process.exitCode = 1;
+} else {
+  console.log("Dependency audit passed with zero known advisories.");
+}

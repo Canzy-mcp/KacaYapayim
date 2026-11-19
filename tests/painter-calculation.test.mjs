@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { calculatePainterJobCost, PainterCalculationError } from "../src/lib/jobs/painter-calculation.ts";
+import { calculatePainterJobCost, PainterCalculationError } from "../packages/core/src/jobs/painter-calculation.ts";
 
 const definitions = [
   ["interior_paint", "material", "liter", 450], ["primer", "material", "liter", 300],

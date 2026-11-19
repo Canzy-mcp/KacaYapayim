@@ -4,5 +4,5 @@ import { Suspense } from "react";
 import { MarketingMotion } from "@/components/marketing/motion";
 import "./marketing.css";
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
-  return <div className="public-marketing min-h-screen bg-[#f5f5f7] text-[#1d1d1f]"><MarketingMotion/>{process.env.ANALYTICS_ENABLED === "true" && <Suspense fallback={null}><MarketingTracker/></Suspense>}<MarketingHeader/><main id="main-content">{children}</main><MarketingFooter/></div>;
+  return <div className="public-marketing min-h-screen bg-[#f5f5f7] text-[#1d1d1f]"><MarketingMotion/>{process.env.ANALYTICS_ENABLED === "true" && <Suspense fallback={null}><MarketingTracker/></Suspense>}<a href="#main-content" className="sr-only z-50 rounded-lg bg-white p-3 font-semibold text-blue-900 focus:not-sr-only focus:fixed focus:left-5 focus:top-3">İçeriğe geç</a><MarketingHeader/><main id="main-content" tabIndex={-1} className="scroll-mt-24">{children}</main><MarketingFooter/></div>;
 }

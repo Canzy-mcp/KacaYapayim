@@ -1,5 +1,7 @@
 import { cache } from "react";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import { requestReturnPath } from "@/lib/account/home";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import type { Business, Profile } from "@/types/database";
@@ -12,7 +14,10 @@ export const getViewer = cache(async () => {
   if (error || !userId) return null;
   const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
   if (assurance.error) throw new Error("Oturum güvenliği kontrol edilemedi.");
-  if (assurance.data.nextLevel === "aal2" && assurance.data.currentLevel !== "aal2") redirect("/mfa");
+  if (assurance.data.nextLevel === "aal2" && assurance.data.currentLevel !== "aal2") {
+    const next = requestReturnPath((await headers()).get("x-kacayapayim-route"));
+    redirect(next ? `/mfa?next=${encodeURIComponent(next)}` : "/mfa");
+  }
   const [profileResult, businessResult] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
     supabase.from("businesses").select("*").eq("owner_id", userId).maybeSingle(),

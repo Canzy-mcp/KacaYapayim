@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { calculateProfessionJob, compileTemplate } from "../src/lib/professions/engine.ts";
-import { parseExpression, evaluateExpression } from "../src/lib/professions/expression.ts";
-import { builtInTemplates, painterTemplate, electricianTemplate, plumberTemplate, hvacTemplate } from "../src/lib/professions/templates.ts";
-import { evaluateCondition, TemplateError } from "../src/lib/professions/schema.ts";
+import { calculateProfessionJob, compileTemplate } from "../packages/core/src/professions/engine.ts";
+import { parseExpression, evaluateExpression } from "../packages/core/src/professions/expression.ts";
+import { builtInTemplates, painterTemplate, electricianTemplate, plumberTemplate, hvacTemplate } from "../packages/core/src/professions/templates.ts";
+import { evaluateCondition, TemplateError } from "../packages/core/src/professions/schema.ts";
 
 const costsFor = (template) => template.costs.map((item) => ({ id: item.key, key: item.key,
   name: item.name, category: item.category, unit: item.unit, unit_cost: item.defaultValue,

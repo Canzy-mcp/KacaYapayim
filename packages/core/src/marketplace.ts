@@ -29,10 +29,13 @@ export type MarketDetail = {
 };
 export type MarketMessage = { id: string; provider_id: string; display_name: string; sender: "customer" | "provider"; body: string; created_at: string };
 export type MarketNotice = { id: string; request_id: string; event: string; title: string; read_at: string | null; created_at: string };
+export type MarketModerationAction = "suspend" | "restore" | "hide_review" | "resolve" | "dismiss";
 export type MarketReport = {
   id: string; provider_id: string | null; request_id: string | null; display_name: string | null;
   title: string | null; suspended: boolean | null; reason: string; state: "open" | "resolved" | "dismissed"; created_at: string;
   can_hide_review: boolean;
+  latest_action?: MarketModerationAction | null;
+  latest_action_at?: string | null;
 };
 export type MarketViews = {
   provider: MarketProviderSettings; favorite: boolean; favorites: MarketProvider[]; notices: MarketNotice[]; moderation: MarketReport[];

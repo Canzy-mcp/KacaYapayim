@@ -1,6 +1,14 @@
 # KaçaYapayım
 
-Next.js tabanlı usta uygulaması: müşteri ve maliyet yönetimi, meslek hesabı veya genel iş hesabı, fiyatlandırma, profesyonel teklif, revizyon, iş takibi, özel dosyalar ve atanmış iş görüntüleme.
+KaçaYapayım, müşterilerin usta bulduğu ve teklif aldığı, ustaların da hizmet profillerini, maliyetlerini ve işlerini yönettiği bir web ve mobil uygulamadır.
+
+## Hizmet pazar yeri
+
+- Müşteriler `/usta-bul` üzerinden bölge ve hizmete göre arayabilir. Seçtikleri ustaya çağrı gönderebilir veya `/talepler/yeni` üzerinden ilan açabilirler.
+- Ustalar `/usta-talepleri` üzerinden profillerini yayımlar, uygun talepleri görür ve teklif verir. Müşteri ile seçilen usta randevu ve iş durumunu talep üzerinden yönetir.
+- Platform yöneticileri iki aşamalı doğrulamadan sonra `/admin/talepler` üzerinden bildirimleri inceleyebilir. Moderasyon kararlarının geçmişi veritabanında tutulur.
+
+Pazar yeri sürümünü doğrulamak için `npm ci`, `npm run verify` ve `node scripts/check-dependency-audit.mjs` çalıştır. Geçişten önce staging ortamında migration geçmişini karşılaştır. Temel pazar yeri şeması varsa `20261119000100_marketplace_integrity.sql` ve `20261119000200_marketplace_privacy.sql` ileri migration'larını sırasıyla doğrula. Web'de müşteri, usta ve moderatör rollerini, mobilde ise giriş ve e-posta dönüşünü ayrı test hesaplarıyla kontrol et.
 
 6 Ekim güvenlik ve ürün geliştirmeleri [AUDIT_IMPLEMENTATION_2026-10-06.md](docs/AUDIT_IMPLEMENTATION_2026-10-06.md) içinde. Elle tahsilat takibi eklendi; ödeme sağlayıcısı bağlı değil. Bu paketin canlı veritabanı geçişi ve web yayını henüz yapılmadı.
 

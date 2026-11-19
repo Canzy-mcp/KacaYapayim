@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { calculatePriceForMargin, calculatePricingSummary, calculatePricingStatus,
-  roundSuggestedPrice, validateMargins } from "../src/lib/pricing/engine.ts";
+  roundSuggestedPrice, validateMargins } from "../packages/core/src/pricing/engine.ts";
 
 test("30% margin on 70,000 cost needs 100,000 sale, not 91,000 markup", () => {
   assert.equal(calculatePriceForMargin(70000, 30), 100000);

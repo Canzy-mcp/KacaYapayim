@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { ArrowRight, Check, ClipboardList, Eye, Monitor, PaintRoller, Send, ShieldCheck, Smartphone, TrendingUp } from "lucide-react";
+import { ArrowRight, CalendarDays, Check, ClipboardList, Eye, Monitor, PaintRoller, Search, Send, Smartphone, TrendingUp } from "lucide-react";
 import { JsonLd, siteMetadata, siteOrigin } from "@/lib/marketing/seo";
 import { DeviceShowcase, HeroVisual, ProfessionCards } from "@/components/marketing/visuals";
 import { MarginExample, ProductDemo } from "@/components/marketing/product-demo";
@@ -15,27 +15,37 @@ export default function Home() {
     <section className="landing-hero"><div className="marketing-container hero-grid">
       <div className="hero-copy">
         <h1>İşin için <span>usta bul.</span></h1>
-        <p className="hero-description">Bölgendeki ustalara çağrı gönder veya ilan verip teklifleri karşılaştır. Ustaysan maliyetini hesapla, tekliflerini ve işlerini tek yerden yönet.</p>
+        <p className="hero-description">Yakınındaki ustaları keşfet, ilanına gelen teklifleri karşılaştır ve randevunu oluştur.</p>
         <div className="hero-actions"><Link className="marketing-primary" href="/usta-bul">Usta Bul <ArrowRight size={18} aria-hidden="true"/></Link>
           <Link className="marketing-secondary" href="/talepler/yeni">İş İlanı Ver</Link></div>
-        <Link className="hero-assurance hover:underline" href="/onboarding?usta=1"><ShieldCheck size={16} aria-hidden="true"/> Usta Paneli</Link>
+        <Link className="marketing-text-link mt-4" href="#usta-paneli">Ustalar için iş yönetimi <ArrowRight size={16} aria-hidden="true" /></Link>
       </div><HeroVisual/>
     </div></section>
-    <div className="audience-line marketing-container" aria-label="Ürün kullanım alanları"><span><PaintRoller size={18} aria-hidden="true"/> Boyacı, elektrikçi, tesisatçı ve klimacılar için</span>
-      <span><Smartphone size={18} aria-hidden="true"/> Bilgisayarda ve telefonda</span><span><ClipboardList size={18} aria-hidden="true"/> Maliyet, teklif ve kâr tek yerde</span></div>
-
-    <section className="landing-section demo-section"><div className="marketing-container">
-      <div className="section-intro" data-reveal><p className="marketing-eyebrow">Hesaptan teklife</p><h2 className="marketing-heading">Bir iş. Baştan sona net.</h2>
-        <p>KaçaYapayım, ustalar ve hizmet işletmeleri için maliyet, fiyat ve teklif hesabını bir araya getirir.</p></div><ProductDemo/>
+    <section id="nasil-calisir" className="landing-section bg-white"><div className="marketing-container">
+      <div className="section-intro"><h2 className="marketing-heading">Aramadan randevuya.</h2></div>
+      <ol className="how-grid">{[
+        { icon: Search, title: "Bölgende ara", text: "İlçeni ve ihtiyacın olan hizmeti seç. Usta profillerini ve müşteri değerlendirmelerini incele." },
+        { icon: ClipboardList, title: "Çağrı gönder veya ilan aç", text: "Bir ustaya doğrudan ulaş ya da işini tarif edip gelen teklifleri karşılaştır." },
+        { icon: CalendarDays, title: "Tarihi birlikte belirle", text: "Talep üzerinden mesajlaş, randevunu onayla ve iş tamamlanınca deneyimini değerlendir." },
+      ].map(({ icon: Icon, title, text }) => <li key={title}>
+        <div className="how-icon"><Icon size={25} aria-hidden="true" /></div><h3>{title}</h3><p>{text}</p>
+      </li>)}</ol>
     </div></section>
 
-    <section id="nasil-calisir" className="landing-section how-section"><div className="marketing-container">
-      <div className="section-intro" data-reveal><p className="marketing-eyebrow">Nasıl çalışır?</p><h2 className="marketing-heading">Sen işini bilirsin.<br/>Hesabı KaçaYapayım’da tut.</h2></div>
-      <div className="how-grid">{[
-        { n: "01", icon: PaintRoller, title: "Maliyetlerini tanımla.", text: "Malzeme, işçilik ve giderlerini bir kez kaydet. Alış fiyatların değiştiğinde güncelle." },
-        { n: "02", icon: ClipboardList, title: "İşin detaylarını gir.", text: "Ölçüyü, gereken malzemeyi ve iş gününü mesleğine uygun formda belirt." },
-        { n: "03", icon: Send, title: "Fiyatı gör, teklifini gönder.", text: "Hedef kârına göre fiyatı bul. İş kapsamını ve ödeme koşullarını açıkça paylaş." },
-      ].map(item => <article key={item.n} data-reveal><div className="how-icon"><item.icon size={25} aria-hidden="true"/><span>{item.n}</span></div><h3>{item.title}</h3><p>{item.text}</p></article>)}</div>
+    <section id="usta-paneli" className="landing-section demo-section"><div className="marketing-container">
+      <div className="section-heading-row"><div className="section-intro"><h2 className="marketing-heading">Ustalar için iş yönetimi.</h2>
+        <p>Hizmet profilini yayınla, bölgendeki taleplere teklif ver ve kendi işlerinde malzeme, işçilik ve kâr hesabını takip et.</p></div>
+        <Link className="marketing-primary shrink-0" href="/onboarding?usta=1">Usta paneline git <ArrowRight size={17} aria-hidden="true" /></Link>
+      </div><ProductDemo/>
+    </div></section>
+
+    <section className="landing-section how-section"><div className="marketing-container">
+      <div className="section-intro" data-reveal><h2 className="marketing-heading">Teklifini üç adımda hazırla.</h2></div>
+      <ol className="how-grid">{[
+        { icon: PaintRoller, title: "Maliyetlerini tanımla", text: "Malzeme, işçilik ve giderlerini bir kez kaydet. Alış fiyatların değiştiğinde güncelle." },
+        { icon: ClipboardList, title: "İşin detaylarını gir", text: "Ölçüyü, gereken malzemeyi ve iş gününü mesleğine uygun formda belirt." },
+        { icon: Send, title: "Fiyatı gör, teklifini gönder", text: "Hedef kârına göre fiyatı bul. İş kapsamını ve ödeme koşullarını açıkça paylaş." },
+      ].map(({ icon: Icon, title, text }) => <li key={title} data-reveal><div className="how-icon"><Icon size={25} aria-hidden="true" /></div><h3>{title}</h3><p>{text}</p></li>)}</ol>
     </div></section>
 
     <section className="landing-section calculation-section"><div className="marketing-container calculation-grid">
@@ -65,7 +75,7 @@ export default function Home() {
         alt="Gerçek demo teklifinden alınan önizleme: iş kapsamı, 42.500 TL örnek fiyat ve ödeme koşulları" sizes="(min-width: 1024px) 440px, (min-width: 640px) 500px, 85vw"/></div>
         <div className="quote-status-card"><span className="success-icon"><Check size={18} aria-hidden="true"/></span><div><strong>Müşteri yanıtı tek yerde.</strong><span>Görüntülenme · Kabul · Red</span></div></div><figcaption>Gerçek teklif önizlemesi · Örnek veriler</figcaption></figure>
       <div className="section-intro" data-reveal><p className="marketing-eyebrow">Teklifini düzenli hale getir</p><h2 className="marketing-heading">Gönder.<br/>Takip et.<br/><span className="text-[#0071e3]">Kârını gör.</span></h2>
-        <p>İşin kapsamını müşterinle aynı şekilde anlayın. Tekliften işin tamamlanmasına kadar sonucu takip et.</p>
+        <p>İşin kapsamını müşterinle paylaş. Teklifin sonucunu ve işin tamamlanma durumunu aynı yerden takip et.</p>
         <ol className="quote-journey">{[
           { icon: Send, title: "Teklifini paylaş", text: "WhatsApp, PDF veya tek bir bağlantı." },
           { icon: Eye, title: "Müşterinin yanıtını gör", text: "Teklif açıldı mı, kabul edildi mi?" },

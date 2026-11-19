@@ -10,6 +10,12 @@ export async function middleware(request: NextRequest) {
   const forwardedHeaders=new Headers(request.headers);
   forwardedHeaders.set("x-nonce",nonce);
   forwardedHeaders.set("Content-Security-Policy",reportPolicy);
+  forwardedHeaders.delete("x-kacayapayim-route");
+  if (pathname === "/talepler" || pathname.startsWith("/talepler/")) {
+    const query = new URLSearchParams(request.nextUrl.searchParams);
+    query.delete("_rsc");
+    forwardedHeaders.set("x-kacayapayim-route", query.size ? `${pathname}?${query}` : pathname);
+  }
   function decorate(response:NextResponse){response.headers.set("Content-Security-Policy-Report-Only",reportPolicy);return response;}
   if ((process.env.DEPLOYMENT_ENV === "production" || process.env.VERCEL_ENV === "production") && process.env.APP_URL) {
     const canonical = new URL(process.env.APP_URL);

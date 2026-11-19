@@ -1,5 +1,24 @@
 begin;
 
+do $$
+declare
+  relation regclass;
+begin
+  foreach relation in array array[
+    'private.market_categories'::regclass, 'private.market_providers'::regclass,
+    'private.market_requests'::regclass, 'private.market_offers'::regclass,
+    'private.market_messages'::regclass, 'private.market_reviews'::regclass,
+    'private.market_favorites'::regclass, 'private.market_notices'::regclass,
+    'private.market_reports'::regclass, 'private.market_moderation_actions'::regclass
+  ] loop
+    if not (select relrowsecurity from pg_class where oid=relation)
+      or has_table_privilege('anon', relation, 'SELECT, INSERT, UPDATE, DELETE, TRUNCATE')
+      or has_table_privilege('authenticated', relation, 'SELECT, INSERT, UPDATE, DELETE, TRUNCATE')
+    then raise exception 'Marketplace table access configuration changed for %', relation; end if;
+  end loop;
+end;
+$$;
+
 insert into auth.users(id,email,raw_user_meta_data) values
   ('91000000-0000-0000-0000-000000000001','market-buyer@example.test','{"first_name":"Müşteri"}'),
   ('91000000-0000-0000-0000-000000000002','market-provider1@example.test','{}'),
@@ -10,6 +29,8 @@ insert into public.businesses(owner_id,name,onboarding_completed,onboarding_step
   ('91000000-0000-0000-0000-000000000002','Test Tesisat',true,4),
   ('91000000-0000-0000-0000-000000000003','Diğer Tesisat',true,4);
 insert into public.platform_admins(user_id) values ('91000000-0000-0000-0000-000000000005');
+insert into private.market_reports(id,reporter_id,reason,created_at)
+  values ('91000000-0000-0000-0000-000000000099','91000000-0000-0000-0000-000000000005','Queue ordering fixture',now()-interval '1 day');
 
 set local role anon;
 do $$
@@ -113,6 +134,10 @@ begin
 
   perform set_config('request.jwt.claims',jsonb_build_object('sub',competitor,'role','authenticated','aal','aal1')::text,true);
   if public.market_read('detail',listing)->'request'->>'address' is not null then raise exception 'Address exposed to rejected competitor'; end if;
+  if (public.market_read('detail',listing)->'request') ?| array['appointment_at','appointment_proposer','appointment_confirmed','address_shared']
+    or exists(select 1 from jsonb_array_elements(public.market_archive('market_requests',null,now())) entry
+      where entry->>'key'=listing::text and (entry->'record') ?| array['appointment_at','appointment_proposer','appointment_confirmed','address_shared'])
+    then raise exception 'Private scheduling details included in competitor projection'; end if;
   if public.market_archive('market_requests',null,now())->0->'record'->>'address' is not null
     or jsonb_array_length(public.market_archive('market_messages',null,now()))<>0
     then raise exception 'Archive exposed another participant data'; end if;
@@ -128,6 +153,9 @@ begin
 
   perform set_config('request.jwt.claims',jsonb_build_object('sub',customer,'role','authenticated','aal','aal1')::text,true);
   perform public.market_write('complete',jsonb_build_object('id',listing));
+  perform public.market_write('address',jsonb_build_object('id',listing,'body','','share',false));
+  if public.market_read('detail',listing)->'request'->>'address' is distinct from ''
+    then raise exception 'Completed request retained the cleared address'; end if;
   perform public.market_write('review',jsonb_build_object('id',listing,'rating','5','body','İş zamanında tamamlandı.'));
   if public.market_directory(jsonb_build_object('id',provider))->'providers'->0->>'review_count'<>'1'
     then raise exception 'Verified review missing'; end if;
@@ -148,10 +176,27 @@ begin
   if jsonb_array_length(public.market_directory(jsonb_build_object('id',provider))->'providers')<>0
     then raise exception 'Suspended provider remains visible'; end if;
   perform public.market_write('moderate',jsonb_build_object('id',report,'decision','restore'));
+  detail := public.market_read('moderation');
+  if detail->0->>'state' is distinct from 'open' or not exists(
+    select from jsonb_array_elements(detail) item where item->>'id'=report::text
+      and item->>'latest_action'='restore' and item->>'latest_action_at' is not null
+  ) then raise exception 'Open-first moderation queue or latest action missing'; end if;
+  denied := false;
+  begin perform public.market_write('moderate',jsonb_build_object('id',report,'decision','dismiss'));
+  exception when raise_exception then denied := sqlerrm='MARKET_STALE'; end;
+  if not denied then raise exception 'Closed report accepted stale disposition'; end if;
+  denied := false;
+  begin perform public.market_write('moderate',jsonb_build_object('id',gen_random_uuid(),'decision','resolve'));
+  exception when raise_exception then denied := sqlerrm='MARKET_UNAVAILABLE'; end;
+  if not denied then raise exception 'Missing report accepted disposition'; end if;
 
   perform set_config('request.jwt.claims',jsonb_build_object('sub',tradesperson,'role','authenticated','aal','aal1')::text,true);
   if not exists(select 1 from public.jobs where id=job and status='completed' and completed_at is not null)
     then raise exception 'Completed service job did not reach owner workflow'; end if;
+  if public.market_read('detail',listing)->'request'->>'address' is not null
+    or exists(select 1 from jsonb_array_elements(public.market_archive('market_requests',null,now())) entry
+      where entry->>'key'=listing::text and entry->'record'->>'address' is not null)
+    then raise exception 'Revoked address remained available to provider'; end if;
   perform public.save_actual_job_costs(job,'[{"name":"Malzeme","category":"material","totalCost":"50.15"}]');
   if not exists(select 1 from public.jobs where id=job and actual_profit=400.05)
     then raise exception 'Agreed platform price was not used for net profit'; end if;
@@ -162,5 +207,30 @@ end;
 $$;
 
 reset role;
+do $$
+declare
+  provider uuid := (select p.id from private.market_providers p join public.businesses b on b.id=p.business_id
+    where b.owner_id='91000000-0000-0000-0000-000000000002');
+  listing uuid := (select id from private.market_requests where state='completed');
+  buyer uuid := '91000000-0000-0000-0000-000000000001';
+  other_reporter uuid := '91000000-0000-0000-0000-000000000004';
+begin
+  if (select array_agg(action order by id) from private.market_moderation_actions
+      where admin_id='91000000-0000-0000-0000-000000000005') is distinct from array['hide_review','suspend','restore']
+    then raise exception 'Moderation history differs from committed decisions'; end if;
+  delete from auth.users where id='91000000-0000-0000-0000-000000000005';
+  if (select count(*) from private.market_moderation_actions where admin_id is null)<>3
+    then raise exception 'Deleting a moderator lost decision history'; end if;
+  insert into private.market_reports(reporter_id,provider_id,request_id,reason) values
+    (buyer,provider,null,'Directory report'), (buyer,provider,listing,'Request report'),
+    (other_reporter,provider,null,'Another directory report');
+  delete from private.market_requests where id=listing;
+  if not exists(select from private.market_reports where reason='Request report' and request_id is null and state='resolved')
+    then raise exception 'Removed request did not close its report'; end if;
+  delete from auth.users where id in (buyer,other_reporter);
+  if (select count(*) from private.market_reports where reporter_id is null and provider_id=provider and state='open')<>2
+    then raise exception 'Reporter deletion did not preserve independent open reports'; end if;
+end;
+$$;
 rollback;
 select 'PASS: customer listing, private provider call, matching, offer selection, private address and messages, appointment, completion, verified review, notifications and moderation' as result;

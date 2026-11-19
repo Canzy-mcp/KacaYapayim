@@ -1,14 +1,17 @@
 import { useState } from "react";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, type Href } from "expo-router";
 import * as Linking from "expo-linking";
 import { Button, Choice, Field, Notice, Screen } from "@/src/components/ui";
 import { db } from "@/src/lib/supabase";
 import { errorText } from "@/src/lib/format";
 import { useAppSession } from "@/src/lib/session";
+import { rememberMarketSignup } from "@/src/lib/market-signup";
+import { marketReturnPath } from "@/src/lib/marketplace";
 
 export default function Register() {
   const { refresh } = useAppSession();
-  const { hesap } = useLocalSearchParams<{ hesap?: string }>();
+  const { hesap, next } = useLocalSearchParams<{ hesap?: string; next?: string }>();
+  const marketDestination = marketReturnPath(next);
   const [account, setAccount] = useState<"customer" | "provider">(hesap === "musteri" ? "customer" : "provider");
   const [first, setFirst] = useState(""); const [last, setLast] = useState("");
   const [email, setEmail] = useState(""); const [password, setPassword] = useState("");
@@ -25,8 +28,15 @@ export default function Register() {
         options: { data: { first_name: first.trim(), last_name: last.trim(), account_preference: account },
           emailRedirectTo: Linking.createURL("auth/callback") } });
       if (authError) throw authError;
-      if (data.session) { await refresh(); router.replace("/"); }
-      else setMessage("Hesabını doğrulamak için e-posta kutunu kontrol et.");
+      if (data.session) {
+        await refresh();
+        if (marketDestination) router.dismissTo(marketDestination as Href);
+        else router.replace("/");
+      } else {
+        if (marketDestination && data.user) await rememberMarketSignup(data.user.id, marketDestination);
+        setMessage(marketDestination ? "E-postandaki bağlantıyla hesabını doğrula. Gerekirse giriş yaparak kaldığın yerden devam edebilirsin."
+          : "Hesabını doğrulamak için e-posta kutunu kontrol et.");
+      }
     } catch (cause) { setError(errorText(cause)); } finally { setBusy(false); }
   }
   return <Screen title="Ücretsiz başla." subtitle="Web hesabın varsa aynı e-posta ile giriş yap.">
@@ -39,6 +49,9 @@ export default function Register() {
     <Field label="Şifre tekrar" value={confirm} onChangeText={setConfirm} secureTextEntry />
     {Boolean(error) && <Notice error>{error}</Notice>}{Boolean(message) && <Notice>{message}</Notice>}
     <Button title={busy ? "Hesap açılıyor..." : "Ücretsiz Başla"} onPress={register} disabled={busy} />
-    <Button title="Giriş Yap" quiet onPress={() => router.back()} />
+    <Button title="Giriş Yap" quiet onPress={() => {
+      if (marketDestination) router.dismissTo({ pathname: "/(auth)/login", params: { next: marketDestination } });
+      else router.back();
+    }} />
   </Screen>;
 }
