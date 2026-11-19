@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { AnalyticsConsent } from "@/components/marketing/analytics-consent";
 import { GoogleAnalytics } from "@/components/marketing/google-analytics";
 import Script from "next/script";
+import { Inter } from "next/font/google";
 import "./globals.css";
+
+const inter = Inter({ subsets: ["latin", "latin-ext"], display: "swap", variable: "--font-inter" });
 
 const siteUrl = process.env.APP_URL || "http://localhost:3005";
 
@@ -18,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="tr"><body><GoogleAnalytics/><AnalyticsConsent/>{children}
+  return <html lang="tr" className={inter.variable}><body><GoogleAnalytics/><AnalyticsConsent/>{children}
     <Script id="google-tag-consent-default" strategy="beforeInteractive">{`
       window.dataLayer = window.dataLayer || [];
       function gtag(){window.dataLayer.push(arguments);}
