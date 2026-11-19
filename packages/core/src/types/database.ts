@@ -259,6 +259,7 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      market_operator_overview: { Args: { p_days?: number }; Returns: unknown };
       market_directory: { Args: { p_filters?: Record<string, string> }; Returns: unknown };
       market_read: { Args: { p_view: string; p_id?: string; p_page?: number }; Returns: unknown };
       market_write: { Args: { p_action: string; p_payload: Record<string, string | string[] | boolean> }; Returns: string | null };

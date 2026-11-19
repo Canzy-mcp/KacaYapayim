@@ -16,7 +16,7 @@ try{
   sql=sql.replace(/create extension if not exists pg_cron;/g,'');
   await db.exec(sql);
  }
- for(const file of ['tests/product-database.sql','tests/audit-database.sql','tests/marketplace-database.sql']){stage=file;const result=await db.exec(await fs.readFile(file,'utf8'));console.log(result.at(-1)?.rows);}
+ for(const file of ['tests/product-database.sql','tests/audit-database.sql','tests/marketplace-database.sql','tests/admin-overview.sql']){stage=file;const result=await db.exec(await fs.readFile(file,'utf8'));console.log(result.at(-1)?.rows);}
  console.log(`PASS: ${files.length} migrations replayed on isolated PostgreSQL; pg_cron execution excluded.`);
 }catch(error){console.error(`FAIL at ${stage}:`,error.message);process.exitCode=1;}
 finally{await db.close();}

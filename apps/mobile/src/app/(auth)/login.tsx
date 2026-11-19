@@ -42,6 +42,6 @@ export default function Login() {
       if (marketDestination) router.push({ pathname: "/(auth)/register", params: { hesap: "musteri", next: marketDestination } });
       else router.push("/(auth)/register");
     }} />
-    <Button title="Usta Rehberini İncele" quiet onPress={() => router.push("/hizmet")} />
+    <Button title="Usta arıyorum" quiet onPress={() => router.push("/hizmet")} />
   </Screen>;
 }

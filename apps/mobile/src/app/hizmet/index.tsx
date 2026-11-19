@@ -96,7 +96,7 @@ export default function ServiceHome() {
           <Row title="Usta tekliflerim ve işlerim" onPress={() => router.push({ pathname: "/hizmet/talepler", params: { gorunum: "work" } })} />
           <Row title="Herkese açık usta profilim" onPress={() => router.push("/hizmet/profil")} />
           <Row title="Usta paneli" onPress={() => router.push("/(tabs)")} />
-        </> : <Row title="Usta olarak başla" onPress={() => router.push("/onboarding")} />}
+        </> : <Row title="Usta olarak başla" onPress={() => router.push({ pathname: "/onboarding", params: { usta: "1" } })} />}
       </>}
       <ServiceText>{session.user.email}</ServiceText>
       <Button title="Hesap silme" quiet onPress={() => router.push("/account/delete")} />

@@ -42,7 +42,7 @@ function ProfileScreen() {
   return <ServiceScreen title="Usta profilim" subtitle="Müşterilerin rehberde göreceği bilgileri ve hizmet bölgeni düzenle.">
     <ServiceLoadState {...result} />
     {data && (data.settings.business ? <ProfileFields {...data} refresh={refresh} /> :
-      <Button title="İşletme kurulumunu tamamla" onPress={() => router.push("/onboarding")} />)}
+      <Button title="İşletme kurulumunu tamamla" onPress={() => router.push({ pathname: "/onboarding", params: { usta: "1" } })} />)}
   </ServiceScreen>;
 }
 

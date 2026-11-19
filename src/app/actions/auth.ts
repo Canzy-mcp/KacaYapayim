@@ -7,7 +7,8 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { cleanText, emailError, passwordError, type FieldErrors } from "@/lib/validation";
 import { consumeRateLimit } from "@/lib/security/rate-limit";
 import { recordEvent } from "@/lib/analytics/events";
-import { accountHome, requestReturnPath } from "@/lib/account/home";
+import { accountHome, providerSetupPath, requestReturnPath } from "@/lib/account/home";
+import { isPlatformAdmin } from "@/lib/account/platform-admin";
 
 type AuthResult = { ok: boolean; error?: string; fieldErrors?: FieldErrors; next?: string; message?: string };
 const setupError = "Supabase bağlantısı henüz yapılandırılmadı.";
@@ -37,7 +38,7 @@ export async function loginAction(form: FormData): Promise<AuthResult> {
   const supabase = await createClient();
   const { data: session, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { ok: false, error: "E-posta veya şifre hatalı." };
-  const next = requestReturnPath(form.get("next"));
+  const next = requestReturnPath(form.get("next")) ?? (session.user && await isPlatformAdmin(session.user.id) ? "/admin" : undefined);
   const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
   if (assurance.data?.nextLevel === "aal2" && assurance.data.currentLevel !== "aal2")
     return { ok: true, next: next ? `/mfa?next=${encodeURIComponent(next)}` : "/mfa" };
@@ -67,8 +68,8 @@ export async function registerAction(form: FormData): Promise<AuthResult> {
   if (Object.keys(fieldErrors).length) return { ok: false, fieldErrors };
   if (!isSupabaseConfigured()) return { ok: false, error: setupError };
   const supabase = await createClient();
-  const preference = form.get("account") === "customer" ? "customer" : "provider";
-  const next = requestReturnPath(form.get("next")) ?? accountHome(null, preference);
+  const preference = form.get("account") === "provider" ? "provider" : "customer";
+  const next = requestReturnPath(form.get("next")) ?? (preference === "provider" ? providerSetupPath : "/talepler");
   const { data, error } = await supabase.auth.signUp({
     email,
     password,

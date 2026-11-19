@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { Text } from "react-native";
 import type { Profession } from "@kacayapayim/core/types";
 import { validateMargins } from "@kacayapayim/core/pricing";
@@ -10,6 +10,8 @@ import { errorText, numberFromInput } from "@/src/lib/format";
 
 export default function Onboarding() {
   const { session, business, refresh } = useAppSession();
+  const { usta } = useLocalSearchParams<{ usta?: string }>();
+  const setupProvider = usta === "1";
   const [name, setName] = useState(business?.name || "");
   const [phone, setPhone] = useState(business?.phone || ""); const [city, setCity] = useState(business?.city || "");
   const [professionId, setProfessionId] = useState(business?.profession_id || "");
@@ -18,10 +20,20 @@ export default function Onboarding() {
   const [minimum, setMinimum] = useState(String(business?.minimum_profit_margin ?? 20));
   const [error, setError] = useState(""); const [busy, setBusy] = useState(false);
   useEffect(() => {
+    if (!setupProvider) return;
     void db().from("professions").select("*").eq("is_active", true).eq("is_public", true)
       .not("current_version", "is", null).order("sort_order")
       .then(({ data }) => setProfessions(data || []));
-  }, []);
+  }, [setupProvider]);
+  async function chooseCustomer() {
+    setError(""); setBusy(true);
+    try {
+      const result = await db().auth.updateUser({ data: { account_preference: "customer" } });
+      if (result.error) throw result.error;
+      await refresh();
+      router.replace("/hizmet");
+    } catch (cause) { setError(errorText(cause)); } finally { setBusy(false); }
+  }
   async function save() {
     setError("");
     const profession = professions.find(item => item.id === professionId);
@@ -32,6 +44,8 @@ export default function Onboarding() {
     if (!session) { setError("Oturumun sona erdi."); return; }
     setBusy(true);
     try {
+      const preference = await db().auth.updateUser({ data: { account_preference: "provider" } });
+      if (preference.error) throw preference.error;
       const values = { name: name.trim(), phone: phone.trim() || null, city: city.trim() || null,
         profession: profession.name, profession_id: profession.id, default_profit_margin: targetNumber,
         minimum_profit_margin: minimumNumber, onboarding_step: 4 as const, onboarding_completed: true };
@@ -41,6 +55,11 @@ export default function Onboarding() {
       await refresh(); router.replace("/(tabs)");
     } catch (cause) { setError(errorText(cause)); } finally { setBusy(false); }
   }
+  if (!setupProvider) return <Screen title="KaçaYapayım’ı nasıl kullanacaksın?" subtitle="Bölgende usta bulabilir ya da işletme panelini kurabilirsin.">
+    {Boolean(error) && <Notice error>{error}</Notice>}
+    <Button title="Usta arıyorum" disabled={busy} onPress={chooseCustomer} />
+    <Button title="Ustayım" quiet disabled={busy} onPress={() => router.replace({ pathname: "/onboarding", params: { usta: "1" } })} />
+  </Screen>;
   return <Screen title="İşini hazırlayalım." subtitle="Aynı işletme web ve mobilde seninle kalır.">
     <Field label="İşletme adı" value={name} onChangeText={setName} />
     <Field label="Telefon (isteğe bağlı)" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
@@ -55,6 +74,7 @@ export default function Onboarding() {
     <Field label="Minimum kâr marjı (%)" value={minimum} onChangeText={setMinimum} keyboardType="decimal-pad" />
     {Boolean(error) && <Notice error>{error}</Notice>}
     <Button title={busy ? "Kaydediliyor..." : "İşletmeyi Hazırla"} onPress={save} disabled={busy || !professions.length} />
+    <Button title="Daha sonra" quiet disabled={busy} onPress={chooseCustomer} />
     <Button title="Çıkış Yap" quiet onPress={async () => { await db().auth.signOut(); router.replace("/"); }} />
   </Screen>;
 }

@@ -12,7 +12,7 @@ export default function Index() {
   if (loading) return <Loading />;
   if (!session) return <Redirect href="/(auth)/login" />;
   if (requiresMfa) return <Redirect href="/mfa" />;
-  if (!business?.onboarding_completed && session.user.user_metadata.account_preference === "customer") return <Redirect href="/hizmet" />;
+  if (session.user.user_metadata.account_preference === "customer") return <Redirect href="/hizmet" />;
   if (!business?.onboarding_completed) return <Redirect href="/onboarding" />;
   return <Redirect href="/(tabs)" />;
 }

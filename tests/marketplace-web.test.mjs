@@ -10,7 +10,7 @@ const hooks = registerHooks({
     return nextResolve(specifier === "@kacayapayim/core/marketplace" ? coreSource : specifier, context);
   },
 });
-const { requestReturnPath } = await import("../src/lib/account/home.ts");
+const { accountHome, providerSetupPath, requestReturnPath } = await import("../src/lib/account/home.ts");
 const { parseMarketForm } = await import("../src/lib/marketplace/form-payload.ts");
 hooks.deregister();
 
@@ -27,6 +27,26 @@ test("marketplace login resumes supported deep links and drops unknown destinati
     assert.equal(requestReturnPath(path), path);
   }
   for (const path of ["/dashboard", "/talepler/yeni?usta=bilinmiyor", `/talepler/${id}?mesaj=102`, `/talepler/${id}/randevu`, `/talepler/${id}?mesaj=1&mesaj=2`]) {
+    assert.equal(requestReturnPath(path), undefined);
+  }
+});
+
+test("account home keeps customer intent separate from provider onboarding", () => {
+  assert.equal(accountHome(null, "customer"), "/talepler");
+  assert.equal(accountHome({ onboarding_completed: true }, "customer"), "/talepler");
+  assert.equal(accountHome(null, "provider"), "/onboarding");
+  assert.equal(accountHome(null, undefined), "/onboarding");
+  assert.equal(accountHome(null, "admin"), "/onboarding");
+  assert.equal(accountHome({ onboarding_completed: true }, "provider"), "/dashboard");
+});
+
+test("login and MFA preserve exact admin and provider setup destinations", () => {
+  for (const path of [providerSetupPath, "/onboarding", "/admin", "/admin?gun=90", "/admin/analytics",
+    "/admin/professions", `/admin/professions?id=${id}`, "/admin/talepler", "/admin/talepler?page=101"]) {
+    assert.equal(requestReturnPath(path), path);
+  }
+  for (const path of ["/onboarding?usta=0", "/admin?gun=31", "/admin?t=1", "/admin/talepler?page=102",
+    "/admin/professions?id=invalid", `/admin/professions?id=${id}&next=/admin`, "//external.example/admin"]) {
     assert.equal(requestReturnPath(path), undefined);
   }
 });

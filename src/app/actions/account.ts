@@ -15,6 +15,18 @@ async function authenticatedClient() {
   return { supabase, userId: data.claims.sub };
 }
 
+export async function chooseCustomerMode(): Promise<SaveResult> {
+  const auth = await authenticatedClient();
+  if (!auth) return { ok: false, error: notReady };
+  const { error } = await auth.supabase.auth.updateUser({ data: { account_preference: "customer" } });
+  if (error) return { ok: false, error: "Hesap tercihin kaydedilemedi. Tekrar dene." };
+  // Refresh the session JWT, which is where getViewer reads the preference.
+  const { error: refreshError } = await auth.supabase.auth.refreshSession();
+  if (refreshError) return { ok: false, error: "Oturumun güncellenemedi. Tekrar giriş yap." };
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
 export async function saveBusinessBasics(form: FormData): Promise<SaveResult> {
   const name = cleanText(form.get("name"), 120);
   const phone = cleanText(form.get("phone"), 30);
@@ -67,6 +79,9 @@ export async function completeOnboarding(): Promise<SaveResult> {
   if (readError || !business?.name || !business.profession) return { ok: false, error: "Önce işletme ve meslek bilgilerini tamamla." };
   if (business.onboarding_step !== 4) return { ok: false, error: "Önce kâr ayarlarını tamamla." };
   if (Object.keys(marginErrors(business.default_profit_margin, business.minimum_profit_margin)).length) return { ok: false, error: "Kâr ayarlarını kontrol et." };
+  const { error: preferenceError } = await auth.supabase.auth.updateUser({ data: { account_preference: "provider" } });
+  if (preferenceError) return { ok: false, error: "Usta hesabı tercihin kaydedilemedi. Tekrar dene." };
+  await auth.supabase.auth.refreshSession();
   const { error } = await auth.supabase.from("businesses").update({ onboarding_completed: true }).eq("owner_id", auth.userId);
   if (error) return { ok: false, error: "Kurulum tamamlanamadı. Tekrar dene." };
   revalidatePath("/", "layout");

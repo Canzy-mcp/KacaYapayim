@@ -11,7 +11,7 @@ export async function middleware(request: NextRequest) {
   forwardedHeaders.set("x-nonce",nonce);
   forwardedHeaders.set("Content-Security-Policy",reportPolicy);
   forwardedHeaders.delete("x-kacayapayim-route");
-  if (pathname === "/talepler" || pathname.startsWith("/talepler/")) {
+  if (pathname === "/admin" || pathname.startsWith("/admin/") || pathname === "/talepler" || pathname.startsWith("/talepler/")) {
     const query = new URLSearchParams(request.nextUrl.searchParams);
     query.delete("_rsc");
     forwardedHeaders.set("x-kacayapayim-route", query.size ? `${pathname}?${query}` : pathname);

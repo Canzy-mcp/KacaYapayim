@@ -1,8 +1,6 @@
-import { notFound } from "next/navigation";
+import { adminChallenge } from "../access";
 import Link from "next/link";
 import type { MarketModerationAction, MarketReport } from "@kacayapayim/core/marketplace";
-import { requireViewer } from "@/lib/viewer";
-import { createClient } from "@/lib/supabase/server";
 import { marketPage, marketRead } from "@/lib/marketplace/service";
 import { MarketForm } from "@/components/marketplace/form";
 import { marketDate, MarketEmpty, MarketHeading, MarketPagination, panel } from "@/components/marketplace/ui";
@@ -19,10 +17,8 @@ const actionLabels: Record<MarketModerationAction, string> = {
 };
 
 export default async function MarketModerationPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
-  await requireViewer();
-  const client = await createClient();
-  const { data, error } = await client.rpc("market_read", { p_view: "admin" });
-  if (error || !data) notFound();
+  const challenge = await adminChallenge("/admin/talepler");
+  if (challenge) return challenge;
   const page = marketPage((await searchParams).page);
   const reports = await marketRead("moderation", page);
   return <main className="mx-auto max-w-4xl px-5 py-10 text-[#112046]">

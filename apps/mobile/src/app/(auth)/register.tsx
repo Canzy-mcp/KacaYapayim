@@ -12,7 +12,7 @@ export default function Register() {
   const { refresh } = useAppSession();
   const { hesap, next } = useLocalSearchParams<{ hesap?: string; next?: string }>();
   const marketDestination = marketReturnPath(next);
-  const [account, setAccount] = useState<"customer" | "provider">(hesap === "musteri" ? "customer" : "provider");
+  const [account, setAccount] = useState<"customer" | "provider">(hesap === "usta" ? "provider" : "customer");
   const [first, setFirst] = useState(""); const [last, setLast] = useState("");
   const [email, setEmail] = useState(""); const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState(""); const [message, setMessage] = useState("");
@@ -31,7 +31,8 @@ export default function Register() {
       if (data.session) {
         await refresh();
         if (marketDestination) router.dismissTo(marketDestination as Href);
-        else router.replace("/");
+        else if (account === "provider") router.replace({ pathname: "/onboarding", params: { usta: "1" } });
+        else router.replace("/hizmet");
       } else {
         if (marketDestination && data.user) await rememberMarketSignup(data.user.id, marketDestination);
         setMessage(marketDestination ? "E-postandaki bağlantıyla hesabını doğrula. Gerekirse giriş yaparak kaldığın yerden devam edebilirsin."
@@ -40,7 +41,7 @@ export default function Register() {
     } catch (cause) { setError(errorText(cause)); } finally { setBusy(false); }
   }
   return <Screen title="Ücretsiz başla." subtitle="Web hesabın varsa aynı e-posta ile giriş yap.">
-    <Choice title="Hizmet alacağım" selected={account === "customer"} onPress={() => setAccount("customer")} />
+    <Choice title="Usta arıyorum" selected={account === "customer"} onPress={() => setAccount("customer")} />
     <Choice title="Ustayım" selected={account === "provider"} onPress={() => setAccount("provider")} />
     <Field label="Ad" value={first} onChangeText={setFirst} textContentType="givenName" />
     <Field label="Soyad" value={last} onChangeText={setLast} textContentType="familyName" />
