@@ -156,5 +156,32 @@ do $$ begin
    then raise exception 'Expired checkout reconciliation filter failed'; end if;
 end $$;
 reset role;
+
+-- One-time entry fee settles once, stays idempotent and is stored as a lifetime row.
+insert into private.billing_checkout_attempts(token,business_id,plan_id,billing_interval,plan_reference,expires_at)
+values ('entry-fee-token',current_setting('test.bb')::uuid,'pro','once','entry-fee',now()+interval '30 minutes');
+select set_config('request.jwt.claims','{"role":"service_role"}',true);
+set local role service_role;
+do $$
+declare ev jsonb;
+begin
+ ev:=jsonb_build_object('businessId',current_setting('test.bb'),'planId','pro','status','active','eventId','entry:1',
+  'eventType','entry_fee.paid','payloadHash','h','occurredAt',now(),'providerSubscriptionId','pay-1',
+  'currentPeriodStart',now(),'currentPeriodEnd',timestamptz '2126-01-01');
+ if not public.apply_entry_fee_event(ev,'entry-fee-token') or not public.apply_entry_fee_event(ev,'entry-fee-token')
+   or public.apply_entry_fee_event(ev,'unknown-token')
+   or public.apply_entry_fee_event(ev||'{"planId":"usta"}','entry-fee-token') then
+   raise exception 'Entry fee settlement is not idempotent or accepted a foreign attempt'; end if;
+ if public.get_iyzico_checkout('entry-fee-token')->>'status' is distinct from 'completed' then
+   raise exception 'Entry fee attempt not completed'; end if;
+end $$;
+reset role;
+do $$ begin
+ if (select count(*) from public.subscriptions where business_id=current_setting('test.bb')::uuid
+   and plan_id='pro' and status='active' and billing_interval is null and provider='iyzico'
+   and provider_subscription_id='pay-1' and current_period_end>now()+interval '90 years')<>1
+   or public.effective_plan_id(current_setting('test.bb')::uuid)<>'pro' then
+   raise exception 'Entry fee did not create a lifetime subscription'; end if;
+end $$;
 rollback;
 select 'PASS: manual precision, 251 quote search/pagination, filters, copying, revisions, package drafts, cross-business denial, team invite identity/reuse/revocation, public projection and anonymous permissions; fixtures rolled back' as result;

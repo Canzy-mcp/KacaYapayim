@@ -74,7 +74,7 @@ export function MarketingMobileNavigation({ links, group }: { links: readonly Na
       {links.map(([label, href]) => <Link key={href} href={href} aria-current={current(href)} onClick={close}>{label}</Link>)}
       {group.href && <Link href={group.href} aria-current={current(group.href)} onClick={close}>{group.label}</Link>}
       {group.links.map(([label, href]) => <Link key={href} href={href} className="ky-mobile-sub" aria-current={current(href)} onClick={close}>{label}</Link>)}
-      <div className="ky-mobile-actions"><Link href="/login" onClick={close} className="marketing-secondary">Giriş yap</Link><Link href="/register" onClick={close} className="marketing-primary">Ücretsiz başla</Link></div>
+      <div className="ky-mobile-actions"><Link href="/login" onClick={close} className="marketing-secondary">Giriş yap</Link><Link href="/register" onClick={close} className="marketing-primary">Hesap aç</Link></div>
     </nav>
   </div>;
 }

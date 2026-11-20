@@ -37,7 +37,7 @@ const faqs = [
   { q: "Adresimi herkes görebilir mi?", a: "Hayır. Adresin ilanda ya da profilde görünmez. Bir ustayı seçtikten sonra istersen adresini yalnızca o ustayla paylaşırsın." },
   { q: "İlan ile doğrudan talep arasındaki fark nedir?", a: "Doğrudan talepte seçtiğin ustaya yazarsın. İlanda işi bir kez anlatırsın, bölgendeki ustalar teklif verir ve sen karşılaştırıp birini seçersin." },
   { q: "Yorumlara güvenebilir miyim?", a: "Yorumlar yalnızca tamamlanan işlerden sonra, o işi yaptıran müşteri tarafından yazılır. Talebi tamamlanmamış biri puan veremez." },
-  { q: "Usta olarak nasıl katılırım?", a: "Ücretsiz hesap aç, hizmet alanını ve bölgeni ekle, profilini yayınla. Teklif ve maliyet araçları aynı hesapta." },
+  { q: "Usta olarak nasıl katılırım?", a: "Hesap aç, hizmet alanını ve bölgeni ekle. Profilini yayınlamak ve teklif vermek için tek seferlik 199 ₺ usta üyeliği gerekir; abonelik yok, üyelik süresiz. Teklif ve maliyet araçları aynı hesapta." },
 ] as const;
 const faqPairs = faqs.map(f => [f.q, f.a] as const);
 

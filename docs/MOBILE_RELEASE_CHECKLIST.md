@@ -29,7 +29,7 @@ Bu dosya gerçek hesap ve cihazla tamamlanacak işleri açık bırakır. Kodun d
 - [x] İş/teklif taslakları cihazda korunuyor; müşteri, iş ve teklif listeleri sayfalı yükleniyor.
 - [x] Fiyat ve gerçekleşen maliyet kaydetmeden önce başka cihaz değişikliği kontrol ediliyor. Bu kontrol veritabanında atomik olmadığından eşzamanlı yarış testi staging'de yapılmalı.
 - [ ] Boyacı, elektrikçi, tesisatçı ve klimacı için gerçek veriyle aynı sonuçları web/mobilde karşılaştır.
-- [ ] Teklif limiti, müşteri limiti ve paket yetkilerini Free/Usta/Pro test hesaplarında doğrula.
+- [ ] Üyeliksiz (teklif yok) ve Usta Üyelik (süresiz, tüm özellikler) test hesaplarında teklif, müşteri ve pazar yeri yetkilerini doğrula.
 - [ ] Teklif linkini dış telefonda aç; görüntülenme ve kabul/red sonucunun iki uygulamada güncellendiğini doğrula.
 - [ ] PDF'nin iOS ve Android paylaşım ekranında doğru Türkçe karakter, tutar ve tarih içerdiğini doğrula.
 - [ ] Çevrimdışı taslak, bağlantı kesilmesi, çift dokunma ve yeniden deneme durumlarını test et.

@@ -18,6 +18,6 @@ export default function Page() {
       <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{items.map(([t, d]) => <li key={t} className={tile}><h3 className={title}>{t}</h3><p className="mt-3 leading-[1.55] text-[#515154]">{d}</p></li>)}</ul>
       <p className="mt-8"><Link className={textLink} href="/metodoloji">Fiyat hesabının nasıl yapıldığını öğren</Link></p>
     </Band>
-    <CtaBand id="cta-title" h="Ücretsiz başla." text="İlk tekliflerini ücretsiz pakette hazırla."><Link href="/register?hesap=usta" className={ctaLight}>Hesap aç</Link><Link href="/fiyatlandirma" className={ctaGhost}>Fiyatlandırma</Link></CtaBand>
+    <CtaBand id="cta-title" h="Usta olarak katıl." text="Tek seferlik 199 ₺ ile tekliflerini sınırsız hazırla. Abonelik yok."><Link href="/register?hesap=usta" className={ctaLight}>Usta olarak katıl</Link><Link href="/fiyatlandirma" className={ctaGhost}>Fiyatlandırma</Link></CtaBand>
   </>;
 }

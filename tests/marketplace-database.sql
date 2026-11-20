@@ -24,10 +24,17 @@ insert into auth.users(id,email,raw_user_meta_data) values
   ('91000000-0000-0000-0000-000000000002','market-provider1@example.test','{}'),
   ('91000000-0000-0000-0000-000000000003','market-provider2@example.test','{}'),
   ('91000000-0000-0000-0000-000000000004','market-other@example.test','{}'),
-  ('91000000-0000-0000-0000-000000000005','market-admin@example.test','{}');
+  ('91000000-0000-0000-0000-000000000005','market-admin@example.test','{}'),
+  ('91000000-0000-0000-0000-000000000006','market-unpaid@example.test','{}');
 insert into public.businesses(owner_id,name,onboarding_completed,onboarding_step) values
   ('91000000-0000-0000-0000-000000000002','Test Tesisat',true,4),
-  ('91000000-0000-0000-0000-000000000003','Diğer Tesisat',true,4);
+  ('91000000-0000-0000-0000-000000000003','Diğer Tesisat',true,4),
+  ('91000000-0000-0000-0000-000000000006','Ödemesiz Tesisat',true,4);
+-- Entry fee: the two working providers hold lifetime memberships; the third business does not.
+-- (The migration grandfathers businesses that exist when it runs, not fixtures created later.)
+insert into public.subscriptions(business_id,plan_id,status,provider,provider_subscription_id,current_period_start,current_period_end)
+  select id,'pro','active','test','entry-'||id::text,now(),timestamptz '2126-01-01' from public.businesses
+  where owner_id in ('91000000-0000-0000-0000-000000000002','91000000-0000-0000-0000-000000000003');
 insert into public.platform_admins(user_id) values ('91000000-0000-0000-0000-000000000005');
 insert into private.market_reports(id,reporter_id,reason,created_at)
   values ('91000000-0000-0000-0000-000000000099','91000000-0000-0000-0000-000000000005','Queue ordering fixture',now()-interval '1 day');
@@ -73,6 +80,14 @@ begin
   provider := public.market_write('profile','{"title":"Test Ustası","body":"Musluk ve su tesisatı","city":"İstanbul","districts":["Kadıköy"],"categories":["tesisat"],"published":true}');
   perform set_config('request.jwt.claims',jsonb_build_object('sub',competitor,'role','authenticated','aal','aal1')::text,true);
   other_provider := public.market_write('profile','{"title":"İkinci Usta","city":"İstanbul","districts":[],"categories":["tesisat"],"published":true}');
+  perform set_config('request.jwt.claims',jsonb_build_object('sub','91000000-0000-0000-0000-000000000006','role','authenticated','aal','aal1')::text,true);
+  begin
+    perform public.market_write('profile','{"title":"Ödemesiz","city":"İstanbul","districts":[],"categories":["tesisat"],"published":true}');
+    raise exception 'Unpaid provider published a profile';
+  exception when others then
+    if sqlerrm <> 'BILLING_ENTRY_REQUIRED' then raise; end if;
+  end;
+  perform public.market_write('profile','{"title":"Ödemesiz","city":"İstanbul","districts":[],"categories":["tesisat"],"published":false}');
   if jsonb_array_length(public.market_directory('{"city":"istanbul","district":"kadıköy","category":"tesisat"}')->'providers')<>2
     or public.market_directory(jsonb_build_object('id',provider))->'providers'->0 ? 'business_id'
     then raise exception 'Directory filtering or privacy failed'; end if;

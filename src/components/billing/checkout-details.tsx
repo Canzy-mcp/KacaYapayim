@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { startCheckout } from "@/app/actions/billing";
-import type { BillingDetails, BillingInterval } from "@/lib/billing/provider";
-import type { Plan } from "@/types/database";
+import { startEntryCheckout } from "@/app/actions/billing";
+import { ENTRY_FEE_LABEL } from "@/lib/billing/catalog";
 
-export type CheckoutDefaults = Pick<BillingDetails, "name" | "surname" | "email" | "city" | "gsmNumber">;
+export type CheckoutDefaults = { name: string; surname: string; email: string; city: string; gsmNumber?: string };
 
 const control = "mt-1 min-h-11 w-full rounded-xl border border-[#776f63] bg-white px-3 py-2 text-base focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#075D54]";
 const fields = [
@@ -13,15 +12,14 @@ const fields = [
   { key: "surname", label: "Soyad", autocomplete: "family-name", type: "text", maxLength: 80, required: true },
   { key: "email", label: "E-posta", autocomplete: "email", type: "email", maxLength: 254, required: true },
   { key: "city", label: "Şehir", autocomplete: "address-level1", type: "text", maxLength: 80, required: true },
-  { key: "gsmNumber", label: "Cep telefonu (isteğe bağlı)", autocomplete: "tel", type: "tel", maxLength: 25, required: false },
+  { key: "gsmNumber", label: "Cep telefonu", autocomplete: "tel", type: "tel", maxLength: 25, required: true },
 ] as const;
 
-export function CheckoutDetails({ plan, interval, defaults, close }: { plan: Plan; interval: BillingInterval; defaults: CheckoutDefaults; close: () => void }) {
+export function CheckoutDetails({ defaults, close }: { defaults: CheckoutDefaults; close: () => void }) {
   const heading = useRef<HTMLHeadingElement>(null);
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
   useEffect(() => { heading.current?.focus(); }, []);
-  const price = interval === "monthly" ? plan.monthly_price_kurus : plan.yearly_price_kurus;
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -30,7 +28,7 @@ export function CheckoutDetails({ plan, interval, defaults, close }: { plan: Pla
     setPending(true);
     setError("");
     try {
-      const result = await startCheckout(plan.id, interval, details);
+      const result = await startEntryCheckout(details);
       if (result.ok) {
         window.location.assign(result.url);
         return;
@@ -44,7 +42,7 @@ export function CheckoutDetails({ plan, interval, defaults, close }: { plan: Pla
 
   return <form onSubmit={submit} aria-labelledby="billing-details-title" className="mt-6 rounded-2xl border border-[#E7E1D6] bg-[#FAF7F1] p-5 text-[#202923] sm:p-6">
     <h3 id="billing-details-title" ref={heading} tabIndex={-1} className="text-xl font-semibold">Fatura bilgileri</h3>
-    <p className="mt-2 text-[#5B6460]">{plan.name} · {new Intl.NumberFormat("tr-TR").format(price / 100)} ₺/{interval === "monthly" ? "ay" : "yıl"}</p>
+    <p className="mt-2 text-[#5B6460]">Usta Üyelik · {ENTRY_FEE_LABEL} tek seferlik</p>
     <p className="mt-2 text-sm text-[#5B6460]">Ödeme bilgilerini iyzico sayfasında gireceksin.</p>
     <fieldset disabled={pending} className="mt-5 grid min-w-0 gap-4 sm:grid-cols-2">
       {fields.map(field => <label key={field.key} className="min-w-0 text-sm font-medium">
@@ -53,8 +51,8 @@ export function CheckoutDetails({ plan, interval, defaults, close }: { plan: Pla
           defaultValue={defaults[field.key]} maxLength={field.maxLength} required={field.required}
           placeholder={field.key === "gsmNumber" ? "+90 5XX XXX XX XX" : undefined} />
       </label>)}
-      <label className="text-sm font-medium">TCKN veya VKN (isteğe bağlı)
-        <input className={control} name="identityNumber" autoComplete="off" inputMode="numeric" maxLength={11} pattern="[0-9]{10,11}" />
+      <label className="text-sm font-medium">TCKN veya VKN
+        <input className={control} name="identityNumber" autoComplete="off" inputMode="numeric" maxLength={11} pattern="[0-9]{10,11}" required />
       </label>
       <label className="text-sm font-medium sm:col-span-2">Fatura adresi
         <textarea className={control} name="address" autoComplete="street-address" minLength={5} maxLength={300} rows={2} required />

@@ -1,5 +1,6 @@
 "use server";
 import { logFailure } from "@/lib/observability/log";
+import { BILLING_ENTRY_REQUIRED_MESSAGE } from "@/lib/billing/catalog";
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -66,7 +67,7 @@ export async function saveQuote(input: QuoteSaveInput): Promise<QuoteSaveResult>
     logFailure("Quote save failed");
     const message = error?.message || "";
     if (message.includes("Job already accepted")) return { ok: false, error: "Bu iş için bir teklif zaten kabul edildi." };
-    if (message.includes("BILLING_QUOTE_LIMIT")) return { ok: false, error: "Bu ayki teklif hakkını kullandın. Yeni teklif için paketini yükseltebilirsin.", needsUpgrade: true };
+    if (message.includes("BILLING_QUOTE_LIMIT") || message.includes("BILLING_ENTRY_REQUIRED")) return { ok: false, error: BILLING_ENTRY_REQUIRED_MESSAGE, needsUpgrade: true };
     if (message.includes("Pricing risk confirmation required")) return { ok: false, error: "Bu fiyatı onaylaman gerekiyor.", needsConfirmation: true };
     if (message.includes("Customer or price missing")) return { ok: false, error: "Teklifi hazırlamak için müşteri ve geçerli bir fiyat gerekli." };
     if (message.includes("Job price missing")) return { ok: false, error: "Önce iş fiyatını kaydetmelisin." };

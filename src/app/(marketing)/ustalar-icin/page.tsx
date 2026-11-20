@@ -11,7 +11,7 @@ export const metadata = siteMetadata(name, description, "/ustalar-icin");
 const path = "/ustalar-icin";
 
 const faqs = [
-  ["Usta olarak katılmak ücretli mi?", "Hayır. Profil açmak ve yayınlamak ücretsiz. Daha fazla teklif ve müşteri için paketler var; ücretli paketler şu an herkese açık olmayabilir, durumu fiyatlandırma sayfasında görürsün."],
+  ["Usta olarak katılmak ücretli mi?", "Hesap açmak ve maliyetlerini hazırlamak ücretsiz. Teklif hazırlamak, profilini yayınlamak ve pazar yerinde teklif vermek için tek seferlik 199 ₺ usta üyeliği gerekir. Abonelik ve aylık ücret yok; üyelik süresizdir. Bu değişiklikten önce katılmış ustalar ücretsiz devam eder."],
   ["Ödeme nasıl yapılır?", "KaçaYapayım ödemeyi tutmaz ve ödemeye aracılık etmez. Ödeme müşteri ile senin aranda, birlikte belirlediğin koşullarla yapılır."],
   ["Hangi bölgelere hizmet verdiğimi nasıl belirtirim?", "Profilini kurarken hizmet kategorilerini, ilini ve hizmet verdiğin ilçeleri seçersin. Bölgendeki talepler sana düşer."],
   ["Profilim ne zaman görünür olur?", "Hizmet alanını, bölgeni ve kısa bir tanıtım yazını ekleyip yayınladığında. İstediğin zaman yayından kaldırabilirsin."],
@@ -52,12 +52,12 @@ export default function Page() {
 
     <Band tone="gray" label="plans-title">
       <div className="grid items-end gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-        <Intro eyebrow="Paketler" h="Ücretsiz başla, büyüdükçe genişlet." id="plans-title" text="Ücretsiz pakette ayda 5 teklif hazırlayabilir ve 20 aktif müşteri tutabilirsin. Limitleri ve özellikleri karşılaştır." />
-        <div className="lg:justify-self-end"><Link href="/fiyatlandirma" className={pillSecondary}>Paketleri karşılaştır</Link></div>
+        <Intro eyebrow="Üyelik" h="Tek ödeme, süresiz üyelik." id="plans-title" text="Usta üyelik 199 ₺, tek seferlik. Sınırsız teklif ve müşteri, gelişmiş raporlar ve pazar yerinde profil. Abonelik yok." />
+        <div className="lg:justify-self-end"><Link href="/fiyatlandirma" className={pillSecondary}>Fiyatı gör</Link></div>
       </div>
     </Band>
 
     <Band label="faq-title"><Faq items={faqs} /></Band>
-    <CtaBand id="cta-title" h="Profilini bugün yayınla." text="Hesap açmak ücretsiz. Müşterilerin seni bölgende bulsun."><Link href="/onboarding?usta=1" className={ctaLight}>Profilini oluştur</Link><Link href="/register?hesap=usta" className={ctaGhost}>Hesap aç</Link></CtaBand>
+    <CtaBand id="cta-title" h="Profilini bugün yayınla." text="Hesap açmak ücretsiz; yayınlamak için tek seferlik 199 ₺ üyelik. Müşterilerin seni bölgende bulsun."><Link href="/onboarding?usta=1" className={ctaLight}>Profilini oluştur</Link><Link href="/register?hesap=usta" className={ctaGhost}>Hesap aç</Link></CtaBand>
   </>;
 }

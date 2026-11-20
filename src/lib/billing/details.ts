@@ -15,7 +15,6 @@ export function readBillingDetails(form: FormData): BillingDetails | null {
   if (!name || name.length > 80 || !surname || surname.length > 80 ||
     !city || city.length > 80 || address.length < 5 || address.length > 300 ||
     email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
-    (identityNumber && !/^\d{10,11}$/.test(identityNumber)) ||
-    (gsmNumber && !/^\+[1-9]\d{7,14}$/.test(gsmNumber))) return null;
-  return { name, surname, email, city, address, identityNumber: identityNumber || undefined, gsmNumber: gsmNumber || undefined };
+    !/^\d{10,11}$/.test(identityNumber) || !/^\+[1-9]\d{7,14}$/.test(gsmNumber)) return null;
+  return { name, surname, email, city, address, identityNumber, gsmNumber };
 }

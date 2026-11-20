@@ -1,11 +1,5 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
-import type { BillingInterval } from "./provider";
-import type { SubscriptionStatus } from "@/types/database";
-
-const planKeys = {
-  usta: { monthly: "IYZICO_PLAN_USTA_MONTHLY", yearly: "IYZICO_PLAN_USTA_YEARLY" },
-  pro: { monthly: "IYZICO_PLAN_PRO_MONTHLY", yearly: "IYZICO_PLAN_PRO_YEARLY" },
-} as const;
+import { ENTRY_FEE_KURUS } from "./catalog.ts";
 
 export function readIyzicoConfig(env: Record<string, string | undefined>) {
   const mode = env.IYZICO_ENV;
@@ -17,17 +11,10 @@ export function readIyzicoConfig(env: Record<string, string | undefined>) {
   const secretKey = env.IYZICO_SECRET_KEY?.trim();
   const merchantId = env.IYZICO_MERCHANT_ID?.trim();
   const app = parseHttpsUrl(env.APP_URL);
-  const plans = {
-    usta: { monthly: env[planKeys.usta.monthly]?.trim(), yearly: env[planKeys.usta.yearly]?.trim() },
-    pro: { monthly: env[planKeys.pro.monthly]?.trim(), yearly: env[planKeys.pro.yearly]?.trim() },
-  };
-  const codes = [...Object.values(plans.usta), ...Object.values(plans.pro)];
-  if (!apiKey || !secretKey || !merchantId || !app || codes.some(code => !isReference(code)) ||
-    new Set(codes).size !== codes.length) return null;
+  if (!apiKey || !secretKey || !merchantId || !app) return null;
   return {
     apiKey, secretKey, merchantId, mode, appUrl: app.origin,
     apiUrl: mode === "sandbox" ? "https://sandbox-api.iyzipay.com" : "https://api.iyzipay.com",
-    plans: plans as Record<keyof typeof planKeys, Record<BillingInterval, string>>,
   } as const;
 }
 
@@ -64,48 +51,46 @@ export function iyzicoAuthHeaders(apiKey: string, secretKey: string, rnd: string
   return { authorization: `IYZWSv2 ${auth}`, "x-iyzi-rnd": rnd };
 }
 
-export function verifyIyzicoWebhook(body: Record<string, unknown>, signature: string | null, merchantId: string, secretKey: string) {
-  const { iyziEventType, subscriptionReferenceCode, customerReferenceCode } = body;
-  const orderReferenceCode = body.orderReferenceCode ?? "";
+// iyzico Checkout Form (HPP) webhook, header X-IYZ-SIGNATURE-V3:
+// hex(HMAC-SHA256(secretKey, secretKey + iyziEventType + iyziPaymentId + token + paymentConversationId + status)).
+// https://docs.iyzico.com/en/advanced/webhook
+export function verifyCheckoutFormWebhook(body: Record<string, unknown>, signature: string | null, secretKey: string) {
+  const { iyziEventType, token, paymentConversationId, status } = body;
+  const iyziPaymentId = typeof body.iyziPaymentId === "number" ? String(body.iyziPaymentId) : body.iyziPaymentId;
   if (!signature || !/^[a-f\d]{64}$/i.test(signature) || typeof iyziEventType !== "string" ||
-    !/^[a-z.]{1,128}$/.test(iyziEventType) || !isReference(subscriptionReferenceCode) ||
-    !isReference(customerReferenceCode) ||
-    !(isReference(orderReferenceCode) || (orderReferenceCode === "" && !iyziEventType.startsWith("subscription.order.")))) return null;
-  const fields = [iyziEventType, subscriptionReferenceCode, orderReferenceCode, customerReferenceCode];
-  const expected = createHmac("sha256", secretKey).update(merchantId + secretKey + fields.join("")).digest();
+    !/^[A-Za-z_.]{1,128}$/.test(iyziEventType) || typeof iyziPaymentId !== "string" || !/^\d{1,20}$/.test(iyziPaymentId) ||
+    !isReference(token) || typeof paymentConversationId !== "string" || paymentConversationId.length > 128 ||
+    typeof status !== "string" || !/^[A-Za-z_]{1,32}$/.test(status)) return null;
+  const message = secretKey + iyziEventType + iyziPaymentId + token + paymentConversationId + status;
+  const expected = createHmac("sha256", secretKey).update(message).digest();
   if (!timingSafeEqual(expected, Buffer.from(signature, "hex"))) return null;
-  // The provider's notification ID and timestamp are outside the signed fields.
-  const eventId = `webhook:${hashBillingValue(fields.join(""))}`;
-  return { eventId, iyziEventType, subscriptionReferenceCode, orderReferenceCode, customerReferenceCode };
+  return { iyziEventType, iyziPaymentId, token, paymentConversationId, status };
 }
 
 export function hashBillingValue(value: string) {
   return createHash("sha256").update(value).digest("hex");
 }
 
-export function webhookStatus(eventType: string): SubscriptionStatus | null {
-  switch (eventType) {
-    case "subscription.order.success":
-    case "subscription.activate":
-    case "subscription.activated": return "active";
-    case "subscription.order.failure": return "past_due";
-    case "subscription.cancel":
-    case "subscription.cancelled":
-    case "subscription.canceled": return "cancelled";
-    case "subscription.expired": return "expired";
-    default: return null;
-  }
+export function entryBasketId(businessId: string) {
+  return `entry-${businessId}`;
 }
 
-export function iyzicoStatus(value: unknown): SubscriptionStatus | null {
-  switch (value) {
-    case "ACTIVE": return "active";
-    case "UNPAID": return "past_due";
-    case "CANCELED":
-    case "CANCELLED": return "cancelled";
-    case "EXPIRED":
-    case "UPGRADED": return "expired";
-    case "PENDING": return "incomplete";
-    default: return null;
-  }
+export type CheckoutFormResult = {
+  status?: unknown; paymentStatus?: unknown; paidPrice?: unknown; price?: unknown; currency?: unknown;
+  basketId?: unknown; conversationId?: unknown; paymentId?: unknown; token?: unknown;
+};
+
+function kurus(value: unknown) {
+  const number = typeof value === "number" ? value : typeof value === "string" && /^\d+(\.\d{1,2})?$/.test(value) ? Number(value) : NaN;
+  return Number.isFinite(number) ? Math.round(number * 100) : NaN;
+}
+
+// Never trust the redirect: a payment counts only if iyzico itself reports exactly the entry fee.
+export function verifyEntryPayment(result: CheckoutFormResult | null | undefined, token: string, businessId: string) {
+  if (!result || result.status !== "success" || result.paymentStatus !== "SUCCESS" || result.currency !== "TRY" ||
+    kurus(result.paidPrice) !== ENTRY_FEE_KURUS || kurus(result.price) !== ENTRY_FEE_KURUS ||
+    result.basketId !== entryBasketId(businessId) || result.conversationId !== entryBasketId(businessId) ||
+    (result.token !== undefined && result.token !== token)) return null;
+  const paymentId = String(result.paymentId ?? "");
+  return /^\d{1,20}$/.test(paymentId) ? paymentId : null;
 }

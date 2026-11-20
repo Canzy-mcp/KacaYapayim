@@ -13,7 +13,7 @@ const items = [
   { href: "/demo/customers", label: "Müşteriler", icon: UsersRound },
   { href: "/demo/costs", label: "Maliyetlerim", icon: Layers3 },
   { href: "/demo/professions", label: "Meslek Formları", icon: Wrench },
-  { href: "/demo/billing", label: "Paket ve Kullanım", icon: CreditCard },
+  { href: "/demo/billing", label: "Üyelik", icon: CreditCard },
   { href: "/demo/settings", label: "Ayarlar", icon: Settings2 },
 ] as const;
 

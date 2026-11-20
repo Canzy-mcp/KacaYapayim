@@ -10,14 +10,14 @@ test("missing and expired subscriptions resolve to Free", () => {
   assert.equal(resolvePlanId({ ...subscription, status: "cancelled" }, new Date("2026-09-30T00:00:00Z")), "free");
 });
 
-test("Free limits and plan features remain distinct", () => {
-  const [free, usta, pro] = fallbackPlans;
-  assert.equal(limitReached(free, "monthly_quotes", 4), false);
-  assert.equal(limitReached(free, "monthly_quotes", 5), true);
-  assert.equal(limitReached(free, "active_customers", 20), true);
-  assert.equal(limitReached(usta, "monthly_quotes", 500), false);
+test("without membership no quotes are allowed; membership is unlimited with the full feature set", () => {
+  const [free, member] = fallbackPlans;
+  assert.equal(limitReached(free, "monthly_quotes", 0), true);
+  assert.equal(limitReached(member, "monthly_quotes", 500), false);
+  assert.equal(limitReached(member, "active_customers", 5000), false);
   assert.equal(hasFeature(free, "remove_branding"), false);
-  assert.equal(hasFeature(pro, "remove_branding"), true);
+  for (const feature of ["actual_profit", "advanced_reports", "remove_branding", "business_logo"]) assert.equal(hasFeature(member, feature), true);
+  assert.equal(resolvePlanId({ plan_id: "pro", status: "active", current_period_end: "2126-01-01T00:00:00Z" }, new Date("2030-01-01T00:00:00Z")), "pro");
 });
 
 test("quote allowance resets at Istanbul calendar month boundary", () => {

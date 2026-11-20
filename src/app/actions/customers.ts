@@ -55,7 +55,7 @@ export async function createCustomer(form: FormData): Promise<CustomerActionResu
     const supabase = await createClient();
     const values: CustomerInsert = { ...parsed.values, business_id: viewer.business!.id };
     const { data, error } = await supabase.from("customers").insert(values).select("id").single();
-    if (error || !data) { logFailure("Customer create failed"); if (error?.message.includes("BILLING_CUSTOMER_LIMIT")) return { ok: false, error: "Aktif müşteri sınırına ulaştın. Yeni müşteri için paketini yükseltebilir veya eski bir müşteriyi arşivleyebilirsin.", needsUpgrade: true }; return { ok: false, error: "Müşteri kaydedilemedi. Tekrar dene." }; }
+    if (error || !data) { logFailure("Customer create failed"); if (error?.message.includes("BILLING_CUSTOMER_LIMIT")) return { ok: false, error: "Üyeliksiz hesapta 20 aktif müşteriye kadar eklenebilir. Usta üyeliğiyle (199 ₺, tek seferlik) sınırsız müşteri ekleyebilir veya eski bir müşteriyi arşivleyebilirsin.", needsUpgrade: true }; return { ok: false, error: "Müşteri kaydedilemedi. Tekrar dene." }; }
     revalidatePath("/customers");
     return { ok: true, id: data.id };
   } catch (error) { logFailure("Customer create failed"); return { ok: false, error: "Müşteri kaydedilemedi. Tekrar dene." }; }

@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { createHmac } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { registerHooks } from "node:module";
 import test from "node:test";
@@ -72,11 +71,7 @@ const hooks = registerHooks({
   resolve(specifier, context, nextResolve) {
     if (specifier === "server-only") return nextResolve("data:text/javascript,", context);
     if (specifier === "./iyzico-store") {
-      const stub = `export const hasIyzicoEvent = async () => false;
-        export const findIyzicoSubscription = async () => ({business_id:"business",plan_id:"usta",billing_interval:"monthly",provider_customer_id:"customer"});
-        export const billingRpc = async () => "usta-monthly";
-        export const applyIyzicoEvent = () => {}, getCheckoutAttempt = () => {}, listPendingCheckoutTokens = () => {};`;
-      return nextResolve(`data:text/javascript,${encodeURIComponent(stub)}`, context);
+      return nextResolve("data:text/javascript," + encodeURIComponent("export const billingRpc = async () => null, getCheckoutAttempt = async () => null, applyEntryPayment = async () => false;"), context);
     }
     if (context.parentURL?.includes("/src/lib/billing/") && /^\.\/[\w-]+$/.test(specifier)) {
       return nextResolve(`${specifier}.ts`, context);
@@ -84,34 +79,11 @@ const hooks = registerHooks({
     return nextResolve(specifier, context);
   },
 });
-const { IyzicoBillingProvider } = await import("../src/lib/billing/iyzico.ts");
 const { billingAvailable } = await import("../src/lib/billing/provider.ts");
 hooks.deregister();
 
 const env = { BILLING_PROVIDER: "iyzico", APP_URL: "https://example.test", IYZICO_ENV: "sandbox",
-  IYZICO_API_KEY: "testKey", IYZICO_SECRET_KEY: "testSecret", IYZICO_MERCHANT_ID: "12345",
-  IYZICO_PLAN_USTA_MONTHLY: "usta-monthly", IYZICO_PLAN_USTA_YEARLY: "usta-yearly",
-  IYZICO_PLAN_PRO_MONTHLY: "pro-monthly", IYZICO_PLAN_PRO_YEARLY: "pro-yearly" };
-
-test("eski iyzico başarısızlık bildirimi doğrulanır ve yeni aktif dönem korunur", async t => {
-  const body = { iyziEventType: "subscription.order.failure", subscriptionReferenceCode: "subscription",
-    orderReferenceCode: "failed-order", customerReferenceCode: "customer" };
-  const signature = createHmac("sha256", "testSecret")
-    .update("12345testSecret" + Object.values(body).join("")).digest("hex");
-  const notice = { body: new TextEncoder().encode(JSON.stringify(body)), headers: new Headers({ "X-IYZ-SIGNATURE-V3": signature }) };
-  const failed = { referenceCode: "failed-order", orderStatus: "FAILED", startPeriod: 1_000, endPeriod: 2_000 };
-  const paid = { referenceCode: "success-order", orderStatus: "SUCCESS", startPeriod: 2_000, endPeriod: 3_000 };
-  const snapshot = { referenceCode: "subscription", customerReferenceCode: "customer",
-    pricingPlanReferenceCode: "usta-monthly", subscriptionStatus: "ACTIVE", orders: [failed, paid] };
-  t.mock.method(globalThis, "fetch", async () => Response.json({ status: "success", systemTime: 2_500, data: snapshot }));
-  const provider = new IyzicoBillingProvider({ appUrl: "https://example.test", apiUrl: "https://iyzico.example.test",
-    merchantId: "12345", secretKey: "testSecret", apiKey: "testKey" });
-  const event = await provider.handleWebhook(notice);
-  assert.equal(event.status, "active");
-  assert.equal(event.currentPeriodStart, new Date(paid.startPeriod).toISOString());
-  snapshot.orders = [paid];
-  await assert.rejects(provider.handleWebhook(notice), /order result is not ready/);
-});
+  IYZICO_API_KEY: "testKey", IYZICO_SECRET_KEY: "testSecret", IYZICO_MERCHANT_ID: "12345" };
 
 test("faturalama uygunluğu eksik yapılandırmayı reddeder ve usta kayıt tercihi seçilebilir", async () => {
   assert.equal(billingAvailable({ BILLING_PROVIDER: "iyzico" }), false);

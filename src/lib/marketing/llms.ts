@@ -15,7 +15,7 @@ export const kurumsalBilgiler = [
   "Adres paylaşımı: Müşterinin adresi yalnızca seçtiği ustayla ve yalnızca müşteri, işi verdikten sonra adresi açıkça paylaşmayı seçerse paylaşılır. Diğer ustalar adresi görmez.",
   "Yorumlar: Yalnızca tamamlanmış bir talep için ve yalnızca o talebin müşterisi yorum yazabilir.",
   "Fiyat yaklaşımı: Piyasa fiyatı veya ortalama ücret yayımlanmaz. Teklifler ustanın kendi maliyetine ve hedef kâr marjına dayanır.",
-  "Ustalar için paketler: Ücretli usta paketleri, ödeme altyapısı yapılandırılana kadar satın alınamaz. Güncel durum Fiyatlandırma sayfasındadır.",
+  "Ustalar için üyelik: Tek seferlik 199 TL usta üyeliği, süresiz erişim, abonelik yok. Ödeme altyapısı yapılandırılana kadar satın alınamaz; güncel durum Fiyatlandırma sayfasındadır.",
 ];
 
 export function llmsTxt(): string {
@@ -34,7 +34,7 @@ export function llmsTxt(): string {
     ...guides.map(g => link(g.title, `/rehber/${g.slug}`, g.answer)), "",
     "## Şirket ve yöntem", "",
     link("Hesaplama metodolojisi", "/metodoloji", "Fiyatın girdilerle ve hedef marjla nasıl hesaplandığı."),
-    link("Fiyatlandırma", "/fiyatlandirma", "Ücretsiz, Usta ve Pro paketlerinin limitleri ve fiyatları."),
+    link("Fiyatlandırma", "/fiyatlandirma", "Usta Üyelik: tek seferlik 199 TL, süresiz. Müşteriler için ücretsiz."),
     link("Özellikler", "/ozellikler", "Maliyet hesabı, teklif hazırlama ve kâr takibi."),
     link("Hakkımızda", "/hakkimizda", "KaçaYapayım nedir ve kimin için?"),
     link("Yayın politikası", "/yayin-politikasi", "İçeriklerin nasıl hazırlandığı, kontrol edildiği ve güncellendiği."), "",

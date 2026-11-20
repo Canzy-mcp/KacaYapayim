@@ -42,11 +42,9 @@ Boyacı, elektrikçi, tesisatçı ve klimacı şablonları 012 migration'ında y
 
 `/demo/professions` dört mesleğin etkileşimli iş formunu ve örnek maliyet hesabını gösterir. Demo Supabase bağlı olduğunda da açıktır ve gerçek işletme kayıtlarını kullanmaz. Yeni meslek yayını yönetici MFA doğrulaması ve sunucuda başarılı örnek iş hesabı gerektirir.
 
-## Paketler ve ödeme bağlantısı
+## Üyelik ve ödeme
 
-`/pricing` herkese açık, `/billing` giriş yapan işletme sahibine açıktır. Ücretsiz plan ayda 5 teklif ve 20 aktif müşteriye izin verir. Teklif dönemi İstanbul saatine göre takvim ayıdır; arşivlenen müşteri aktif sınıra dahil değildir. Sınırlar veritabanı tetikleyicilerinde işlem içinde kontrol edilir. Aboneliği olmayan ve süresi dolmuş işletmeler Ücretsiz plana döner; eski kayıtlar silinmez. Paket fiyatları ve özellikleri `plans` tablosundan gelir; migration'daki ilk seed ve `src/lib/billing/catalog.ts` içindeki kurulum öncesi görünüm aynı başlangıç değerlerini kullanır.
-
-Supabase projesi bağlıdır, ödeme sağlayıcısı bağlı değildir. Ücretli paket satın alma, iptal, devam ettirme ve mağaza abonelik doğrulama düğmeleri bu yüzden kapalıdır; ücretli planı tarayıcı yönlendirmesiyle etkinleştiren bir yol yoktur. `src/lib/billing/provider.ts` Google Play, App Store veya başka bir sağlayıcı için adaptör sözleşmesini tanımlar. Bir adaptör eklendiğinde mağazanın imzalı bildirimini ve satın almayı doğrulamalı, olayı `billing_events` içinde tekil kimlikle işlemeli ve aboneliği sunucudan güncellemelidir. Sağlayıcı anahtarları yalnızca sunucuda tutulmalıdır.
+`/fiyatlandirma` herkese açık, `/billing` giriş yapan işletme sahibine açıktır. Müşteriler ücretsizdir. Ustalar tek seferlik 199 TL usta üyeliği öder (süresiz, abonelik yok); sabit tutar `ENTRY_FEE_KURUS` olarak sunucuda tutulur. Üyeliği olmayan usta teklif oluşturamaz (`BILLING_QUOTE_LIMIT`), pazar yerinde profil yayınlayamaz veya teklif veremez (`BILLING_ENTRY_REQUIRED`); göç anında kayıtlı işletmeler ücretsiz ve süresiz devam eder. Üyelik, `subscriptions` tablosundaki `pro` planlı satırdır ve yalnızca iyzico Checkout Form sonucu sunucuda doğrulandıktan sonra yazılır. Kurulum: `docs/IYZICO_SETUP.md`.
 
 ## Kontrol
 

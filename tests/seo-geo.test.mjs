@@ -102,12 +102,13 @@ test("hesaplama araclari tam eslesen baslik ve SSS tasir", () => {
   for (const c of calculators) assert.ok(calcSeo[c.slug]);
 });
 
-test("fiyatlandirma planlari katalogdan okur, ucretli paket notu var", () => {
+test("fiyatlandirma tek seferlik 199 TL uyeligi gosterir, odeme kapaliyken not var", () => {
   const s = read("src/app/(marketing)/fiyatlandirma/page.tsx");
-  assert.match(s, /getPlans\(\)/);
-  assert.match(s, /Ücretli paketler çok yakında/);
+  assert.match(s, /ENTRY_FEE_KURUS/);
+  assert.match(s, /Ödeme çok yakında/);
   assert.match(s, /BILLING_PROVIDER/);
-  assert.match(s, /yearly_price_kurus/);
+  assert.match(s, /priceCurrency: "TRY"/);
+  assert.doesNotMatch(s, /yearly_price_kurus|monthly_price_kurus/);
   assert.match(s, /faqNode/);
 });
 
