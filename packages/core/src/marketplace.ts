@@ -62,6 +62,7 @@ export const marketNoticeLabels: Record<string, string> = {
 };
 
 export function marketError(message: string) {
+  if (message.includes("BILLING_ENTRY_REQUIRED")) return "Profil yayınlamak ve teklif vermek için Usta Üyelik gerekir.";
   if (message.includes("MARKET_RATE")) return "İşlem sınırına ulaştın. Açık taleplerini kontrol et veya daha sonra tekrar dene.";
   if (message.includes("MARKET_STALE")) return "Bilgiler değişti. Sayfayı yenileyip son durumu kontrol et.";
   if (message.includes("MARKET_AUTH") || message.includes("MFA")) return "İşleme devam etmek için hesabına yeniden giriş yap.";

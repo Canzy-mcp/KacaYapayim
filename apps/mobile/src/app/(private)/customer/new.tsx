@@ -19,7 +19,7 @@ export default function NewCustomer() {
       company_name: company.trim() || null }).select("id").single();
     setBusy(false);
     if (saveError || !data) { setError(saveError?.message.includes("BILLING_CUSTOMER_LIMIT")
-      ? "Paketindeki aktif müşteri sınırına ulaştın." : "Müşteri kaydedilemedi. Tekrar dene."); return; }
+      ? "Üyeliksiz hesapta aktif müşteri sınırına ulaştın. Daha fazlası için Usta Üyelik gerekir." : "Müşteri kaydedilemedi. Tekrar dene."); return; }
     if (returnTo === "job") router.replace("/job/new");
     else router.replace({ pathname: "/customer/[id]", params: { id: data.id } });
   }

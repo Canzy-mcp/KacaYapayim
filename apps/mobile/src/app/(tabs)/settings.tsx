@@ -55,10 +55,10 @@ export default function Settings() {
       <Text style={{ color: palette.muted }}>Meslek: {business?.profession || "—"}</Text>
       {Boolean(error) && <Notice error>{error}</Notice>}{Boolean(message) && <Notice>{message}</Notice>}
       <Button title="Ayarları Kaydet" onPress={() => { void save(); }} /></Card>
-    <SectionTitle>Abonelik</SectionTitle>
-    <Card><Row title="Paket" right={plan === "free" ? "Ücretsiz" : plan === "usta" ? "Usta" : "Pro"} />
+    <SectionTitle>Üyelik</SectionTitle>
+    <Card><Row title="Usta Üyelik" right={plan === "free" ? "Yok" : "Aktif, süresiz"} />
       <Text style={{ color: palette.muted, lineHeight: 21, marginTop: 12 }}>
-        Mobil mağaza ödemeleri henüz etkin değil. Mevcut aboneliğin web ve mobilde aynı işletmeye bağlıdır.
+        Üyeliğin web ve mobilde aynı işletmeye bağlıdır. Mobil uygulamada satın alma yapılmaz.
       </Text></Card>
     <SectionTitle>Yardım ve güvenlik</SectionTitle>
     <Card><Row title="İletişim" onPress={() => openWeb("/iletisim")} />

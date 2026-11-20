@@ -63,7 +63,7 @@ export default function NewQuote() {
     });
     setBusy(false);
     if (saveError || !id) { setError(saveError?.message.includes("BILLING_QUOTE_LIMIT")
-      ? "Bu ayki teklif hakkını kullandın. Paketini kontrol et." : "Teklif oluşturulamadı. Bilgileri kontrol et."); return; }
+      ? "Teklif hazırlamak için Usta Üyelik gerekir." : "Teklif oluşturulamadı. Bilgileri kontrol et."); return; }
     if (draftTimer.current) clearTimeout(draftTimer.current);
     setReady(false);
     if (draftKey) await secureStorage.removeItem(draftKey);
