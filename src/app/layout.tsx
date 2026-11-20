@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AnalyticsConsent } from "@/components/marketing/analytics-consent";
 import { GoogleAnalytics } from "@/components/marketing/google-analytics";
+import { headers } from "next/headers";
 import Script from "next/script";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -20,15 +21,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return <html lang="tr" className={inter.variable}><body><GoogleAnalytics/><AnalyticsConsent/>{children}
-    <Script id="google-tag-consent-default" strategy="beforeInteractive">{`
+    <Script id="google-tag-consent-default" strategy="beforeInteractive" nonce={nonce}>{`
       window.dataLayer = window.dataLayer || [];
       function gtag(){window.dataLayer.push(arguments);}
       gtag('consent', 'default', {analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied'});
       gtag('js', new Date());
       gtag('config', 'G-T73M9QZQ5J', {send_page_view: false, allow_google_signals: false, allow_ad_personalization_signals: false});
     `}</Script>
-    <Script src="https://www.googletagmanager.com/gtag/js?id=G-T73M9QZQ5J" strategy="beforeInteractive" />
+    <Script src="https://www.googletagmanager.com/gtag/js?id=G-T73M9QZQ5J" strategy="beforeInteractive" nonce={nonce} />
   </body></html>;
 }

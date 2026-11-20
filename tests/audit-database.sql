@@ -40,6 +40,14 @@ do $$ declare t uuid;blocked boolean;begin
  perform set_config('request.jwt.claims',jsonb_build_object('sub',current_setting('test.a'),'role','authenticated','aal','aal1')::text,true);
  if public.get_my_payment_total(current_setting('test.j')::uuid)<>30.35 then raise exception 'Foreign payment deletion';end if;
  perform public.manage_quote_link(current_setting('test.r')::uuid,'revoke');
+ blocked:=false;begin delete from public.businesses where id=current_setting('test.ba')::uuid;exception when insufficient_privilege then blocked:=true;end;
+ if not blocked or not exists(select 1 from public.businesses where id=current_setting('test.ba')::uuid) then raise exception 'Owner deleted own business';end if;
+ blocked:=false;begin update public.businesses set logo_url='https://evil.example/x.png' where id=current_setting('test.ba')::uuid;exception when check_violation then blocked:=true;end;
+ if not blocked then raise exception 'Arbitrary logo_url accepted';end if;
+ update public.businesses set logo_url='/api/business/logo/'||current_setting('test.ba')||'?v=1700000000000' where id=current_setting('test.ba')::uuid;
+ update public.businesses set logo_url=null where id=current_setting('test.ba')::uuid;
+ blocked:=false;begin insert into public.feedback(business_id,user_id,type,message,page) values(current_setting('test.ba')::uuid,current_setting('test.a')::uuid,'bug','direct insert bypass','/settings');exception when insufficient_privilege then blocked:=true;end;
+ if not blocked then raise exception 'Direct feedback insert accepted';end if;
 end $$;
 reset role;
 do $$ declare blocked boolean; t uuid;begin

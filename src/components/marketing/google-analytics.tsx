@@ -28,6 +28,8 @@ export function GoogleAnalytics() {
       return;
     }
     window.gtag("consent", "update", { analytics_storage: "granted", ad_storage: "denied", ad_user_data: "denied", ad_personalization: "denied" });
+    // Token-bearing URLs (public quotes, email confirmation) must never reach analytics.
+    if (pathname.startsWith("/t/") || pathname.startsWith("/auth/")) return;
     window.gtag("event", "page_view", { page_path: pathname });
   }, [pathname, consentVersion]);
 

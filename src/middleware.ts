@@ -6,24 +6,24 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const nonce = btoa(crypto.randomUUID());
   const origin = process.env.NEXT_PUBLIC_SUPABASE_URL ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin : "";
-  const reportPolicy = `default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' ${origin} ${origin.replace(/^http/,"ws")}; report-uri /api/security/csp-report`;
+  const csp = `default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://www.googletagmanager.com${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://www.google-analytics.com https://www.googletagmanager.com; font-src 'self' data:; connect-src 'self' ${origin} ${origin.replace(/^http/,"ws")} https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com; report-uri /api/security/csp-report`;
   const forwardedHeaders=new Headers(request.headers);
   forwardedHeaders.set("x-nonce",nonce);
-  forwardedHeaders.set("Content-Security-Policy",reportPolicy);
+  forwardedHeaders.set("Content-Security-Policy",csp);
   forwardedHeaders.delete("x-kacayapayim-route");
   if (pathname === "/admin" || pathname.startsWith("/admin/") || pathname === "/talepler" || pathname.startsWith("/talepler/")) {
     const query = new URLSearchParams(request.nextUrl.searchParams);
     query.delete("_rsc");
     forwardedHeaders.set("x-kacayapayim-route", query.size ? `${pathname}?${query}` : pathname);
   }
-  function decorate(response:NextResponse){response.headers.set("Content-Security-Policy-Report-Only",reportPolicy);return response;}
+  function decorate(response:NextResponse){response.headers.set("Content-Security-Policy",csp);return response;}
   if ((process.env.DEPLOYMENT_ENV === "production" || process.env.VERCEL_ENV === "production") && process.env.APP_URL) {
     const canonical = new URL(process.env.APP_URL);
     if (request.nextUrl.hostname !== canonical.hostname || request.nextUrl.protocol !== canonical.protocol) {
       const target = request.nextUrl.clone();
       target.protocol = canonical.protocol;
       target.host = canonical.host;
-      return NextResponse.redirect(target, 308);
+      return decorate(NextResponse.redirect(target, 308));
     }
   }
   if (pathname.startsWith("/t/") || pathname.startsWith("/api/public/quotes/")) {

@@ -14,12 +14,7 @@ if ((process.env.DEPLOYMENT_ENV === "production" || process.env.VERCEL_ENV === "
   if (/placeholder|example|yer tutucu|yayın öncesi/i.test(process.env.NEXT_PUBLIC_LEGAL_ENTITY_NAME || "")) throw new Error("Production hizmet sahibi gerçek bilgi içermeli.");
 }
 
-const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin : "";
-const csp = [
-  "default-src 'self'", "base-uri 'self'", "object-src 'none'", "frame-ancestors 'none'", "form-action 'self'",
-  `script-src 'self' 'unsafe-inline' https://www.googletagmanager.com${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}`, "style-src 'self' 'unsafe-inline'", "img-src 'self' data: blob: https://www.google-analytics.com https://www.googletagmanager.com",
-  "font-src 'self' data:", `connect-src 'self' ${supabaseOrigin} ${supabaseOrigin.replace(/^http/, "ws")} https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com`.trim(),
-].join("; ");
+const hsts = process.env.DEPLOYMENT_ENV === "production" || process.env.VERCEL_ENV === "production" ? [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" }] : [];
 const nextConfig: NextConfig = {
   transpilePackages: ["@kacayapayim/core"],
   experimental: { serverActions: { bodySizeLimit: "6mb" } },
@@ -31,11 +26,11 @@ const nextConfig: NextConfig = {
     { source: "/meslekler/hvac", destination: "/meslekler/klimaci", permanent: true },
   ]; },
   async headers() { return [{ source: "/:path*", headers: [
-    { key: "Content-Security-Policy", value: csp },
     { key: "X-Content-Type-Options", value: "nosniff" },
     { key: "X-Frame-Options", value: "DENY" },
     { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
     { key: "Permissions-Policy", value: "camera=(), microphone=(self), geolocation=()" },
+    ...hsts,
   ] }]; },
 };
 export default nextConfig;
