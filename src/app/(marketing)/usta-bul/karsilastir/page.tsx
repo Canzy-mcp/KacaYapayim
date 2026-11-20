@@ -1,0 +1,53 @@
+import Link from "next/link";
+import type { Metadata } from "next";
+import { ArrowLeft, X } from "lucide-react";
+import type { MarketCategory, MarketProvider } from "@kacayapayim/core/marketplace";
+import { marketDirectory } from "@/lib/marketplace/service";
+import { directoryHref, parseCompareIds, requestHref } from "@/lib/marketplace/prefill";
+import { linkButton, MarketEmpty, plainButton, Rating } from "@/components/marketplace/ui";
+
+export const metadata: Metadata = { title: "Usta Karşılaştır", robots: { index: false, follow: true }, alternates: { canonical: "/usta-bul/karsilastir" } };
+
+export default async function ComparePage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const ids = parseCompareIds((await searchParams).ids);
+  const results = await Promise.all(ids.map((id) => marketDirectory({ id }).catch(() => null)));
+  const categories: MarketCategory[] = results.find(Boolean)?.categories ?? [];
+  const providers = results.flatMap((result) => result?.providers[0] ?? []) as MarketProvider[];
+  const failed = ids.length > 0 && results.some((result) => !result);
+  const without = (id: string) => ids.filter((item) => item !== id);
+  const rows: { label: string; cell: (provider: MarketProvider) => React.ReactNode }[] = [
+    { label: "Hizmetler", cell: (p) => categories.filter((c) => p.categories.includes(c.slug)).map((c) => c.name).join(", ") || "Belirtilmemiş" },
+    { label: "İl", cell: (p) => p.city },
+    { label: "Hizmet verdiği ilçeler", cell: (p) => p.districts.length ? p.districts.join(", ") : "Tüm ilçeler" },
+    { label: "Puan", cell: (p) => <Rating provider={p} /> },
+    { label: "Tanıtım", cell: (p) => p.bio ? <span className="line-clamp-4">{p.bio}</span> : "Tanıtım yazısı yok" },
+  ];
+  return <div className="bg-[#FAF7F1] text-[#202923]"><div className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-12">
+    <Link href={directoryHref({}, { compare: ids })} className="mb-3 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[#075D54] hover:underline"><ArrowLeft size={17} aria-hidden="true" /> Usta rehberi</Link>
+    <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Ustaları karşılaştır</h1>
+    <p className="mt-2 max-w-xl text-base text-[#5B6460]">En fazla üç ustayı hizmet, bölge ve değerlendirme açısından yan yana gör.</p>
+    {failed && <p role="alert" className="mt-4 rounded-xl bg-[#FBF3E2] px-4 py-3 text-sm text-[#5A3E0E]">Bazı profiller yüklenemedi. Sayfayı yenilemeyi dene.</p>}
+    {providers.length === 0 ? <div className="mt-6"><MarketEmpty>
+      <p className="font-semibold text-[#202923]">Karşılaştırılacak usta seçilmedi.</p>
+      <p className="mt-1">Usta rehberinde profil kartlarındaki Karşılaştır bağlantısıyla en fazla üç usta seç.</p>
+      <Link href="/usta-bul" className={`mt-4 ${linkButton}`}>Usta rehberine git</Link>
+    </MarketEmpty></div> : <div className="mt-6 overflow-x-auto rounded-2xl border border-[#E7E1D6] bg-white">
+      <table className="w-full min-w-[640px] table-fixed border-collapse text-left text-sm">
+        <caption className="sr-only">Seçilen ustaların karşılaştırması</caption>
+        <thead><tr><td className="w-36 p-4" />{providers.map((p) => <th key={p.id} scope="col" className="border-l border-[#E7E1D6] p-4 align-top">
+          <Link href={`/usta-bul/${p.id}`} className="break-words text-lg font-semibold text-[#202923] hover:underline">{p.display_name}</Link>
+          <Link href={without(p.id).length ? `/usta-bul/karsilastir?ids=${without(p.id).join(",")}` : "/usta-bul/karsilastir"} className="mt-1 flex min-h-9 items-center gap-1 text-xs font-medium text-[#5B6460] hover:underline"><X size={13} aria-hidden="true" /> Listeden çıkar</Link>
+        </th>)}</tr></thead>
+        <tbody>{rows.map((row) => <tr key={row.label} className="border-t border-[#E7E1D6]">
+          <th scope="row" className="p-4 align-top font-semibold text-[#5B6460]">{row.label}</th>
+          {providers.map((p) => <td key={p.id} className="break-words border-l border-[#E7E1D6] p-4 align-top text-[#202923]">{row.cell(p)}</td>)}
+        </tr>)}
+          <tr className="border-t border-[#E7E1D6]"><th scope="row" className="p-4 align-top font-semibold text-[#5B6460]">İşlem</th>
+            {providers.map((p) => <td key={p.id} className="border-l border-[#E7E1D6] p-4 align-top"><div className="grid gap-2">
+              <Link href={requestHref({ usta: p.id })} className={linkButton}>Teklif iste</Link>
+              <Link href={`/usta-bul/${p.id}`} className={plainButton}>Profili gör</Link></div></td>)}</tr>
+        </tbody>
+      </table>
+    </div>}
+  </div></div>;
+}

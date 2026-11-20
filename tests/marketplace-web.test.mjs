@@ -31,6 +31,16 @@ test("marketplace login resumes supported deep links and drops unknown destinati
   }
 });
 
+test("login resumes a prefilled new request only in canonical, validated form", () => {
+  const q = (o) => "/talepler/yeni?" + new URLSearchParams(o).toString();
+  for (const path of [q({ category: "boya", city: "İstanbul", district: "Kadıköy" }), q({ usta: provider, category: "tesisat" }), q({ city: "İzmir" })])
+    assert.equal(requestReturnPath(path), path);
+  for (const path of ["/talepler/yeni?category=boya&category=boya", "/talepler/yeni?x=1", "/talepler/yeni?category=Boya1",
+    "/talepler/yeni?city=%3Cscript%3E", "/talepler/yeni?city=a", q({ category: "boya" }) + "&next=//evil",
+    "/talepler/yeni?district=Kad%C4%B1k%C3%B6y&city=Ankara", "/talepler/yeni?"])
+    assert.equal(requestReturnPath(path), undefined);
+});
+
 test("account home keeps customer intent separate from provider onboarding", () => {
   assert.equal(accountHome(null, "customer"), "/talepler");
   assert.equal(accountHome({ onboarding_completed: true }, "customer"), "/talepler");

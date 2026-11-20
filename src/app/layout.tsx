@@ -4,16 +4,16 @@ import { GoogleAnalytics } from "@/components/marketing/google-analytics";
 import { headers } from "next/headers";
 import Script from "next/script";
 import { Inter } from "next/font/google";
+import { siteOrigin, siteSummary } from "@/lib/marketing/seo";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin", "latin-ext"], display: "swap", variable: "--font-inter" });
 
-const siteUrl = process.env.APP_URL || "http://localhost:3005";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(siteOrigin),
   title: { default: "KaçaYapayım | İşini doğru fiyatlandır", template: "%s | KaçaYapayım" },
-  description: "Kendi maliyetlerini hesapla, hedef kârını gör ve müşterine profesyonel teklif gönder.",
+  description: siteSummary,
+  openGraph: { siteName: "KaçaYapayım", locale: "tr_TR", type: "website" },
   applicationName: "KaçaYapayım",
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "5YHiKGyRlhZoPmBvxTmYVWfHZypE79zmrB3wgaJmciI",

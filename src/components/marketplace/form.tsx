@@ -4,8 +4,8 @@ import { startTransition, useActionState } from "react";
 import { marketAction } from "@/app/actions/marketplace";
 import type { MarketAction } from "@kacayapayim/core/marketplace";
 
-const primary = "inline-flex min-h-11 items-center justify-center rounded-full bg-[#075fc7] px-5 py-2 text-sm font-semibold text-white hover:bg-[#0652ac] disabled:opacity-60";
-const secondary = "inline-flex min-h-11 items-center justify-center rounded-full border border-[#d9dce3] bg-white px-5 py-2 text-sm font-semibold text-[#18335a] hover:bg-[#eff6ff] disabled:opacity-60";
+const primary = "inline-flex min-h-11 items-center justify-center rounded-full bg-[#075D54] px-5 py-2 text-sm font-semibold text-white transition-colors duration-150 hover:bg-[#064A43] disabled:opacity-60";
+const secondary = "inline-flex min-h-11 items-center justify-center rounded-full border border-[#D9D2C4] bg-white px-5 py-2 text-sm font-semibold text-[#202923] hover:bg-[#F3EEE4] disabled:opacity-60";
 
 export function MarketForm({ action, fields = {}, children, label, inline = false, subtle = false, success = "Kaydedildi." }: {
   action: MarketAction; fields?: Record<string, string | null | undefined>; children?: React.ReactNode;
@@ -23,6 +23,6 @@ export function MarketForm({ action, fields = {}, children, label, inline = fals
     <div key={state.saved ?? 0} className="contents">{children}</div>
     <div><button type="submit" className={subtle ? secondary : primary} disabled={pending}>{pending ? "Kaydediliyor…" : label}</button></div>
     {state.error && <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">{state.error}</p>}
-    {!!state.saved && !state.error && <p role="status" className="text-sm text-emerald-800">{success}</p>}
+    {!!state.saved && !state.error && <p role="status" className="text-sm text-[#2F7D4F]">{success}</p>}
   </form>;
 }
