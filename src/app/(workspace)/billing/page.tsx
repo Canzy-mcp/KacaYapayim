@@ -2,8 +2,10 @@
 import { CancelSubscription } from "@/components/billing/cancel-subscription";
 import { PlanCards } from "@/components/billing/plan-cards";
 import { PageHeader } from "@/components/layout";
+import { IyzicoBillingProvider } from "@/lib/billing/iyzico";
 import { readIyzicoConfig } from "@/lib/billing/iyzico-protocol";
 import { getBillingSummary } from "@/lib/billing/service";
+import { logFailure } from "@/lib/observability/log";
 import { requireCompletedViewer } from "@/lib/viewer";
 
 export const metadata = { title: "Paket ve Kullanım" };
@@ -24,9 +26,15 @@ function Usage({ label, used, limit }: { label: string; used: number; limit: num
 export default async function BillingPage() {
   const viewer = await requireCompletedViewer();
   const business = viewer.business!;
-  const { plan, plans, subscription, usage } = await getBillingSummary(business.id);
-  const billingEnabled = Boolean(readIyzicoConfig(process.env));
+  const config = readIyzicoConfig(process.env);
+  const billingEnabled = Boolean(config);
   const owner = business.owner_id === viewer.id;
+  if (owner && config) {
+    await new IyzicoBillingProvider(config).reconcilePendingCheckout(business.id).catch(() => {
+      logFailure("iyzico pending checkout verification failed");
+    });
+  }
+  const { plan, plans, subscription, usage } = await getBillingSummary(business.id);
   const hasSubscription = Boolean(subscription?.provider_subscription_id && !["cancelled", "expired", "free"].includes(subscription.status));
   const checkout = billingEnabled && owner && !hasSubscription ? {
     name: viewer.profile?.first_name ?? "", surname: viewer.profile?.last_name ?? "", email: viewer.profile?.email ?? "",

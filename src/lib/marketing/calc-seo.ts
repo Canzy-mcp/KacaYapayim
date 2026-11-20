@@ -47,9 +47,9 @@ export const calcSeo: Record<string, CalcSeo> = {
   "elektrik-isi-maliyeti": {
     metaTitle: "Elektrik Yaklaşık Maliyet Hesaplama", h1: "Elektrik yaklaşık maliyet hesaplama",
     metaDescription: "Elektrik işi yaklaşık maliyet hesaplama: kablo metrajı, priz adedi ve işçilikle toplam maliyeti ve teklif fiyatını bul.",
-    answer: "Elektrik işinin yaklaşık maliyeti kablo, priz, anahtar, sigorta, buat, işçilik, sarf ve yolun toplamıdır. Metrajı ve adetleri girince araç maliyeti ve hedef marja göre teklif fiyatını verir.",
-    formula: "Maliyet = kablo + priz + anahtar + sigorta + buat + işçilik + sarf + yol.",
-    example: "100 m kablo × 20 TL, 10 priz × 250 TL ve 2 gün × 3.000 TL işçilik için bu üç kalem 10.500 TL eder. Diğer kalemler ayrıca eklenir.",
+    answer: "Bu araç elektrik işinin yaklaşık maliyetini kablo, priz, işçilik ile yol ve sarf giderinin toplamı olarak hesaplar. Kablo metrajını, priz adedini ve diğer kalemleri girince maliyeti ve hedef marja göre teklif fiyatını verir. Anahtar, sigorta ve buat gibi kalemleri \"Yol ve sarf gideri\" alanına ekleyebilirsin.",
+    formula: "Maliyet = kablo metresi × metre maliyeti + priz adedi × birim maliyet + işçilik + yol ve sarf.",
+    example: "100 m kablo × 20 TL, 10 priz × 250 TL ve 2 gün × 3.000 TL işçilik için bu üç kalem 10.500 TL eder. Anahtar, sigorta, buat, sarf ve yol \"Yol ve sarf gideri\" alanına yazılır.",
     faqs: [
       ["Elektrik işi yaklaşık maliyeti nasıl hesaplanır?", "Her kalemi miktar × birim maliyet olarak yaz, işçilik ve sarfı ekle. Kablo kesitlerini ayrı hesapla."],
       ["Elektrik güvenliği bu hesaba dahil mi?", "Hayır. Teknik uygunluk ve güvenlik fiyat hesabının dışındadır; işi yetkin bir usta planlamalıdır."],

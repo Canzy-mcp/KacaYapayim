@@ -3,6 +3,7 @@ import { BriefcaseBusiness, ClipboardList, UserRound } from "lucide-react";
 import { requireCompletedViewer } from "@/lib/viewer";
 import { marketDirectory, marketPage, marketRead } from "@/lib/marketplace/service";
 import { MarketForm } from "@/components/marketplace/form";
+import { ProfileCompleteness } from "@/components/marketplace/profile-completeness";
 import { input, MarketHeading, MarketPagination, panel, plainButton, RequestList } from "@/components/marketplace/ui";
 
 export const metadata = { title: "Usta Talepleri" };
@@ -35,6 +36,7 @@ export default async function ProviderRequestsPage({ searchParams }: { searchPar
       </div>
       {profile?.suspended && <p className="mb-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-950">Profil askıda olduğu sürece rehberden çağrı alamaz ve yeni teklif gönderemezsin.</p>}
       {live && <Link href={`/usta-bul/${profile.id}`} className="mb-4 inline-block text-sm font-semibold text-[#075fc7] hover:underline">Yayımdaki profili gör</Link>}
+      <ProfileCompleteness profile={profile} />
       <MarketForm action="profile" label="Profili kaydet" success="Usta profilin güncellendi.">
         <label className="grid gap-1 text-sm font-medium">Görünen ad<input className={input} name="title" required minLength={2} maxLength={120} defaultValue={profile?.display_name ?? settings.business?.name} /></label>
         <label className="grid gap-1 text-sm font-medium">Tanıtım<textarea className={input} name="body" maxLength={1600} rows={4} defaultValue={profile?.bio} placeholder="Yaptığın işleri ve deneyimini anlat." /></label>

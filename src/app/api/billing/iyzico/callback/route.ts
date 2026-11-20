@@ -1,6 +1,7 @@
 import { BillingProviderUnavailableError, getBillingProvider } from "@/lib/billing/provider";
 import { isReference } from "@/lib/billing/iyzico-protocol";
 import { logFailure } from "@/lib/observability/log";
+import { consumeRateLimit } from "@/lib/security/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -28,6 +29,12 @@ export async function POST(request: Request) {
       body += decoder.decode();
     }
     const token = new URLSearchParams(body).get("token");
+    if (isReference(token) && (
+      !await consumeRateLimit("iyzico-callback-ip", 30) ||
+      !await consumeRateLimit("iyzico-callback-token", 10, 60, token)
+    )) {
+      return new Response(null, { status: 429, headers: { "Retry-After": "60", "Cache-Control": "no-store" } });
+    }
     const success = isReference(token) && await provider.completeCheckout(token);
     return new Response(null, {
       status: 303,

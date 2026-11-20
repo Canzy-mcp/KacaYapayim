@@ -1,3 +1,4 @@
+import { parsePrice } from "../money.ts";
 import { validMarketId, type MarketAction } from "@kacayapayim/core/marketplace";
 
 type Payload = Record<string, string | string[] | boolean>;
@@ -30,7 +31,8 @@ export function parseMarketForm(action: MarketAction, form: FormData): Parsed {
   })) as Partial<Record<typeof textFields[number], string>>;
   const { id, provider, category, title = "", body = "", city = "", district = "", address = "", date,
     offer, version, at, rating, decision } = values;
-  const amount = values.amount?.replace(",", ".");
+  const parsedAmount = values.amount ? parsePrice(values.amount) : null;
+  const amount = !values.amount ? values.amount : parsedAmount == null ? "invalid" : parsedAmount.toFixed(2);
 
   if ((!optionalIdActions.has(action) || id !== undefined) && !validMarketId(id) ||
     provider !== undefined && !validMarketId(provider)) return { error: "Talep veya usta bilgisi geçersiz. Sayfayı yenileyip tekrar dene." };

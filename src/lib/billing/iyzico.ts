@@ -1,10 +1,11 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
 import type { BillingProvider, VerifiedSubscriptionEvent } from "./provider";
-import { applyIyzicoEvent, billingRpc, findIyzicoSubscription, getCheckoutAttempt, hasIyzicoEvent, type VerifiedIyzicoEvent } from "./iyzico-store";
+import { applyIyzicoEvent, billingRpc, findIyzicoSubscription, getCheckoutAttempt, hasIyzicoEvent, listPendingCheckoutTokens, type VerifiedIyzicoEvent } from "./iyzico-store";
 import { hashBillingValue, hostedCheckoutUrl, isReference, iyzicoAuthHeaders, iyzicoStatus, verifyIyzicoWebhook, webhookStatus, type readIyzicoConfig } from "./iyzico-protocol";
 
 type Config = NonNullable<ReturnType<typeof readIyzicoConfig>>;
+type Notice = NonNullable<ReturnType<typeof verifyIyzicoWebhook>>;
 type ProviderOrder = { referenceCode: string; orderStatus: string; startPeriod: number; endPeriod: number };
 type ProviderSubscription = {
   referenceCode: string;
@@ -13,13 +14,24 @@ type ProviderSubscription = {
   subscriptionStatus: string;
   orders?: ProviderOrder[];
   items?: ProviderSubscription[];
+  createdDate?: number;
   startDate?: number;
   endDate?: number;
 };
 
 export class InvalidIyzicoSignatureError extends Error {}
 export class IyzicoCheckoutInProgressError extends Error {}
-export class IyzicoAdditionalDetailsError extends Error {}
+export class IyzicoAdditionalDetailsError extends Error {
+  readonly field: "phone" | "identity";
+
+  constructor(field: "phone" | "identity") {
+    super("iyzico rejected a checkout detail");
+    this.field = field;
+  }
+}
+
+type SubscriptionRead = { event: VerifiedIyzicoEvent; orders: ProviderOrder[] };
+const checkoutVerifications = new Map<string, Promise<SubscriptionRead | "completed" | null>>();
 
 function isoDate(ms: unknown) {
   if (typeof ms !== "number" || !Number.isSafeInteger(ms) || ms <= 0 || ms > 8.64e15) return null;
@@ -41,7 +53,7 @@ export class IyzicoBillingProvider implements BillingProvider {
     this.appUrl = config.appUrl;
   }
 
-  private async request<T>(path: string, payload?: Record<string, unknown>, allowDeclined = false) {
+  private async request<T>(path: string, payload?: Record<string, unknown>, failure?: "checkout-init" | "checkout-result") {
     const body = payload && JSON.stringify(payload);
     const response = await fetch(this.config.apiUrl + path, {
       method: body === undefined ? "GET" : "POST",
@@ -52,9 +64,17 @@ export class IyzicoBillingProvider implements BillingProvider {
       redirect: "error",
       signal: AbortSignal.timeout(10_000),
     });
-    if (!response.ok && !(allowDeclined && response.status === 400)) throw new Error("iyzico API request failed");
-    const result = await response.json() as T & { status?: string; systemTime?: number };
-    if (allowDeclined && result?.status === "failure") return null;
+    if (!response.ok && !(failure && response.status === 400)) throw new Error("iyzico API request failed");
+    const result = await response.json() as T & { status?: string; systemTime?: number; errorCode?: string | number };
+    if (result?.status === "failure") {
+      if (failure === "checkout-result") return null;
+      if (failure === "checkout-init") {
+        // iyzico's documented general validation codes.
+        const code = String(result.errorCode);
+        if (["25", "26", "27"].includes(code)) throw new IyzicoAdditionalDetailsError("phone");
+        if (["8", "9", "10"].includes(code)) throw new IyzicoAdditionalDetailsError("identity");
+      }
+    }
     if (result?.status !== "success") throw new Error("iyzico API operation failed");
     return result;
   }
@@ -62,8 +82,7 @@ export class IyzicoBillingProvider implements BillingProvider {
   async createCheckoutSession(input: Parameters<BillingProvider["createCheckoutSession"]>[0]) {
     const reference = this.config.plans[input.planId][input.interval];
     // Reconcile a previously issued form before allowing a fresh payment.
-    const pendingToken = await billingRpc<string | null>("get_pending_iyzico_checkout", { p_business_id: input.businessId });
-    if (pendingToken && await this.completeCheckout(pendingToken)) throw new IyzicoCheckoutInProgressError();
+    if (await this.reconcilePendingCheckout(input.businessId)) throw new IyzicoCheckoutInProgressError();
     const pricing = await this.request<{ data: { referenceCode: string; price: number; currencyCode: string;
       status: string; paymentInterval: string; paymentIntervalCount: number; trialPeriodDays?: number;
       planPaymentType: string } }>(`/v2/subscription/pricing-plans/${reference}`);
@@ -83,8 +102,7 @@ export class IyzicoBillingProvider implements BillingProvider {
         pricingPlanReferenceCode: reference,
         subscriptionInitialStatus: "ACTIVE",
         customer: { ...customer, billingAddress: { contactName: `${customer.name} ${customer.surname}`, city, country: "Turkey", address } },
-      }, true);
-    if (!result && (!customer.gsmNumber || !customer.identityNumber)) throw new IyzicoAdditionalDetailsError();
+      }, "checkout-init");
     if (!isReference(result?.token)) throw new Error("Missing iyzico checkout token");
     const url = hostedCheckoutUrl(this.config.mode, result.token, result.paymentPageUrl);
     const ttl = result.tokenExpireTime ?? 1800;
@@ -101,75 +119,140 @@ export class IyzicoBillingProvider implements BillingProvider {
     return { url: this.appUrl + "/billing" };
   }
 
-  async completeCheckout(token: string) {
+  async reconcilePendingCheckout(businessId: string) {
+    const token = await billingRpc<string | null>("get_pending_iyzico_checkout", { p_business_id: businessId });
+    return token ? this.completeCheckout(token) : false;
+  }
+
+  private verifyCheckout(token: string) {
+    const key = `${this.config.apiUrl}:${this.config.merchantId}:${token}`;
+    const inflight = checkoutVerifications.get(key);
+    if (inflight) return inflight;
+    const verification = this.readCheckout(token).finally(() => checkoutVerifications.delete(key));
+    checkoutVerifications.set(key, verification);
+    return verification;
+  }
+
+  private async readCheckout(token: string): Promise<SubscriptionRead | "completed" | null> {
+    if (!isReference(token)) return null;
     const attempt = await getCheckoutAttempt(token);
-    if (!attempt) return false;
-    if (attempt.status === "completed") return true;
+    if (!attempt) return null;
+    if (attempt.status === "completed") return "completed";
     const result = await this.request<{ data: ProviderSubscription; token?: string }>(
-      `/v2/subscription/checkoutform/${token}`, undefined, true);
+      `/v2/subscription/checkoutform/${token}`, undefined, "checkout-result");
     const checkout = result?.data;
-    if (!checkout || checkout.subscriptionStatus !== "ACTIVE" || (result.token !== undefined && result.token !== token) ||
-      checkout.pricingPlanReferenceCode !== attempt.plan_reference) return false;
-    const event = await this.readSubscription(checkout.referenceCode, {
+    const status = iyzicoStatus(checkout?.subscriptionStatus);
+    if (!checkout || !status || status === "incomplete" || (result.token !== undefined && result.token !== token) ||
+      !isReference(checkout.customerReferenceCode) || checkout.pricingPlanReferenceCode !== attempt.plan_reference) return null;
+    return this.readSubscription(checkout.referenceCode, {
       businessId: attempt.business_id, planId: attempt.plan_id, interval: attempt.billing_interval,
-      planReference: attempt.plan_reference, customerId: checkout.customerReferenceCode,
+      planReference: attempt.plan_reference, customerId: checkout.customerReferenceCode, requirePayment: true,
     });
-    if (event.status !== "active") throw new Error("iyzico checkout subscription is not active");
+  }
+
+  async completeCheckout(token: string) {
+    const checkout = await this.verifyCheckout(token);
+    if (!checkout) return false;
+    return checkout === "completed" || this.settleCheckout(token, checkout.event);
+  }
+
+  private settleCheckout(token: string, event: VerifiedIyzicoEvent) {
     return applyIyzicoEvent({
       ...event, eventType: "subscription.checkout.completed", eventId: `checkout:${hashBillingValue(token)}`,
     }, token);
   }
 
-  private async readSubscription(reference: string, target: Pick<VerifiedSubscriptionEvent, "businessId" | "planId" | "interval"> & {
-    planReference: string; customerId?: string | null; previousStart?: string | null; previousEnd?: string | null;
-  }, notice?: NonNullable<ReturnType<typeof verifyIyzicoWebhook>>): Promise<VerifiedIyzicoEvent> {
+  private async fetchSubscription(reference: string) {
     const result = await this.request<{ data: ProviderSubscription }>(subscriptionPath(reference));
     const data = result?.data;
     const snapshot = Array.isArray(data?.items) ? data.items.find(item => item?.referenceCode === reference) : data;
-    const status = iyzicoStatus(snapshot?.subscriptionStatus);
     const occurredAt = isoDate(result?.systemTime);
-    if (!snapshot || snapshot.referenceCode !== reference || snapshot.pricingPlanReferenceCode !== target.planReference ||
-      !isReference(snapshot.customerReferenceCode) || (target.customerId && snapshot.customerReferenceCode !== target.customerId) ||
-      !status || status === "free" || !occurredAt) throw new Error("Invalid iyzico subscription snapshot");
+    if (!snapshot || snapshot.referenceCode !== reference || !isReference(snapshot.customerReferenceCode) ||
+      !isReference(snapshot.pricingPlanReferenceCode) || !occurredAt) throw new Error("Invalid iyzico subscription snapshot");
+    return { snapshot, occurredAt };
+  }
+
+  private async readSubscription(reference: string, target: Pick<VerifiedSubscriptionEvent, "businessId" | "planId" | "interval"> & {
+    planReference: string; customerId?: string | null; previousStart?: string | null; previousEnd?: string | null; requirePayment?: boolean;
+  }): Promise<SubscriptionRead> {
+    const { snapshot, occurredAt } = await this.fetchSubscription(reference);
+    const status = iyzicoStatus(snapshot.subscriptionStatus);
+    if (snapshot.pricingPlanReferenceCode !== target.planReference ||
+      (target.customerId && snapshot.customerReferenceCode !== target.customerId) || !status || status === "free") {
+      throw new Error("Invalid iyzico subscription snapshot");
+    }
 
     const orders = Array.isArray(snapshot.orders) ? snapshot.orders.filter(order =>
       order && isoDate(order.startPeriod) && isoDate(order.endPeriod) && order.endPeriod > order.startPeriod
     ).sort((a, b) => b.startPeriod - a.startPeriod) : [];
-    if (notice?.orderReferenceCode && notice.iyziEventType.startsWith("subscription.order.")) {
-      const order = orders.find(item => item.referenceCode === notice.orderReferenceCode);
-      if (!order || (order.orderStatus !== "SUCCESS" && order.orderStatus !== "FAILED") ||
-        (notice.iyziEventType === "subscription.order.success" && order.orderStatus !== "SUCCESS")) {
-        throw new Error("iyzico order result is not ready");
-      }
-    }
     const paid = orders.find(order => order.orderStatus === "SUCCESS" && order.startPeriod <= Date.parse(occurredAt));
     const latest = orders.find(order => order.startPeriod <= Date.parse(occurredAt) && ["FAILED", "SUCCESS"].includes(order.orderStatus));
     const effectiveStatus = status === "active" && latest?.orderStatus === "FAILED" ? "past_due" : status;
     const periodStart = paid ? isoDate(paid.startPeriod) : target.previousStart ?? isoDate(orders[0]?.startPeriod ?? snapshot.startDate);
     const periodEnd = paid ? isoDate(paid.endPeriod) : target.previousEnd ?? isoDate(orders[0]?.endPeriod ?? snapshot.endDate);
     if (!periodStart || !periodEnd || Date.parse(periodEnd) <= Date.parse(periodStart) ||
+      (target.requirePayment && (!paid || effectiveStatus === "incomplete")) ||
       (effectiveStatus === "active" && !paid) ||
       (effectiveStatus === "past_due" && !paid && !target.previousEnd)) throw new Error("Missing verified iyzico billing period");
-    return {
+    return { orders, event: {
       provider: this.id, eventId: `snapshot:${reference}:${occurredAt}`, eventType: "subscription.snapshot",
       businessId: target.businessId, planId: target.planId, interval: target.interval,
       status: effectiveStatus, providerCustomerId: snapshot.customerReferenceCode, providerSubscriptionId: reference,
       currentPeriodStart: periodStart, currentPeriodEnd: periodEnd, cancelAtPeriodEnd: false,
       occurredAt, planReference: target.planReference,
       payloadHash: hashBillingValue(JSON.stringify([reference, target.planReference, snapshot.customerReferenceCode, effectiveStatus, periodStart, periodEnd])),
-    };
+    } };
   }
 
-  private async lookupSubscription(reference: string, notice?: NonNullable<ReturnType<typeof verifyIyzicoWebhook>>) {
-    const local = await findIyzicoSubscription(reference);
-    if (!local || local.plan_id === "free" || !local.billing_interval) throw new Error("Unknown iyzico subscription");
+  private async readLocalSubscription(reference: string, local: NonNullable<Awaited<ReturnType<typeof findIyzicoSubscription>>>) {
+    if (local.plan_id === "free" || !local.billing_interval) throw new Error("Unknown iyzico subscription");
     const planReference = await billingRpc<string | null>("get_iyzico_subscription_plan", { p_subscription_id: reference }) ??
       this.config.plans[local.plan_id][local.billing_interval];
     return this.readSubscription(reference, {
       businessId: local.business_id, planId: local.plan_id, interval: local.billing_interval, planReference,
-      customerId: notice?.customerReferenceCode ?? local.provider_customer_id,
+      customerId: local.provider_customer_id,
       previousStart: local.current_period_start, previousEnd: local.current_period_end,
-    }, notice);
+    });
+  }
+
+  private async reconcileWebhook(notice: Notice) {
+    const reference = notice.subscriptionReferenceCode;
+    const { snapshot } = await this.fetchSubscription(reference);
+    if (snapshot.customerReferenceCode !== notice.customerReferenceCode) throw new Error("Invalid iyzico subscription customer");
+    let cursor = "";
+    for (;;) {
+      const tokens = await listPendingCheckoutTokens(snapshot.pricingPlanReferenceCode, isoDate(snapshot.createdDate), cursor);
+      if (!tokens.length) break;
+      const candidates = await Promise.allSettled(tokens.map(token => this.verifyCheckout(token)));
+      for (const [index, result] of candidates.entries()) {
+        if (result.status !== "fulfilled" || !result.value || result.value === "completed") continue;
+        const checkout = result.value;
+        if (checkout.event.providerSubscriptionId !== reference ||
+          checkout.event.providerCustomerId !== notice.customerReferenceCode ||
+          checkout.event.planReference !== snapshot.pricingPlanReferenceCode) continue;
+        this.assertWebhookReady(notice, checkout);
+        if (await this.settleCheckout(tokens[index], checkout.event)) return checkout;
+      }
+      cursor = tokens[tokens.length - 1];
+    }
+    // Another request may have settled the checkout while the webhook was looking it up.
+    const local = await findIyzicoSubscription(reference);
+    if (local) return this.readLocalSubscription(reference, local);
+    throw new Error("Unknown iyzico subscription");
+  }
+
+  private assertWebhookReady(notice: Notice, { event, orders }: SubscriptionRead) {
+    if (event.providerCustomerId !== notice.customerReferenceCode) throw new Error("Invalid iyzico subscription customer");
+    const expected = webhookStatus(notice.iyziEventType);
+    if (notice.iyziEventType.startsWith("subscription.order.")) {
+      const order = orders.find(item => item.referenceCode === notice.orderReferenceCode);
+      if (order?.orderStatus !== (expected === "past_due" ? "FAILED" : "SUCCESS")) {
+        throw new Error("iyzico order result is not ready");
+      }
+      // A historical renewal can arrive after the subscription has recovered.
+      return;
+    }
+    if (expected !== "active" && event.status !== expected) throw new Error("iyzico subscription change is not yet reflected");
   }
 
   async handleWebhook(input: Parameters<BillingProvider["handleWebhook"]>[0]) {
@@ -177,12 +260,18 @@ export class IyzicoBillingProvider implements BillingProvider {
     const notice = verifyIyzicoWebhook(body, input.headers.get("X-IYZ-SIGNATURE-V3"), this.config.merchantId, this.config.secretKey);
     if (!notice) throw new InvalidIyzicoSignatureError();
     if (!webhookStatus(notice.iyziEventType) || await hasIyzicoEvent(notice.eventId)) return null;
-    const event = await this.lookupSubscription(notice.subscriptionReferenceCode, notice);
+    const reference = notice.subscriptionReferenceCode;
+    const local = await findIyzicoSubscription(reference);
+    const subscription = local ? await this.readLocalSubscription(reference, local) : await this.reconcileWebhook(notice);
+    this.assertWebhookReady(notice, subscription);
+    const { event } = subscription;
     return { ...event, eventId: notice.eventId, eventType: notice.iyziEventType };
   }
 
-  getSubscription({ providerSubscriptionId }: Parameters<BillingProvider["getSubscription"]>[0]) {
-    return this.lookupSubscription(providerSubscriptionId);
+  async getSubscription({ providerSubscriptionId }: Parameters<BillingProvider["getSubscription"]>[0]) {
+    const local = await findIyzicoSubscription(providerSubscriptionId);
+    if (!local) throw new Error("Unknown iyzico subscription");
+    return (await this.readLocalSubscription(providerSubscriptionId, local)).event;
   }
 
   async cancelSubscription(input: Parameters<BillingProvider["cancelSubscription"]>[0]) {
@@ -194,11 +283,11 @@ export class IyzicoBillingProvider implements BillingProvider {
   }
 
   private async changeSubscription(reference: string, operation: "cancel" | "activate", status: "cancelled" | "active") {
-    let event = await this.lookupSubscription(reference);
+    let event = await this.getSubscription({ providerSubscriptionId: reference });
     if (event.status !== status && !(operation === "cancel" && event.status === "expired")) {
       if (operation === "activate" && event.status !== "incomplete") throw new Error("Only pending iyzico subscriptions can be activated");
       await this.request(subscriptionPath(reference) + "/" + operation, { locale: "tr", conversationId: randomUUID() });
-      event = await this.lookupSubscription(reference);
+      event = await this.getSubscription({ providerSubscriptionId: reference });
       if (event.status !== status) throw new Error("iyzico subscription change is not yet reflected");
     }
     await applyIyzicoEvent({ ...event, eventType: `subscription.${operation}`, eventId: `${operation}:${reference}:${event.occurredAt}` });

@@ -67,7 +67,8 @@ test("form data normalizes a decimal price and preserves offer version precision
     { id, amount: "1200.50", body: "Musluk değişimi" });
   assert.deepEqual(parseMarketForm("award", form({ id, offer: provider, version })).payload,
     { id, offer: provider, version });
-  assert.ok(parseMarketForm("offer", form({ id, amount: "1.234", body: "Musluk değişimi" })).error);
+  assert.equal(parseMarketForm("offer", form({ id, amount: "1.234", body: "Musluk değişimi" })).payload?.amount, "1234.00"); // Turkish grouping
+  assert.ok(parseMarketForm("offer", form({ id, amount: "1,234.5", body: "Musluk değişimi" })).error);
 });
 
 test("form data preserves explicit address revocation and validates shared address length", () => {

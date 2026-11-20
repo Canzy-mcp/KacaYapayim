@@ -62,3 +62,72 @@ export const guideTradeSlugs = (slug: string): string[] =>
 export const guideMetaTitles: Record<string, string> = { "pazarlikta-ne-kadar-indirim": "Pazarlıkta ne kadar indirim yapılabilir?" };
 
 export const siteContentModified = "2026-11-20";
+
+// Answer-first blocks: 2-3 sentence direct answer with the key number, stated assumptions and a short summary.
+// Every figure comes from the guide's own example data above.
+export type GuideLead = { direct: string; assumptions: string; summary: readonly string[] };
+export const guideLeads: Record<string, GuideLead> = {
+  "kar-marji-nasil-hesaplanir": {
+    direct: "Kâr marjı = (satış fiyatı − maliyet) ÷ satış fiyatı × 100. 20.000 TL maliyetli bir iş 28.600 TL'ye satılırsa kâr 8.600 TL, marj yaklaşık %30,07 olur. Hedef marjdan fiyat bulmak için maliyeti (1 − marj) değerine böl.",
+    assumptions: "Maliyete malzeme, işçilik, sarf ve yol dahildir. Vergiler ve genel giderler hesaba katılmadı. Uygulama öneriyi yüz TL yukarı yuvarlar.",
+    summary: ["Marj kârı satış fiyatına böler, markup maliyete böler.", "%30 marj için 20.000 TL maliyet 28.571,43 TL fiyat gerektirir.", "Yuvarlanmış fiyatla gerçekleşen marjı yeniden hesapla."],
+  },
+  "is-maliyeti-nasil-hesaplanir": {
+    direct: "İş maliyeti; malzeme, işçilik, sarf ve yolun toplamıdır. 12.000 TL malzeme, 8.000 TL işçilik, 800 TL sarf ve 700 TL yol gideri olan işin maliyeti 21.500 TL eder.",
+    assumptions: "Tutarlar örnek içindir. Vergiler ve işletmenin genel giderleri dahil değildir.",
+    summary: ["Her kalemi miktar × birim maliyet olarak ayrı yaz.", "İşçiliği kişi ve gün sayısına böl.", "Gerçekleşen giderle tahmini karşılaştır."],
+  },
+  "teklif-fiyati-nasil-belirlenir": {
+    direct: "Teklif fiyatı = toplam maliyet ÷ (1 − hedef marj). 30.000 TL maliyet ve %25 hedef marjla fiyat 40.000 TL, brüt kâr 10.000 TL olur.",
+    assumptions: "Maliyet 30.000 TL kabul edildi. Marj brüt kâra göredir, vergi hariçtir.",
+    summary: ["Önce maliyet, sonra hedef marj, sonra fiyat.", "%20, %25 ve %30 marj aynı maliyette 37.500, 40.000 ve 42.857,14 TL verir.", "Kapsamı, hariç işleri ve geçerlilik süresini teklife yaz."],
+  },
+  "markup-ve-marj-farki": {
+    direct: "Markup kârı maliyete, marj kârı satış fiyatına böler. 20.000 TL maliyete %30 markup 26.000 TL fiyat ve %23,08 marj verir; %30 marj ise 28.571,43 TL fiyat ve %42,86 markup demektir.",
+    assumptions: "Maliyet 20.000 TL kabul edildi. Vergiler hariçtir.",
+    summary: ["Aynı yüzde, farklı fiyat verir.", "Maliyete %30 eklemek %23,08 marja karşılık gelir.", "Hedefin marj mı markup mı olduğunu fiyatlamadan önce netleştir."],
+  },
+  "iscilik-maliyeti-nasil-hesaplanir": {
+    direct: "İşçilik maliyeti, kişi sayısı × iş günü × günlük maliyetin toplamıdır. 3 gün çalışan usta (günlük 3.000 TL) ile 2 gün çalışan yardımcı (günlük 1.800 TL) için işçilik 12.600 TL olur.",
+    assumptions: "Günlük tutarlar örnektir, ücret standardı değildir. Fazla mesai ve yasal işveren maliyetleri hesaba katılmadı.",
+    summary: ["Usta ve yardımcıyı ayrı satıra yaz.", "Keşif ve ikinci ziyaretleri iş gününe say.", "İş uzarsa ek günün maliyetini önceden gör."],
+  },
+  "boyaci-teklifi-nasil-hazirlanir": {
+    direct: "Boya miktarı = alan × kat sayısı ÷ örtücülük × (1 + fire). 100 m² duvar, 2 kat, 10 m²/L örtücülük ve %10 fire ile yaklaşık 22 L boya gerekir.",
+    assumptions: "Yalnızca duvar alanı, belirtilen örtücülük ve fire payı kullanıldı. Astar, tavan ve macun ayrıca hesaplanır; litre fiyatı örnekte yoktur.",
+    summary: ["Alanı, kat sayısını ve ürünün örtücülüğünü gir.", "Fire payını unutma.", "Astar, tavan ve onarımı ayrı kalem yap."],
+  },
+  "elektrik-isi-nasil-fiyatlandirilir": {
+    direct: "Elektrik işinin maliyeti kablo, priz, işçilik, sarf ve yolun toplamıdır. 100 m kablo (2.000 TL), 10 priz (2.500 TL) ve 2 gün işçilik (6.000 TL) için bu üç kalem 10.500 TL eder.",
+    assumptions: "Anahtar, sigorta, buat, sarf ve yol bu örneğe dahil değildir; ayrıca eklenir. Teknik uygunluk fiyat hesabının dışındadır.",
+    summary: ["Kabloyu kesit ve metraj bazında ayır.", "Adet kalemlerini birim maliyetle çarp.", "İşçilik gününü ve yardımcıyı ayrıca yaz."],
+  },
+  "teklifte-odeme-kosullari": {
+    direct: "Ödeme koşulunda toplam tutarı, avansı ve kalan ödemenin hangi aşamada yapılacağını yaz. 40.000 TL'lik örnek işte %30 avans 12.000 TL, teslimde kalan ödeme 28.000 TL olur.",
+    assumptions: "%30 avans bir öneri veya hukuki kural değildir. Tarafların anlaşması ve geçerli mevzuat esastır.",
+    summary: ["Her aşamanın tutarını yaz.", "Teslim kilometre taşını net tanımla.", "Kapsam değişirse planı yeniden konuş."],
+  },
+  "pazarlikta-ne-kadar-indirim": {
+    direct: "İndirim sınırın minimum marjından gelir: minimum fiyat = maliyet ÷ (1 − minimum marj). 20.000 TL maliyet ve %20 alt sınırda minimum fiyat 25.000 TL'dir; %30 hedef fiyatla (28.571 TL) arasındaki yaklaşık 3.571 TL indirim alanıdır.",
+    assumptions: "Maliyet 20.000 TL, hedef marj %30, minimum marj %20 kabul edildi. Vergiler hariçtir.",
+    summary: ["Önce minimum kabul marjını belirle.", "İstenen indirim 3.571 TL'yi aşıyorsa kapsamı veya ödemeyi konuş.", "İndirim sonrası kâr tutarını da gör."],
+  },
+  "usta-yaklasik-fiyat-nasil-alinir": {
+    direct: "Karşılaştırılabilir fiyat için aynı kapsamı, aynı malzeme varsayımını ve aynı tarihi birkaç ustaya ilet. KaçaYapayım'da iş ilanı verip gelen teklifleri kalem kalem karşılaştırabilirsin; yaklaşık fiyat bağlayıcı değildir.",
+    assumptions: "Örnek bir iş tarifi içindir; rakam içermez. Kesin tutar ustanın kapsamı görmesi ve yazılı teklifiyle belli olur.",
+    summary: ["Ölçü, malzeme ve tarihi yaz.", "Fotoğraf ekle.", "Teklifleri toplam tutara göre değil dahil ve hariç işlere göre karşılaştır."],
+  },
+};
+
+// Contextual hub: marj vs markup comparison, shown on the two strongest margin pages.
+export const marjMarkupTable: GuideTable = {
+  caption: "Kâr marjı ve markup farkı (20.000 TL maliyet, 8.000 TL kâr)",
+  head: ["", "Kâr marjı", "Markup"],
+  rows: [
+    ["Neye böler", "Satış fiyatına", "Maliyete"],
+    ["Formül", "Kâr ÷ satış fiyatı", "Kâr ÷ maliyet"],
+    ["Örnek sonuç", "8.000 ÷ 28.000 = %28,57", "8.000 ÷ 20.000 = %40"],
+    ["Hedef %30 olunca fiyat", "20.000 ÷ 0,70 = 28.571,43 TL", "20.000 × 1,30 = 26.000 TL"],
+  ],
+};
+export const marjGuideSlugs = ["kar-marji-nasil-hesaplanir", "markup-ve-marj-farki"] as const;

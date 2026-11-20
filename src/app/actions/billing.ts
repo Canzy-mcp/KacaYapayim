@@ -17,7 +17,9 @@ function providerError(error: unknown, message: string): Extract<Result, { ok: f
     return { ok: false, error: "Bu işletmenin açık bir ödeme oturumu veya aboneliği var. Lütfen paket durumunu kontrol et." };
   }
   if (error instanceof IyzicoAdditionalDetailsError) {
-    return { ok: false, error: "iyzico ödeme formunu açamadı. Cep telefonu ve TCKN veya VKN alanlarını doldurup tekrar dene." };
+    return { ok: false, error: error.field === "phone"
+      ? "Cep telefonu numaranı kontrol edip tekrar dene."
+      : "TCKN veya VKN bilgini kontrol edip tekrar dene." };
   }
   logFailure("Billing provider operation failed");
   return { ok: false, error: message };

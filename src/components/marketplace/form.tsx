@@ -5,7 +5,7 @@ import { marketAction } from "@/app/actions/marketplace";
 import type { MarketAction } from "@kacayapayim/core/marketplace";
 
 const primary = "inline-flex min-h-11 items-center justify-center rounded-full bg-[#075D54] px-5 py-2 text-sm font-semibold text-white transition-colors duration-150 hover:bg-[#064A43] disabled:opacity-60";
-const secondary = "inline-flex min-h-11 items-center justify-center rounded-full border border-[#D9D2C4] bg-white px-5 py-2 text-sm font-semibold text-[#202923] hover:bg-[#F3EEE4] disabled:opacity-60";
+const secondary = "inline-flex min-h-11 items-center justify-center rounded-full border border-[#d2d2d7] bg-white px-5 py-2 text-sm font-semibold text-[#1d1d1f] hover:bg-[#f5f5f7] disabled:opacity-60";
 
 export function MarketForm({ action, fields = {}, children, label, inline = false, subtle = false, success = "Kaydedildi." }: {
   action: MarketAction; fields?: Record<string, string | null | undefined>; children?: React.ReactNode;

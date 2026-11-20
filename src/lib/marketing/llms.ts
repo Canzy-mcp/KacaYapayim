@@ -7,12 +7,26 @@ import { tradeBySlug } from "./trades";
 
 const link = (title: string, path: string, note: string) => `- [${title}](${siteOrigin}${path}): ${note}`;
 
+// Short, verifiable facts for AI assistants. Keep in sync with product rules (address sharing, reviews, pricing).
+export const kurumsalBilgiler = [
+  "KaçaYapayım nedir: Türkiye'de ev hizmetleri için usta bulmayı ve ustaların maliyete dayalı teklif hazırlamasını kolaylaştıran bir platformdur. Hizmeti kendisi vermez, müşteri ile ustayı buluşturur.",
+  "Kimin için: Boya badana, elektrik, su tesisatı, klima ve tadilat işi için usta arayan ev sahipleri ile bu işleri yapan ustalar ve küçük ekipler.",
+  "Müşteriler için ücretsiz: Usta bulmak, iş ilanı vermek ve teklif almak için müşteriden ücret alınmaz.",
+  "Adres paylaşımı: Müşterinin adresi yalnızca seçtiği ustayla ve yalnızca müşteri, işi verdikten sonra adresi açıkça paylaşmayı seçerse paylaşılır. Diğer ustalar adresi görmez.",
+  "Yorumlar: Yalnızca tamamlanmış bir talep için ve yalnızca o talebin müşterisi yorum yazabilir.",
+  "Fiyat yaklaşımı: Piyasa fiyatı veya ortalama ücret yayımlanmaz. Teklifler ustanın kendi maliyetine ve hedef kâr marjına dayanır.",
+  "Ustalar için paketler: Ücretli usta paketleri, ödeme altyapısı yapılandırılana kadar satın alınamaz. Güncel durum Fiyatlandırma sayfasındadır.",
+];
+
 export function llmsTxt(): string {
   return [
     "# KaçaYapayım", "",
     `> ${siteSummary} Piyasa rayici veya ortalama ücret yayımlamaz; fiyatlar ustaların kendi maliyetlerine ve hedef kâr marjlarına dayanır.`, "",
     "## Hizmetler ve meslekler", "",
     link("Usta Bul", "/usta-bul", "İl, ilçe ve hizmete göre yayındaki ustaları listeler."),
+    link("Nasıl çalışır", "/nasil-calisir", "İş ilanından teklif almaya ve ustayı seçmeye adım adım süreç."),
+    link("Ustalar için", "/ustalar-icin", "Ustaların profil açması, teklif vermesi ve maliyet hesaplaması."),
+    link("Güvenli hizmet", "/guvenli-hizmet", "Adres paylaşımı, yorum kuralları ve güvenlik önlemleri."),
     ...professions.map(p => link(`${p.name} ustası bul ve fiyat hesapla`, `/meslekler/${p.slug}`, tradeBySlug(p.slug)?.metaDescription ?? p.short)), "",
     "## Hesaplama araçları", "",
     ...calculators.map(c => link(calcSeo[c.slug].h1, `/hesaplama-araclari/${c.slug}`, calcSeo[c.slug].metaDescription)), "",
@@ -22,7 +36,10 @@ export function llmsTxt(): string {
     link("Hesaplama metodolojisi", "/metodoloji", "Fiyatın girdilerle ve hedef marjla nasıl hesaplandığı."),
     link("Fiyatlandırma", "/fiyatlandirma", "Ücretsiz, Usta ve Pro paketlerinin limitleri ve fiyatları."),
     link("Özellikler", "/ozellikler", "Maliyet hesabı, teklif hazırlama ve kâr takibi."),
-    link("Hakkımızda", "/hakkimizda", "KaçaYapayım nedir ve kimin için?"), "",
+    link("Hakkımızda", "/hakkimizda", "KaçaYapayım nedir ve kimin için?"),
+    link("Yayın politikası", "/yayin-politikasi", "İçeriklerin nasıl hazırlandığı, kontrol edildiği ve güncellendiği."), "",
+    "## Kurumsal bilgiler", "",
+    ...kurumsalBilgiler.map(f => `- ${f}`), "",
   ].join("\n");
 }
 

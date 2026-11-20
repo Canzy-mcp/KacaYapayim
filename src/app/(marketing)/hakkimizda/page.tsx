@@ -1,22 +1,24 @@
 import Link from "next/link";
-import { breadcrumbNode, graph, JsonLd, siteMetadata, siteSummary, webPageNode } from "@/lib/marketing/seo";
-import { Crumbs, h2Class, Hero, PageShell } from "@/lib/marketing/blocks";
+import { siteMetadata, siteSummary } from "@/lib/marketing/seo";
+import { Band, PageHead, PageLd, textLink, tile, title } from "@/components/marketing/acquisition/parts";
 
-const title = "Hakkımızda: KaçaYapayım Nedir?";
+const name = "Hakkımızda: KaçaYapayım Nedir?";
 const description = "KaçaYapayım, Türkiye'de usta bulmayı ve maliyete dayalı teklif hazırlamayı kolaylaştıran bir platformdur. Kimin için ve nasıl çalışır?";
-export const metadata = siteMetadata(title, description, "/hakkimizda");
+export const metadata = siteMetadata(name, description, "/hakkimizda");
+const path = "/hakkimizda";
 const blocks = [
-  ["Kimin için?", "Hizmet arayan ev sahipleri ile boyacı, elektrikçi, tesisatçı ve klimacı gibi iş bazında teklif hazırlayan profesyoneller için. Her mesleğin kullandığı miktar ve maliyet kalemleri farklıdır."],
-  ["Hangi sorunu çözer?", "Hizmet arayanlar bölgelerindeki ustaları bulur, işini tarif edip teklif alır. Ustalar bir işin malzeme, işçilik ve diğer giderlerini aynı hesapta toplar, hedef kâr için gereken fiyatı görür ve sonucu teklife dönüştürür."],
-  ["Veri ve iddialar", "Fiyat önerileri kullanıcı girdilerine dayanır. Başka kullanıcıların verisi, şehir ortalaması veya garanti edilen kâr olarak sunulmaz. Şirket ve ekip bilgileri resmileştiğinde bu sayfa güncellenecektir."],
+  ["Kimin için?", "Hizmet arayan ev sahipleri ile boyacı, elektrikçi, tesisatçı ve klimacı gibi iş bazında teklif hazırlayan ustalar için."],
+  ["Hangi sorunu çözer?", "Ev sahipleri bölgelerindeki ustaları bulur, işini anlatıp teklif alır. Ustalar bir işin malzeme, işçilik ve diğer giderlerini tek hesapta toplar, hedef kârı için gereken fiyatı görür ve teklife dönüştürür."],
+  ["Veri ve iddialar", "Fiyat önerileri kullanıcının girdiği rakamlara dayanır. Başka kullanıcıların verisi, şehir ortalaması ya da garanti edilen kâr olarak sunulmaz. Şirket ve ekip bilgileri resmileştiğinde bu sayfa güncellenir."],
 ] as const;
 
 export default function Page() {
-  return <PageShell><article className="mx-auto max-w-3xl">
-    <JsonLd data={graph(webPageNode({ path: "/hakkimizda", name: title, description, type: "AboutPage" }), breadcrumbNode([{ name: "Ana Sayfa", path: "/" }, { name: "Hakkımızda", path: "/hakkimizda" }]))} />
-    <Crumbs items={[{ name: "Ana Sayfa", href: "/" }, { name: "Hakkımızda" }]} />
-    <Hero eyebrow="Hakkımızda" title="KaçaYapayım nedir?" lead={siteSummary} />
-    {blocks.map(([h, t]) => <section key={h} className="mt-10"><h2 className={h2Class}>{h}</h2><p className="mt-4 text-lg leading-8 text-[#3F4944]">{t}</p></section>)}
-    <p className="mt-10"><Link href="/metodoloji" className="inline-flex min-h-11 items-center font-semibold text-[#075D54] underline underline-offset-4">Hesaplama metodolojisi</Link></p>
-  </article></PageShell>;
+  return <>
+    <PageLd path={path} name={name} description={description} type="AboutPage" crumbs={[{ name: "Ana Sayfa", path: "/" }, { name: "Hakkımızda", path }]} />
+    <PageHead crumbs={[{ name: "Ana Sayfa", href: "/" }, { name: "Hakkımızda" }]} eyebrow="Hakkımızda" h="KaçaYapayım nedir?" text={siteSummary} />
+    <Band tone="gray" label="about-title"><h2 id="about-title" className="sr-only">Hakkımızda ayrıntılar</h2>
+      <div className="grid gap-4 md:grid-cols-3">{blocks.map(([h, t]) => <section key={h} className={tile}><h3 className={title}>{h}</h3><p className="mt-3 leading-[1.6] text-[#515154]">{t}</p></section>)}</div>
+      <p className="mt-8 flex flex-wrap gap-x-6"><Link href="/metodoloji" className={`${textLink} inline-flex min-h-11 items-center`}>Hesaplama metodolojisi</Link><Link href="/yayin-politikasi" className={`${textLink} inline-flex min-h-11 items-center`}>Yayın politikası</Link></p>
+    </Band>
+  </>;
 }

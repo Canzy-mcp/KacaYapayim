@@ -7,11 +7,12 @@ test("Turkish costs show grouped whole and fractional lira", () => {
   assert.equal(formatMoney(1850.5), "1.850,50 TL");
 });
 
-test("cost input accepts plain decimals and rejects negative or ambiguous input", () => {
+test("cost input accepts plain decimals and accepts Turkish grouping and rejects negative or ambiguous input", () => {
   assert.equal(parseCostInput("3000"), 3000);
   assert.equal(parseCostInput("1850,50"), 1850.5);
   assert.equal(parseCostInput("0"), 0);
   assert.equal(parseCostInput("-1"), null);
-  assert.equal(parseCostInput("1.000,50"), null);
-  assert.equal(parseCostInput("1.234"), null);
+  assert.equal(parseCostInput("1.000,50"), 1000.5);
+  assert.equal(parseCostInput("1.234"), 1234);
+  assert.equal(parseCostInput("1,234.5"), null);
 });

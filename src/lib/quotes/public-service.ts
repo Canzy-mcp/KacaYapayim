@@ -24,9 +24,17 @@ function isPublicQuote(value: unknown): value is PublicQuote {
 export async function getPublicQuote(token: string): Promise<PublicQuote | null> {
   if (!isPublicToken(token) || !isSupabaseConfigured() || !process.env.SUPABASE_SERVICE_ROLE_KEY) return null;
   if (!await consumeRateLimit("public-quote-lookup", 60, 60)) return null;
-  if ((await quoteAccess(token)).state !== "allowed") return null;
+  const access = await quoteAccess(token);
+  if (access.state !== "allowed") return null;
   const supabase = createServiceClient();
   const { data, error } = await supabase.rpc("get_public_quote_details", { p_token: token });
   if (error) { logFailure("public_quote_lookup"); return null; }
-  return isPublicQuote(data) ? data : null;
+  if (!isPublicQuote(data)) return null;
+  if (["ready", "sent", "viewed"].includes(data.status)) {
+    const { data: job, error: jobError } = await supabase.from("jobs").select("accepted_quote_id")
+      .eq("id", access.jobId).maybeSingle();
+    if (jobError) logFailure("public_quote_job_lookup");
+    if (job?.accepted_quote_id && job.accepted_quote_id !== access.quoteId) return { ...data, status: "cancelled" };
+  }
+  return data;
 }

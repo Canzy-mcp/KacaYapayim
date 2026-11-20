@@ -28,6 +28,12 @@ export function getCheckoutAttempt(token: string) {
   return billingRpc<CheckoutAttempt | null>("get_iyzico_checkout", { p_token: token });
 }
 
+export function listPendingCheckoutTokens(planReference: string, createdAt: string | null, afterToken: string) {
+  return billingRpc<string[]>("list_pending_iyzico_checkouts", {
+    p_plan_reference: planReference, p_created_at: createdAt, p_after_token: afterToken,
+  });
+}
+
 export function applyIyzicoEvent(event: VerifiedIyzicoEvent, token: string | null = null) {
   return billingRpc<boolean>("apply_iyzico_event", { p_event: event, p_token: token });
 }

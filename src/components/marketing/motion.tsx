@@ -8,7 +8,7 @@ export function MarketingMotion() {
   const pathname = usePathname();
   useEffect(() => {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const elements = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
+    const elements = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal], .ky-reveal"));
     if (!('IntersectionObserver' in window) || preference.matches) return;
     const observer = new IntersectionObserver(entries => {
       for (const entry of entries) {

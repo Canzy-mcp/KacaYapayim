@@ -30,7 +30,7 @@ test("home has FAQ details and trust claims", () => {
 });
 
 test("design tokens exist and grids use shrinkable tracks", () => {
-  for (const token of ["--ky-bg: #FAF7F1", "--ky-ink: #202923", "--ky-primary: #075D54", "--ky-primary-hover: #064A43"]) assert.ok(globals.includes(token), token);
+  for (const token of ["--ky-band: #f5f5f7", "--ky-ink: #1d1d1f", "--ky-primary: #075d54", "--ky-primary-hover: #064a43"]) assert.ok(globals.includes(token), token);
   assert.ok(!/grid-template-columns:\s*(repeat\(\d+,\s*1fr\)|1fr[ ;])/.test(css), "use minmax(0, 1fr)");
   assert.match(css, /@media \(max-width: 899px\)[\s\S]*\.demo-body \{ grid-template-columns: minmax\(0, 1fr\)/);
 });

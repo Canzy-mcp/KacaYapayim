@@ -1,4 +1,5 @@
 import type { BusinessCostItem, CostCategory, CostUnit } from "../types/database.ts";
+import { lineTotal } from "../decimal.ts";
 import { evaluateExpression, parseExpression, type ExpressionNode, type FormulaContext } from "./expression.ts";
 import { evaluateCondition, generateQuoteScope, TemplateError, validateFieldValues,
   type FieldValues, type ProfessionFormula, type ProfessionTemplate } from "./schema.ts";
@@ -159,7 +160,7 @@ export function calculateProfessionJob(input: {
       cost.unit_cost > 0 ? value / cost.unit_cost : 0;
     if (quantity < 0 || quantity > 1e9) throw new TemplateError("INVALID_QUANTITY", `${formula.name} miktarını kontrol et.`, formula.key);
     const preciseQuantity = round4(quantity);
-    const lineCost = Math.round(preciseQuantity * cents(cost.unit_cost)) / 100;
+    const lineCost = lineTotal(preciseQuantity, cost.unit_cost);
     if (Math.abs(lineCost - value) > 0.011) throw new TemplateError("COST_FORMULA_MISMATCH", `${formula.name} tutarı ile miktarı uyuşmuyor.`, formula.key);
     if (preciseQuantity === 0) continue;
     lines.push({ cost_item_id: cost.id, key, name: cost.name, category: cost.category, unit: cost.unit,
@@ -178,7 +179,7 @@ export function calculateProfessionJob(input: {
       !Number.isFinite(cost.unit_cost) || cost.unit_cost < 0) throw new TemplateError("INVALID_EXTRAS", "Ek maliyet miktarını kontrol et.");
     const quantity = round4(extra.quantity);
     lines.push({ cost_item_id: cost.id, key: cost.key, name: cost.name, category: cost.category, unit: cost.unit,
-      quantity, unit_cost: cost.unit_cost, total_cost: Math.round(quantity * cents(cost.unit_cost)) / 100,
+      quantity, unit_cost: cost.unit_cost, total_cost: lineTotal(quantity, cost.unit_cost),
       source_type: "extra", metadata: {} });
   }
   const sum = (type: GenericCostLine["source_type"]) => lines.filter((line) => line.source_type === type).reduce((total, line) => total + cents(line.total_cost), 0);

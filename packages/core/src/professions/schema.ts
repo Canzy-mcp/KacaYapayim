@@ -84,11 +84,17 @@ export function validateFieldValues(template: ProfessionTemplate, raw: FieldValu
     } else if (field.fieldType === "select") {
       if (typeof value !== "string" || !field.options?.some((option) => option.value === value)) errors[field.key] = `${field.label} seçimini kontrol et.`;
     } else if (field.fieldType === "date") {
-      if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value) || Number.isNaN(new Date(`${value}T12:00:00Z`).getTime())) errors[field.key] = "Geçerli bir tarih gir.";
+      if (!isCalendarDate(value)) errors[field.key] = "Geçerli bir tarih gir.";
     } else if (typeof value !== "string" || value.length > (field.fieldType === "textarea" ? 2000 : 300)) errors[field.key] = `${field.label} metnini kontrol et.`;
   }
   for (const key of Object.keys(raw)) if (!keys.has(key)) errors[key] = "Bilinmeyen alan.";
   return { values, errors };
+}
+
+export function isCalendarDate(value: unknown): value is string {
+  if (typeof value !== "string" || !/^(?!0000)\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }
 
 export function generateQuoteScope(template: ProfessionTemplate, values: FieldValues) {

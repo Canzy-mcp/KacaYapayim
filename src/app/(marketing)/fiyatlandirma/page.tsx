@@ -1,57 +1,79 @@
 import Link from "next/link";
+import { Check, Minus } from "lucide-react";
+import type { Metadata } from "next";
 import { getPlans } from "@/lib/billing/service";
-import { breadcrumbNode, faqNode, graph, JsonLd, siteMetadata, siteOrigin, webPageNode } from "@/lib/marketing/seo";
-import { btnPrimary, btnSecondary, card, Crumbs, DataTable, Faq, h2Class, Hero, PageShell } from "@/lib/marketing/blocks";
+import { billingAvailable } from "@/lib/billing/provider";
+import { getViewer } from "@/lib/viewer";
+import { siteMetadata, siteOrigin } from "@/lib/marketing/seo";
+import { Band, Faq, Intro, PageHead, PageLd, headline, pillPrimary, pillSecondary, textLink, tile, title } from "@/components/marketing/acquisition/parts";
 import type { Plan, PlanFeature } from "@/types/database";
 
-const title = "Fiyatlandırma: Ücretsiz, Usta ve Pro Paketler";
-const description = "Ücretsiz, Usta ve Pro paketlerinin yıllık fiyatlarını, teklif ve müşteri limitlerini karşılaştır. Ücretli paketler çok yakında.";
-export const metadata = siteMetadata(title, description, "/fiyatlandirma");
+const name = "Fiyatlandırma: Ücretsiz, Usta ve Pro Paketler";
+const path = "/fiyatlandirma";
+// Availability comes from billingAvailable(), the same check billing uses (BILLING_PROVIDER and iyzico settings).
+export function generateMetadata(): Metadata {
+  return siteMetadata(name, billingAvailable() ? "Ücretsiz, Usta ve Pro paketlerinin yıllık ve aylık fiyatlarını, teklif ve müşteri limitlerini karşılaştır." : "Ücretsiz, Usta ve Pro paketlerinin yıllık fiyatlarını, teklif ve müşteri limitlerini karşılaştır. Ücretli paketler çok yakında.", path);
+}
 export const dynamic = "force-dynamic";
 
 const tl = (kurus: number) => `${new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 2 }).format(kurus / 100)} ₺`;
 const limit = (v: number | null | undefined, one: string, many: (n: number) => string) => v === null || v === undefined ? "Sınırsız" : v === 1 ? one : many(v);
 const featureRows: [PlanFeature, string][] = [["public_quotes", "Paylaşılabilir teklif bağlantısı"], ["pdf", "PDF teklif"], ["whatsapp", "WhatsApp ile paylaşım"], ["actual_profit", "Gerçek kâr takibi"], ["advanced_reports", "Gelişmiş raporlar"], ["remove_branding", "KaçaYapayım ibaresini kaldırma"], ["business_logo", "Teklifte işletme logosu"]];
 
-const faqs = [
-  ["Ücretli paketler ne zaman açılıyor?", "Ücretli paketler çok yakında açılacak. Ödeme altyapısı hazır olana kadar Ücretsiz paketle başlayabilirsin; ödeme açıldığında koşullar satın alma ekranında gösterilir."],
-  ["Ücretsiz paketin sınırı nedir?", "Ücretsiz pakette ayda 5 teklif hazırlayabilir ve 20 aktif müşteri tutabilirsin. İşletme ve kullanıcı sayısı bir ile sınırlıdır."],
-  ["Yıllık ödeme neden öne çıkarılıyor?", "Yıllık fiyat, aylık fiyatın on ikiyle çarpımından düşüktür. Tutarlar TL cinsindendir; vergi ve ödeme koşulları ödeme ekranında gösterilecektir."],
-  ["Paket almadan usta bulabilir miyim?", "Evet. Usta bulmak ve iş ilanı vermek paketlerden bağımsızdır."],
-] as const;
-
 export default async function Page() {
-  const plans = await getPlans();
-  const paidOpen = Boolean(process.env.BILLING_PROVIDER?.trim());
-  const rows: string[][] = [
-    ["Aylık teklif", ...plans.map(p => limit(p.limits.monthly_quotes, "Ayda 1 teklif", n => `Ayda ${n} teklif`))],
-    ["Aktif müşteri", ...plans.map(p => limit(p.limits.active_customers, "1 müşteri", n => `${n} müşteri`))],
-    ["İşletme", ...plans.map(p => String(p.limits.businesses ?? "Sınırsız"))],
-    ["Kullanıcı", ...plans.map(p => String(p.limits.users ?? "Sınırsız"))],
-    ...featureRows.map(([key, label]) => [label, ...plans.map(p => p.features[key] ? "Var" : "Yok")]),
+  const [plans, viewer] = await Promise.all([getPlans(), getViewer()]);
+  const paidOpen = billingAvailable();
+  const buyHref = viewer ? "/billing" : "/register?hesap=usta";
+  const faqs: (readonly [string, string])[] = [
+    paidOpen
+      ? ["Paketi nasıl satın alırım?", "Usta hesabınla giriş yapıp faturalama sayfasından paketi ve ödeme dönemini seçersin. Tutarlar TL cinsindendir; vergi ve ödeme koşulları ödeme ekranında gösterilir."]
+      : ["Ücretli paketler ne zaman açılıyor?", "Ücretli paketler çok yakında açılacak. O zamana kadar Ücretsiz paketle başlayabilirsin; ödeme açıldığında koşullar satın alma ekranında gösterilir."],
+    ["Ücretsiz paketin sınırı nedir?", `Ücretsiz pakette ${limit(plans.find(p => p.id === "free")?.limits.monthly_quotes, "ayda 1 teklif", n => `ayda ${n} teklif`)} hazırlayabilir ve ${limit(plans.find(p => p.id === "free")?.limits.active_customers, "1 aktif müşteri", n => `${n} aktif müşteri`)} tutabilirsin.`],
+    ["Yıllık ödeme neden öne çıkarılıyor?", "Yıllık fiyat, aylık fiyatın on ikiyle çarpımından düşüktür. Her pakette iki fiyatı da gösteriyoruz."],
+    ["Paket almadan usta bulabilir miyim?", "Evet. Müşteriler için usta bulmak ve iş ilanı vermek her zaman ücretsiz ve paketlerden bağımsızdır."],
+  ] as const;
+  const cell = (on: boolean) => on ? <><Check size={18} aria-hidden="true" className="text-[#075d54]" /><span className="sr-only">Var</span></> : <><Minus size={18} aria-hidden="true" className="text-[#6e6e73]" /><span className="sr-only">Yok</span></>;
+  const rows: { label: string; values: React.ReactNode[] }[] = [
+    { label: "Aylık teklif", values: plans.map(p => limit(p.limits.monthly_quotes, "Ayda 1 teklif", n => `Ayda ${n} teklif`)) },
+    { label: "Aktif müşteri", values: plans.map(p => limit(p.limits.active_customers, "1 müşteri", n => `${n} müşteri`)) },
+    { label: "İşletme", values: plans.map(p => String(p.limits.businesses ?? "Sınırsız")) },
+    { label: "Kullanıcı", values: plans.map(p => String(p.limits.users ?? "Sınırsız")) },
+    ...featureRows.map(([key, label]) => ({ label, values: plans.map(p => cell(Boolean(p.features[key]))) })),
   ];
-  const crumbs = [{ name: "Ana Sayfa", path: "/" }, { name: "Fiyatlandırma", path: "/fiyatlandirma" }];
-  return <PageShell>
-    <JsonLd data={graph(
-      webPageNode({ path: "/fiyatlandirma", name: title, description }), breadcrumbNode(crumbs), faqNode("/fiyatlandirma", faqs),
-      ...plans.filter(p => p.id !== "free").map((p: Plan) => ({ "@type": "Product", "@id": `${siteOrigin}/fiyatlandirma#${p.id}`, name: `KaçaYapayım ${p.name}`, description: p.description, offers: { "@type": "Offer", price: p.yearly_price_kurus / 100, priceCurrency: "TRY", url: `${siteOrigin}/fiyatlandirma`, availability: paidOpen ? "https://schema.org/InStock" : "https://schema.org/PreOrder" } })),
-    )} />
-    <Crumbs items={[{ name: "Ana Sayfa", href: "/" }, { name: "Fiyatlandırma" }]} />
-    <Hero eyebrow="Fiyatlandırma" title="İşin büyüdükçe yanında." lead="İlk işinin hesabını ücretsiz çıkar. Daha fazla teklif ve müşteri gerektiğinde yıllık paketle büyü." />
-    {!paidOpen && <p role="note" className="mt-6 max-w-3xl rounded-2xl bg-[#F7EBD6] p-4 font-semibold leading-7">Ücretli paketler çok yakında. Şimdilik Ücretsiz paketle başlayabilirsin.</p>}
-    <section className="mt-10" aria-label="Paket karşılaştırması"><h2 className="sr-only">Paketler</h2>
-      <div className="grid gap-4 lg:grid-cols-3">{plans.map(p => { const paid = p.id !== "free"; return <section key={p.id} className={`${card} flex min-w-0 flex-col ${p.id === "usta" ? "border-[#075D54]" : ""}`}>
-        <h3 className="text-xl font-bold">{p.name}</h3><p className="mt-1 leading-6 text-[#5B6460]">{p.description}</p>
-        <p className="mt-5"><span className="text-4xl font-bold tracking-[-.03em]">{paid ? tl(p.yearly_price_kurus) : "0 ₺"}</span><span className="ml-1 text-[#5B6460]">{paid ? "/yıl" : ""}</span></p>
-        {paid && <p className="mt-1 text-sm text-[#5B6460]">Aylık ödemeyle {tl(p.monthly_price_kurus)}/ay; yıllık ödeme aylık {tl(Math.round(p.yearly_price_kurus / 12))} eder.</p>}
-        <p className="mt-4 text-sm font-semibold">{limit(p.limits.monthly_quotes, "Ayda 1 teklif", n => `Ayda ${n} teklif`)} · {limit(p.limits.active_customers, "1 müşteri", n => `${n} aktif müşteri`)}</p>
+  const crumbs = [{ name: "Ana Sayfa", path: "/" }, { name: "Fiyatlandırma", path }];
+  // FAQPage (faqNode) is emitted through PageLd and only for the FAQ visible below.
+  // Offers only when paid plans can actually be bought; otherwise no Product/Offer markup at all.
+  const offers = paidOpen ? plans.filter(p => p.id !== "free").map((p: Plan) => ({ "@type": "Product", "@id": `${siteOrigin}${path}#${p.id}`, name: `KaçaYapayım ${p.name}`, description: p.description, offers: { "@type": "Offer", price: p.yearly_price_kurus / 100, priceCurrency: "TRY", url: `${siteOrigin}${path}`, availability: "https://schema.org/InStock" } })) : [];
+  return <>
+    <PageLd path={path} name={name} description="Paket fiyatları ve limitleri." crumbs={crumbs} faqs={faqs} extra={offers} />
+    <PageHead crumbs={[{ name: "Ana Sayfa", href: "/" }, { name: "Fiyatlandırma" }]} eyebrow="Fiyatlandırma" h="İşin büyüdükçe yanında." text="Müşteriler için usta bulmak ve ilan açmak ücretsiz. Ustalar için ilk teklifler ücretsiz; daha fazlası için yıllık ya da aylık paket.">
+      {!paidOpen && <p role="note" className="rounded-full bg-[#f5f5f7] px-5 py-3 text-base font-semibold text-[#1d1d1f]">Ücretli paketler çok yakında. Şimdilik Ücretsiz paketle başlayabilirsin.</p>}
+    </PageHead>
+
+    <Band tone="gray" label="plans-title">
+      <h2 id="plans-title" className="sr-only">Paketler</h2>
+      <div className="grid gap-4 lg:grid-cols-3">{plans.map(p => { const paid = p.id !== "free"; return <section key={p.id} aria-labelledby={`plan-${p.id}`} className={`${tile} flex flex-col ${p.id === "usta" ? "border-2 border-[#075d54]" : ""}`}>
+        <h3 id={`plan-${p.id}`} className={title}>{p.name}</h3><p className="mt-2 leading-[1.5] text-[#515154]">{p.description}</p>
+        <p className="mt-6"><span className="text-5xl font-[650] tracking-[-.04em] text-[#1d1d1f]">{paid ? tl(Math.round(p.yearly_price_kurus / 12)) : "0 ₺"}</span><span className="ml-1 text-[#515154]">{paid ? "/ay" : ""}</span></p>
+        {paid ? <p className="mt-2 text-sm leading-[1.45] text-[#515154]">Yıllık ödemede toplam {tl(p.yearly_price_kurus)}. Aylık ödemede {tl(p.monthly_price_kurus)}/ay.</p> : <p className="mt-2 text-sm text-[#515154]">Süresiz ücretsiz.</p>}
+        <p className="mt-4 text-sm font-semibold text-[#1d1d1f]">{limit(p.limits.monthly_quotes, "Ayda 1 teklif", n => `Ayda ${n} teklif`)} · {limit(p.limits.active_customers, "1 müşteri", n => `${n} aktif müşteri`)}</p>
         <div className="mt-6 flex-1" />
-        {paid ? (paidOpen ? <Link href="/register" className={btnPrimary}>{p.name} paketini seç</Link> : <span className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#F4EFE4] px-4 text-center font-semibold text-[#5B6460]">Çok yakında</span>) : <Link href="/register" className={btnPrimary}>Ücretsiz Başla</Link>}
+        {paid ? (paidOpen ? <Link href={buyHref} className={pillPrimary}>{p.name} paketini seç</Link> : <span className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#f5f5f7] px-5 text-center font-semibold text-[#515154]">Çok yakında</span>) : <Link href="/register?hesap=usta" className={pillSecondary}>Ücretsiz başla</Link>}
       </section>; })}</div>
-      <DataTable caption="Paketlerin özellik ve limit karşılaştırması" head={["Özellik", ...plans.map(p => p.name)]} rows={rows} />
-      <p className="mt-3 text-sm text-[#5B6460]">Fiyatlar TL cinsindendir. Vergi ve ödeme koşulları ödeme ekranında gösterilir.</p>
-    </section>
-    <Faq items={faqs} />
-    <aside className={`${card} mt-14 flex flex-wrap items-center justify-between gap-4`}><div><h2 className={h2Class}>Önce bir işi hesapla.</h2><p className="mt-2 text-[#3F4944]">Ücretsiz hesaplayıcıyla maliyetinin teklif fiyatına nasıl dönüştüğünü gör.</p></div><Link href="/hesaplama-araclari/kar-marji" className={btnSecondary}>Kâr marjını hesapla</Link></aside>
-  </PageShell>;
+      <p className="mt-5 text-sm text-[#515154]">Müşteriler için ücretsiz: usta aramak, talep göndermek ve ilan açmak için paket gerekmez. Fiyatlar TL cinsindendir; vergi ve ödeme koşulları ödeme ekranında gösterilir.</p>
+    </Band>
+
+    <Band label="matrix-title">
+      <h2 id="matrix-title" className={headline}>Paketleri karşılaştır.</h2>
+      <div className="relative mt-8 overflow-x-auto rounded-[20px] border border-[#d2d2d7]"><table className="w-full min-w-[34rem] border-collapse text-left text-[15px] leading-6">
+        <caption className="sr-only">Paketlerin özellik ve limit karşılaştırması</caption>
+        <thead><tr className="bg-[#f5f5f7]"><th scope="col" className="px-4 py-4 font-semibold text-[#1d1d1f]">Özellik</th>{plans.map(p => <th key={p.id} scope="col" className="px-4 py-4 font-semibold text-[#1d1d1f]">{p.name}</th>)}</tr></thead>
+        <tbody>{rows.map(r => <tr key={r.label} className="border-t border-[#d2d2d7]"><th scope="row" className="px-4 py-3 align-middle font-semibold text-[#1d1d1f]">{r.label}</th>{r.values.map((v, i) => <td key={i} className="px-4 py-3 align-middle text-[#515154]"><span className="inline-flex items-center gap-1">{v}</span></td>)}</tr>)}</tbody>
+      </table></div>
+    </Band>
+
+    <Band tone="gray" label="faq-title"><Faq items={faqs} /></Band>
+    <Band label="calc-title"><div className="flex flex-wrap items-center justify-between gap-6"><Intro h="Önce bir işi hesapla." id="calc-title" text="Ücretsiz hesaplayıcıyla maliyetinin teklif fiyatına nasıl dönüştüğünü gör." /><Link href="/hesaplama-araclari/kar-marji" className={pillSecondary}>Kâr marjını hesapla</Link></div>
+      <p className="mt-6"><Link href="/ustalar-icin" className={textLink}>Ustalar için ürün turu</Link></p></Band>
+  </>;
 }

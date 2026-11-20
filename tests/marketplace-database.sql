@@ -59,6 +59,8 @@ declare
   copied uuid;
   accepted jsonb;
   detail jsonb;
+  overview jsonb;
+  istanbul_today date := (now() at time zone 'Europe/Istanbul')::date;
   proposal text := to_char((now() at time zone 'Europe/Istanbul') + interval '1 day','YYYY-MM-DD"T"HH24:MI');
   report uuid;
   payload jsonb := '{"category":"tesisat","title":"Musluk değişimi","body":"Mutfak musluğu sökülüp yenisi takılacak.","city":"İstanbul","district":"Kadıköy","address":"Gizli adres 12","amount":"375.50"}';
@@ -147,6 +149,13 @@ begin
   if detail->'request'->>'address'<>'Yalnızca seçilen usta adresi'
     or not exists(select 1 from public.jobs where id=job and status='accepted' and selected_sale_price=450.20)
     then raise exception 'Selected price or allocated job missing'; end if;
+  overview := public.get_dashboard_overview(istanbul_today,istanbul_today+1);
+  if overview->>'hasAnyQuote' is distinct from 'true'
+    or (overview->'active'->>'count')::integer is distinct from 1
+    or (overview->'active'->>'volume')::numeric is distinct from 450.20
+    or overview->'activeJobs'->0->>'id' is distinct from job::text
+    or (overview->'activeJobs'->0->>'amount')::numeric is distinct from 450.20
+    then raise exception 'Awarded marketplace job missing from active dashboard overview'; end if;
   perform public.market_write('confirm_appointment',jsonb_build_object('id',listing,'version',detail->'request'->>'appointment_at'));
   perform public.market_write('start',jsonb_build_object('id',listing));
   perform public.market_write('finish',jsonb_build_object('id',listing));
@@ -159,6 +168,10 @@ begin
   perform public.market_write('review',jsonb_build_object('id',listing,'rating','5','body','İş zamanında tamamlandı.'));
   if public.market_directory(jsonb_build_object('id',provider))->'providers'->0->>'review_count'<>'1'
     then raise exception 'Verified review missing'; end if;
+  perform public.market_write('favorite',jsonb_build_object('provider',provider));
+  detail := public.market_read('favorites')->0;
+  if (detail->>'rating')::numeric is distinct from 5 or (detail->>'review_count')::integer is distinct from 1
+    then raise exception 'Favorite rating or review count missing'; end if;
   report := public.market_write('report',jsonb_build_object('id',listing,'body','İncelenmesi istenen kayıt.'));
   perform public.market_write('mark_read','{}');
   if exists(select 1 from jsonb_array_elements(public.market_read('notices')) n where n->>'read_at' is null)
@@ -200,6 +213,18 @@ begin
   perform public.save_actual_job_costs(job,'[{"name":"Malzeme","category":"material","totalCost":"50.15"}]');
   if not exists(select 1 from public.jobs where id=job and actual_profit=400.05)
     then raise exception 'Agreed platform price was not used for net profit'; end if;
+  overview := public.get_dashboard_overview(istanbul_today,istanbul_today+1);
+  if (overview->'completed'->>'count')::integer is distinct from 1
+    or (overview->'completed'->>'completedAmount')::numeric is distinct from 450.20
+    or (overview->'completed'->>'actualProfit')::numeric is distinct from 400.05
+    or overview->'topJobs'->0->>'id' is distinct from job::text
+    or (overview->'topJobs'->0->>'salePrice')::numeric is distinct from 450.20
+    then raise exception 'Completed marketplace job missing from dashboard financials'; end if;
+  perform set_config('request.jwt.claims',jsonb_build_object('sub',customer,'role','authenticated','aal','aal1')::text,true);
+  detail := public.market_read('favorites')->0;
+  if detail->>'rating' is not null or (detail->>'review_count')::integer is distinct from 0
+    then raise exception 'Hidden review leaked into favorites'; end if;
+  perform set_config('request.jwt.claims',jsonb_build_object('sub',tradesperson,'role','authenticated','aal','aal1')::text,true);
   copied := public.copy_my_job(job);
   if exists(select 1 from public.jobs where id=copied and input_data ? 'market_request')
     then raise exception 'A copied job inherited the private request link'; end if;

@@ -95,11 +95,31 @@ do $$ declare token uuid;other_token uuid;p jsonb;blocked boolean;begin
  if (select count(*) from public.quotes where package_group_id=(select package_group_id from public.quotes where public_token=token) and status='cancelled')<>2 then raise exception 'Alternative packages remained open';end if;
 end $$;
 -- Automatic expenses and explicit team note permission.
-update public.quotes set status='accepted',accepted_at=now() where id=current_setting('test.qa')::uuid;
-update public.jobs set status='in_progress',accepted_quote_id=current_setting('test.qa')::uuid where id=current_setting('test.ja')::uuid;
+set local role service_role;
+do $$
+declare job_id_arg uuid := current_setting('test.ja')::uuid;
+        winner uuid := current_setting('test.qa')::uuid;
+        winner_token uuid; sibling_token uuid;
+begin
+ select public_token into winner_token from public.quotes where id=winner;
+ select public_token into sibling_token from public.quotes where job_id=job_id_arg and quote_number='TEST-3';
+ if public.respond_to_quote(winner_token,'accept') is distinct from 'accepted'
+   or public.respond_to_quote(winner_token,'accept') is distinct from 'accepted'
+   then raise exception 'Ordinary quote acceptance or retry failed'; end if;
+ if public.get_public_quote_details(sibling_token)->>'status' is distinct from 'cancelled'
+   or exists(select 1 from public.quotes where job_id=job_id_arg and status in ('ready','sent','viewed'))
+   then raise exception 'Accepted ordinary quote left another public quote open'; end if;
+end $$;
+reset role;
 set local role authenticated;
 do $$ declare lines jsonb; blocked boolean; e uuid; begin
  perform set_config('request.jwt.claims',jsonb_build_object('sub',current_setting('test.a'),'role','authenticated')::text,true);
+ blocked:=false;
+ begin
+   perform public.save_quote_with_tax_rate(null,current_setting('test.ja')::uuid,'ready','Late quote','','[{"name":"Scope"}]','[]','','',current_date+7,'',null,false,'included',20);
+ exception when raise_exception then blocked:=sqlerrm='Job already accepted'; end;
+ if not blocked then raise exception 'Accepted job received another published quote'; end if;
+ perform public.start_job(current_setting('test.ja')::uuid);
  select jsonb_agg(jsonb_build_object('estimatedId',id,'totalCost',total_cost::text)) into lines from public.job_cost_breakdown where job_id=current_setting('test.ja')::uuid;
  insert into public.work_entries(business_id,job_id,kind,title,amount) values(current_setting('test.ba')::uuid,current_setting('test.ja')::uuid,'expense','Parking',100) returning id into e;
  perform public.save_actual_job_costs(current_setting('test.ja')::uuid,lines,'');
@@ -121,6 +141,19 @@ do $$ declare lines jsonb; blocked boolean; e uuid; begin
  if jsonb_array_length(public.get_assigned_jobs()->0->'notes')<>1 then raise exception 'Shared note missing';end if;
  blocked:=false;begin perform public.add_assigned_job_note(current_setting('test.jb')::uuid,'Other job','');exception when raise_exception then blocked:=true;end;
  if not blocked then raise exception 'Unassigned member wrote note';end if;
+end $$;
+reset role;
+
+insert into private.billing_checkout_attempts(token,business_id,plan_id,billing_interval,plan_reference,created_at,expires_at)
+values ('expired-test-token',current_setting('test.ba')::uuid,'usta','monthly','test-plan',now()-interval '5 minutes',now()-interval '1 minute'),
+       ('open-test-token',current_setting('test.ba')::uuid,'usta','monthly','test-plan',now()-interval '10 minutes',now()+interval '1 minute'),
+       ('only-expired-token',current_setting('test.bb')::uuid,'usta','monthly','test-plan',now()-interval '5 minutes',now());
+set local role service_role;
+do $$ begin
+ if public.get_pending_iyzico_checkout(current_setting('test.ba')::uuid) is distinct from 'open-test-token'
+   or public.get_pending_iyzico_checkout(current_setting('test.bb')::uuid) is not null
+   or public.get_iyzico_checkout('only-expired-token')->>'status' is distinct from 'pending'
+   then raise exception 'Expired checkout reconciliation filter failed'; end if;
 end $$;
 reset role;
 rollback;

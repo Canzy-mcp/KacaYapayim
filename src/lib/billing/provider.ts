@@ -44,6 +44,10 @@ export class BillingProviderUnavailableError extends Error {
   constructor() { super("Abonelik ödemeleri henüz kullanıma açılmadı."); }
 }
 
+export function billingAvailable(env = process.env): boolean {
+  return readIyzicoConfig(env) !== null;
+}
+
 export function getBillingProvider(): IyzicoBillingProvider {
   const config = readIyzicoConfig(process.env);
   if (!config) throw new BillingProviderUnavailableError();

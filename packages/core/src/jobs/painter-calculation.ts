@@ -1,4 +1,5 @@
 import type { BusinessCostItem, CostCategory, CostUnit } from "../types/database.ts";
+import { lineTotal } from "../decimal.ts";
 
 export type PainterWorkInput = {
   wall_area: number; ceiling_area: number; wall_coats: number; ceiling_coats: number;
@@ -94,7 +95,7 @@ export function calculatePainterJobCost(input: {
       throw new PainterCalculationError("INVALID_COST", `${label} fiyatını Maliyetlerim sayfasında kontrol et.`, key);
     const preciseQuantity = round4(quantity);
     breakdown.push({ cost_item_id: cost.id, name: cost.name, category: cost.category, unit: cost.unit,
-      quantity: preciseQuantity, unit_cost: cost.unit_cost, total_cost: amount(Math.round(preciseQuantity * cents(cost.unit_cost))), source_type, metadata });
+      quantity: preciseQuantity, unit_cost: cost.unit_cost, total_cost: lineTotal(preciseQuantity, cost.unit_cost), source_type, metadata });
   }
   add(byKey.get("interior_paint"), "interior_paint", work.wall_area * work.wall_coats / settings.paint_coverage_per_liter * wasteFactor, "material");
   if (work.primer_required) add(byKey.get("primer"), "primer", work.wall_area * work.primer_coats / settings.primer_coverage_per_liter * wasteFactor, "material");

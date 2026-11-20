@@ -1,3 +1,5 @@
+import { parsePrice } from "../money.ts";
+
 const integer = new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 0 });
 const decimal = new Intl.NumberFormat("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -11,8 +13,6 @@ export function formatPercent(value: number | null) {
 }
 
 export function parseCostInput(value: string) {
-  const normalized = value.trim().replace(",", ".");
-  if (!/^\d+(?:\.\d{1,2})?$/.test(normalized)) return null;
-  const amount = Number(normalized);
-  return Number.isFinite(amount) && amount <= 999999999999.99 ? amount : null;
+  const amount = parsePrice(value);
+  return amount !== null && amount <= 999999999999.99 ? amount : null;
 }

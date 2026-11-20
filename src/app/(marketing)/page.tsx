@@ -1,9 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { ArrowRight, BadgeCheck, CalendarDays, Check, ClipboardList, Lock, MessageSquareText, Search, ShieldCheck } from "lucide-react";
-import { graph, JsonLd, organizationId, siteMetadata, siteOrigin } from "@/lib/marketing/seo";
-import { MarginExample, ProductDemo } from "@/components/marketing/product-demo";
+import { ArrowRight, BadgeCheck, Lock, Search, ShieldCheck, Flag } from "lucide-react";
+import { graph, JsonLd, organizationId, siteMetadata, siteOrigin, webPageNode } from "@/lib/marketing/seo";
+import { Band, CtaBand, Intro, Photo, Steps, ctaGhost, ctaLight, display, headline, lead, pillPrimary, pillSecondary, textLink, tile } from "@/components/marketing/acquisition/parts";
 
 export const metadata: Metadata = siteMetadata("Usta bul, teklif al ve işini yönet", "İşin için usta bul veya ilan açıp teklif al. Ustalar için maliyet hesabı, profesyonel teklifler ve iş takibi.", "/");
 
@@ -20,93 +20,90 @@ const services = [
 ] as const;
 
 const steps = [
-  { icon: Search, title: "Hizmeti ve ilçeni seç", text: "Aradığın işi ve bölgeni yaz. Bölgendeki usta profillerini, hizmet alanlarını ve değerlendirmeleri gör." },
-  { icon: ClipboardList, title: "Bir ustaya yaz ya da ilan aç", text: "Beğendiğin ustaya doğrudan talep gönder. Ya da işi bir kez anlat, ilanına gelen teklifleri karşılaştır." },
-  { icon: CalendarDays, title: "Tarihi birlikte belirle", text: "Mesajlaş, keşif günü ve fiyatta anlaş. İş bitince deneyimini yaz, sonraki müşteriye yol göster." },
+  { title: "Ustayı bul", text: "Hizmeti ve ilçeni seç. Profilleri, hizmet bölgelerini ve değerlendirmeleri incele." },
+  { title: "Talep gönder ya da ilan aç", text: "Beğendiğin ustaya doğrudan yaz. Ya da işi bir kez anlat, gelen teklifleri karşılaştır." },
+  { title: "Seç, buluş, değerlendir", text: "Ustayı sen seç, keşif gününü birlikte belirle. İş bitince deneyimini paylaş." },
 ] as const;
 
 const trust = [
-  { icon: ShieldCheck, title: "Yorumlar gerçek işten gelir", text: "Değerlendirme, ustayla yürüttüğün bir talebe bağlı yazılır. Boş yere puan verilemez." },
-  { icon: Lock, title: "Adresin yalnızca seçtiğin ustaya gider", text: "Açık adresin herkese görünmez. Ustayı sen seçersin, adres ancak o zaman paylaşılır." },
+  { icon: ShieldCheck, title: "Yorumlar tamamlanan işten gelir", text: "Değerlendirmeyi yalnızca işi tamamlanan müşteri yazabilir." },
+  { icon: Lock, title: "Adresin senin elinde", text: "Adresin yalnızca seçtiğin ustaya gider ve ancak sen paylaştıktan sonra." },
   { icon: BadgeCheck, title: "Müşteriler için ücretsiz", text: "Usta aramak, ilan açmak ve teklif almak için ücret ödemezsin." },
+  { icon: Flag, title: "Profili bildirebilirsin", text: "Uygunsuz bir profil görürsen bildir, ekibimiz inceler." },
 ] as const;
 
 const faqs = [
   { q: "Usta bulmak ücretli mi?", a: "Hayır. Usta aramak, talep göndermek ve ilan açmak müşteriler için ücretsiz." },
-  { q: "Adresimi herkes görebilir mi?", a: "Hayır. Açık adresin yalnızca talep gönderdiğin veya teklifini kabul ettiğin ustayla paylaşılır." },
-  { q: "İlan ile doğrudan talep arasındaki fark nedir?", a: "Doğrudan talepte seçtiğin ustaya yazarsın. İlanda işi bir kez anlatırsın, bölgendeki ustalar teklif verir ve sen karşılaştırırsın." },
-  { q: "Yorumlara güvenebilir miyim?", a: "Her yorum, ustayla yürütülmüş bir talebe bağlı olarak yazılır. Talebi olmayan biri puan veremez." },
+  { q: "Adresimi herkes görebilir mi?", a: "Hayır. Adresin ilanda ya da profilde görünmez. Bir ustayı seçtikten sonra istersen adresini yalnızca o ustayla paylaşırsın." },
+  { q: "İlan ile doğrudan talep arasındaki fark nedir?", a: "Doğrudan talepte seçtiğin ustaya yazarsın. İlanda işi bir kez anlatırsın, bölgendeki ustalar teklif verir ve sen karşılaştırıp birini seçersin." },
+  { q: "Yorumlara güvenebilir miyim?", a: "Yorumlar yalnızca tamamlanan işlerden sonra, o işi yaptıran müşteri tarafından yazılır. Talebi tamamlanmamış biri puan veremez." },
   { q: "Usta olarak nasıl katılırım?", a: "Ücretsiz hesap aç, hizmet alanını ve bölgeni ekle, profilini yayınla. Teklif ve maliyet araçları aynı hesapta." },
 ] as const;
+const faqPairs = faqs.map(f => [f.q, f.a] as const);
 
 export default function Home() {
   return <>
-    <JsonLd data={graph({ "@type": "WebApplication", "@id": `${siteOrigin}/#webapp`, name: "KaçaYapayım", applicationCategory: "BusinessApplication", operatingSystem: "Web", description: "Usta arama, iş ilanı, teklif ve iş yönetimi uygulaması.", url: siteOrigin, provider: { "@id": organizationId } })} />
+    <JsonLd data={graph(
+      webPageNode({ path: "/", name: "KaçaYapayım: usta bul, teklif al", description: "İşin için usta bul veya ilan açıp teklif al.", hasBreadcrumb: false }),
+      { "@type": "WebApplication", "@id": `${siteOrigin}/#webapp`, name: "KaçaYapayım", applicationCategory: "BusinessApplication", operatingSystem: "Web", description: "Usta arama, iş ilanı, teklif ve iş yönetimi uygulaması.", url: siteOrigin, publisher: { "@id": organizationId } },
+      { "@type": "FAQPage", "@id": `${siteOrigin}/#faq`, inLanguage: "tr-TR", mainEntity: faqPairs.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) },
+    )} />
 
-    <section className="ky-hero" aria-labelledby="hero-title"><div className="marketing-container ky-hero-grid">
-      <div className="ky-hero-copy">
-        <p className="marketing-eyebrow">Mahallendeki ustalar</p>
-        <h1 id="hero-title">Doğru ustayı bul, işini rahat teslim et.</h1>
-        <p className="ky-lead">Hizmeti ve ilçeni seç, ustaların profillerine bak, tek talepte teklif al.</p>
-        <form action="/usta-bul" method="get" className="ky-search" aria-label="Usta ara">
-          <div className="ky-field ky-field-wide"><label htmlFor="home-category">Hizmet</label>
-            <select id="home-category" name="category" defaultValue=""><option value="">Tüm hizmetler</option>{categories.map(([slug, name]) => <option key={slug} value={slug}>{name}</option>)}</select></div>
-          <div className="ky-field"><label htmlFor="home-city">İl</label><input id="home-city" name="city" type="text" placeholder="Örn. İstanbul" maxLength={80} autoComplete="address-level1" /></div>
-          <div className="ky-field"><label htmlFor="home-district">İlçe</label><input id="home-district" name="district" type="text" placeholder="Örn. Kadıköy" maxLength={80} autoComplete="address-level2" /></div>
-          <button type="submit" className="marketing-primary ky-field-wide"><Search size={18} aria-hidden="true" />Usta bul</button>
-        </form>
-        <p className="ky-hero-alt">Ne aradığından emin değil misin? <Link href="/talepler/yeni" className="marketing-text-link">İş ilanı ver</Link> ve teklifler sana gelsin.</p>
+    <section className="bg-white pb-10 pt-10 sm:pt-16 lg:pb-14 lg:pt-20" aria-labelledby="hero-title"><div className="mx-auto w-full min-w-0 max-w-[1180px] px-5 sm:px-8 lg:px-12">
+      <div className="mx-auto max-w-4xl text-center">
+        <p className="text-sm font-semibold text-[#075d54]">Mahallendeki ustalar</p>
+        <h1 id="hero-title" className={`mt-3 ${display}`}>Doğru ustayı bul, işini rahat teslim et.</h1>
+        <p className={`mx-auto mt-5 max-w-[48ch] ${lead}`}>Hizmeti ve ilçeni seç, ustaların profillerine bak, tek talepte teklif al.</p>
       </div>
-      <figure className="ky-hero-photo"><Image src="/images/marketing/hero-kesif.webp" alt="Bir boyacı ve ev sahibi, salon duvarını şerit metreyle birlikte ölçüyor" fill priority sizes="(min-width: 1024px) 560px, 100vw" />
-        <figcaption>Keşifte duvarı birlikte ölçmek. Temsili görsel.</figcaption></figure>
+      <form action="/usta-bul" method="get" aria-label="Usta ara" className="mx-auto mt-10 grid max-w-4xl gap-4 rounded-[20px] border border-[#d2d2d7] bg-[#f5f5f7] p-4 sm:grid-cols-2 sm:p-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
+        <div className="grid min-w-0 gap-1.5"><label htmlFor="home-category" className="text-sm font-semibold text-[#1d1d1f]">Hizmet</label>
+          <select id="home-category" name="category" defaultValue="" className="min-h-12 w-full min-w-0 rounded-xl border border-[#d2d2d7] bg-white px-3 text-base text-[#1d1d1f] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#075d54]"><option value="">Tüm hizmetler</option>{categories.map(([slug, name]) => <option key={slug} value={slug}>{name}</option>)}</select></div>
+        <div className="grid min-w-0 gap-1.5"><label htmlFor="home-city" className="text-sm font-semibold text-[#1d1d1f]">İl</label>
+          <input id="home-city" name="city" type="text" placeholder="Örn. İstanbul" maxLength={80} autoComplete="address-level1" className="min-h-12 w-full min-w-0 rounded-xl border border-[#d2d2d7] bg-white px-3 text-base text-[#1d1d1f] placeholder:text-[#6e6e73] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#075d54]" /></div>
+        <div className="grid min-w-0 gap-1.5"><label htmlFor="home-district" className="text-sm font-semibold text-[#1d1d1f]">İlçe</label>
+          <input id="home-district" name="district" type="text" placeholder="Örn. Kadıköy" maxLength={80} autoComplete="address-level2" className="min-h-12 w-full min-w-0 rounded-xl border border-[#d2d2d7] bg-white px-3 text-base text-[#1d1d1f] placeholder:text-[#6e6e73] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#075d54]" /></div>
+        <button type="submit" className={`${pillPrimary} sm:col-span-2 lg:col-span-1`}><Search size={18} aria-hidden="true" />Usta bul</button>
+      </form>
+      <p className="mt-5 text-center text-base text-[#515154]">Ne aradığından emin değil misin? <Link href="/talepler/yeni" className={textLink}>İş ilanı ver</Link> ve teklifler sana gelsin.</p>
     </div></section>
 
-    <section id="nasil-calisir" className="landing-section ky-section-white" aria-labelledby="how-title"><div className="marketing-container">
-      <div className="section-intro"><p className="marketing-eyebrow">Nasıl çalışır</p><h2 id="how-title" className="marketing-heading">Aramadan randevuya üç adım.</h2></div>
-      <ol className="how-grid">{steps.map(({ icon: Icon, title, text }, index) => <li key={title}>
-        <div className="how-icon"><Icon size={24} aria-hidden="true" /><span>{index + 1}</span></div><h3>{title}</h3><p>{text}</p></li>)}</ol>
-    </div></section>
+    <section className="bg-white pb-14 sm:pb-20 lg:pb-28" aria-label="Keşifte ev sahibi ve usta">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#e8e8ed] md:aspect-[16/7]"><Image src="/images/marketing/hero-kesif.webp" alt="Bir boyacı ve ev sahibi, salon duvarını şerit metreyle birlikte ölçüyor" fill priority sizes="100vw" className="object-cover" /></div>
+      <p className="mx-auto mt-3 w-full max-w-[1180px] px-5 text-[13px] text-[#6e6e73] sm:px-8 sm:text-sm lg:px-12">Keşifte duvarı birlikte ölçmek. Temsili görsel.</p>
+    </section>
 
-    <section className="landing-section" aria-labelledby="services-title"><div className="marketing-container">
-      <div className="section-heading-row"><div className="section-intro"><p className="marketing-eyebrow">Popüler hizmetler</p><h2 id="services-title" className="marketing-heading">Evinin her işi için usta.</h2></div>
-        <Link href="/meslekler" className="marketing-text-link">Tüm hizmetler <ArrowRight size={17} aria-hidden="true" /></Link></div>
-      <ul className="ky-service-grid">{services.map(service => <li key={service.slug}><Link href={service.slug ? `/usta-bul?category=${service.slug}` : "/usta-bul"} className="ky-service-card">
-        <span className="ky-service-photo"><Image src={`/images/marketing/${service.image}.webp`} alt={service.alt} fill sizes="(min-width: 1280px) 220px, (min-width: 640px) 33vw, 100vw" /></span>
-        <span className="ky-service-copy"><strong>{service.name}</strong><span>{service.text}</span></span></Link></li>)}</ul>
-      <p className="visual-disclosure">Hizmet görselleri temsilidir; usta profillerinde ustaların kendi işleri yer alır.</p>
-    </div></section>
+    <Band tone="gray" label="services-title">
+      <div className="flex flex-wrap items-end justify-between gap-4"><Intro eyebrow="Popüler hizmetler" h="Evinin her işi için usta." id="services-title" /><Link href="/meslekler" className={`${textLink} inline-flex min-h-11 items-center gap-1`}>Tüm meslekler <ArrowRight size={17} aria-hidden="true" /></Link></div>
+      <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{services.map(s => <li key={s.name} className="min-w-0"><Link href={s.slug ? `/usta-bul?category=${s.slug}` : "/usta-bul"} className="group block h-full overflow-hidden rounded-[20px] border border-[#d2d2d7] bg-white no-underline transition-colors duration-150 hover:border-[#075d54] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#075d54]">
+        <span className="relative block aspect-[4/3] bg-[#e8e8ed]"><Image src={`/images/marketing/${s.image}.webp`} alt={s.alt} fill sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw" className="object-cover" /></span>
+        <span className="grid gap-0.5 p-5"><strong className="text-lg font-semibold text-[#1d1d1f]">{s.name}</strong><span className="text-[15px] text-[#515154]">{s.text}</span></span></Link></li>)}</ul>
+      <p className="mt-5 text-sm text-[#6e6e73]">Hizmet görselleri temsilidir. Usta profillerinde ustaların kendi işleri yer alır.</p>
+    </Band>
 
-    <section className="landing-section ky-section-white" aria-labelledby="trust-title"><div className="marketing-container">
-      <div className="section-intro"><p className="marketing-eyebrow">Güven</p><h2 id="trust-title" className="marketing-heading">Kime kapını açtığını bil.</h2></div>
-      <ul className="ky-trust-grid">{trust.map(({ icon: Icon, title, text }) => <li key={title}><span className="ky-trust-icon"><Icon size={22} aria-hidden="true" /></span><h3>{title}</h3><p>{text}</p></li>)}</ul>
-    </div></section>
+    <Band label="how-title" id="nasil-calisir">
+      <Intro eyebrow="Nasıl çalışır" h="Aramadan randevuya üç adım." id="how-title" />
+      <div className="mt-10"><Steps items={steps} /></div>
+      <p className="mt-8"><Link href="/nasil-calisir" className={`${textLink} inline-flex min-h-11 items-center gap-1`}>Ayrıntılı anlatım <ArrowRight size={17} aria-hidden="true" /></Link></p>
+    </Band>
 
-    <section id="usta-paneli" className="landing-section" aria-labelledby="pro-title"><div className="marketing-container">
-      <div className="ky-pro-grid">
-        <div className="ky-pro-copy"><p className="marketing-eyebrow">Ustalar için</p><h2 id="pro-title" className="marketing-heading">Teklifini hesapla, müşterine düzenli gönder.</h2>
-          <p className="ky-lead">Profilini yayınla, bölgendeki taleplere teklif ver. Malzeme, işçilik ve kâr hesabın aynı yerde olsun.</p>
-          <ul className="check-list"><li><Check size={18} aria-hidden="true" /> Maliyetini kendi fiyatlarınla hesapla.</li><li><Check size={18} aria-hidden="true" /> Kapsamı açık bir teklif gönder, yanıtı takip et.</li><li><Check size={18} aria-hidden="true" /> İş bitince gerçek kârını gör.</li></ul>
-          <div className="ky-actions"><Link className="marketing-primary" href="/onboarding?usta=1">Ücretsiz başla <ArrowRight size={17} aria-hidden="true" /></Link><Link className="marketing-secondary" href="/fiyatlandirma">Fiyatlandırma</Link></div>
-          <p className="ky-hero-alt"><Link href="/hesaplama-araclari/kar-marji" className="marketing-text-link">Kâr marjı hesaplama</Link> aracını dene veya <Link href="/rehber" className="marketing-text-link">rehber yazılarına</Link> göz at.</p></div>
-        <figure className="ky-pro-photo"><Image src="/images/marketing/usta-teklif.webp" alt="Şantiyede telefonuyla teklif hazırlayan bir usta" fill sizes="(min-width: 1024px) 540px, 100vw" /><figcaption>Sahada teklif hazırlamak. Temsili görsel.</figcaption></figure>
+    <Band tone="gray" label="trust-title">
+      <Intro eyebrow="Güven" h="Kime kapını açtığını bil." id="trust-title" />
+      <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{trust.map(({ icon: Icon, title: t, text }) => <li key={t} className={`${tile} p-6`}><span className="grid size-11 place-items-center rounded-full bg-[#e4f0ed] text-[#075d54]"><Icon size={22} aria-hidden="true" /></span><h3 className={`mt-5 text-xl font-semibold leading-[1.25] tracking-[-.02em] text-[#1d1d1f]`}>{t}</h3><p className="mt-3 leading-[1.55] text-[#515154]">{text}</p></li>)}</ul>
+      <p className="mt-8"><Link href="/guvenli-hizmet" className={`${textLink} inline-flex min-h-11 items-center gap-1`}>Güvenli hizmet <ArrowRight size={17} aria-hidden="true" /></Link></p>
+    </Band>
+
+    <Band label="pro-title" id="usta-paneli">
+      <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+        <div className="min-w-0"><Intro eyebrow="Ustalar için" h="Teklifini hesapla, müşterine düzenli gönder." id="pro-title" text="Profilini yayınla, bölgendeki taleplere teklif ver. Malzeme, işçilik ve kâr hesabın aynı yerde olsun." />
+          <div className="mt-8 flex flex-wrap gap-3"><Link className={pillPrimary} href="/ustalar-icin">Ustalar için <ArrowRight size={17} aria-hidden="true" /></Link><Link className={pillSecondary} href="/hesaplama-araclari/kar-marji">Kâr marjı hesapla</Link></div></div>
+        <Photo src="/images/marketing/usta-teklif.webp" alt="Şantiyede telefonuyla teklif hazırlayan bir usta" sizes="(min-width: 1024px) 540px, 100vw" caption="Sahada teklif hazırlamak. Temsili görsel." />
       </div>
-      <ProductDemo />
-      <div className="ky-quote-row">
-        <figure className="ky-quote-preview"><div><Image src="/images/marketing/quote-demo-logo.jpg" width={636} height={1279} alt="Gerçek demo teklifinden alınan önizleme: iş kapsamı, 42.500 TL örnek fiyat ve ödeme koşulları" sizes="(min-width: 1024px) 360px, (min-width: 640px) 60vw, 90vw" /></div><figcaption>Gerçek teklif önizlemesi. Örnek veriler.</figcaption></figure>
-        <MarginExample />
-      </div>
-    </div></section>
+    </Band>
 
-    <section className="landing-section ky-section-white" aria-labelledby="faq-title"><div className="marketing-container ky-faq-grid">
-      <div className="section-intro"><p className="marketing-eyebrow">Sık sorulanlar</p><h2 id="faq-title" className="marketing-heading">Aklındaki sorular.</h2>
-        <p className="ky-lead">Cevabı burada yoksa <Link href="/iletisim" className="marketing-text-link">bize yaz</Link>.</p></div>
-      <div className="ky-faq-list">{faqs.map(({ q, a }) => <details key={q}><summary>{q}</summary><p>{a}</p></details>)}</div>
-    </div></section>
+    <Band tone="gray" label="faq-title"><div className="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16"><h2 id="faq-title" className={headline}>Aklındaki sorular.</h2>
+      <div className="grid min-w-0 gap-3">{faqs.map(({ q, a }) => <details key={q} className="group rounded-[20px] border border-[#d2d2d7] bg-white px-6"><summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-4 text-[17px] font-semibold text-[#1d1d1f] marker:content-none focus-visible:outline-[3px] focus-visible:outline-[#075d54] [&::-webkit-details-marker]:hidden"><span className="min-w-0">{q}</span><span aria-hidden="true" className="text-2xl leading-none text-[#075d54] transition-transform duration-150 group-open:rotate-45 motion-reduce:transition-none">+</span></summary><p className="pb-5 leading-[1.6] text-[#515154]">{a}</p></details>)}</div></div>
+    </Band>
 
-    <section className="marketing-container ky-final" aria-labelledby="final-title"><div>
-      <MessageSquareText size={28} aria-hidden="true" />
-      <h2 id="final-title">İşini anlat, ustalar sana yazsın.</h2>
-      <p>Bir kez yaz, bölgendeki ustalardan teklif topla. Ücretsiz.</p>
-      <div className="ky-actions"><Link className="ky-cta-light" href="/talepler/yeni">İş ilanı ver <ArrowRight size={17} aria-hidden="true" /></Link><Link className="ky-cta-ghost" href="/usta-bul">Usta bul</Link></div></div></section>
+    <CtaBand id="final-title" h="İşini anlat, ustalar sana yazsın." text="Bir kez yaz, bölgendeki ustalardan teklif topla. Müşteriler için ücretsiz."><Link className={ctaLight} href="/talepler/yeni">İş ilanı ver <ArrowRight size={17} aria-hidden="true" /></Link><Link className={ctaGhost} href="/usta-bul">Usta bul</Link></CtaBand>
   </>;
 }

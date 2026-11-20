@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { breadcrumbNode, graph, JsonLd, siteMetadata, webPageNode } from "@/lib/marketing/seo";
-import { card, Crumbs, h2Class, Hero, PageShell } from "@/lib/marketing/blocks";
+import { formatDateTr, siteContentModified, marjMarkupTable } from "@/lib/marketing/guides-data";
+import { Band, Byline, Callout, Display, EdCrumbs, Eyebrow, Table, body, h2, muted, pill, pillOutline, proseLink } from "@/lib/marketing/editorial";
 
 const title = "Hesaplama Metodolojisi";
 const description = "KaçaYapayım fiyatı senin girdiğin maliyet ve hedef kâr marjıyla hesaplar; piyasa rayici sunmaz. Formül ve yuvarlama kuralı.";
@@ -10,15 +11,30 @@ const sections = [
   ["2. Hedef kâr marjı", "Marj, kârın satış fiyatına oranıdır. Hedef fiyat = toplam maliyet ÷ (1 − hedef marj / 100). Örneğin 20.000 TL maliyet ve %30 hedef marj için sonuç 28.571,43 TL'dir. Uygulama öneriyi 100 TL yukarı yuvarlayarak 28.600 TL gösterir."],
   ["3. Teklif ve gerçekleşen sonuç", "Önerilen fiyat, teklif kararına yardımcı olur; vergi, tahsilat riski ve kapsam değişiklikleri ayrıca değerlendirilmelidir. İş tamamlandıktan sonra gerçek giderler kaydedildiğinde gerçekleşen kâr = satış fiyatı − gerçekleşen maliyet olarak hesaplanır. Tahmin ile gerçekleşen sonuç farklı olabilir."],
 ] as const;
-const link = "inline-flex min-h-11 items-center font-semibold text-[#075D54] underline underline-offset-4";
 
 export default function Page() {
-  return <PageShell><article className="mx-auto max-w-3xl">
+  return <article>
     <JsonLd data={graph(webPageNode({ path: "/metodoloji", name: title, description }), breadcrumbNode([{ name: "Ana Sayfa", path: "/" }, { name: "Metodoloji", path: "/metodoloji" }]))} />
-    <Crumbs items={[{ name: "Ana Sayfa", href: "/" }, { name: "Metodoloji" }]} />
-    <Hero eyebrow="Metodoloji" title="KaçaYapayım fiyatları nasıl hesaplar?" lead="Önerilen fiyat, senin girdiğin maliyetler ve hedeflediğin satış kâr marjı üzerinden üretilir. KaçaYapayım piyasa fiyatı veya resmi ücret tarifesi vermez." />
-    {sections.map(([h, t]) => <section key={h} className="mt-10"><h2 className={h2Class}>{h}</h2><p className="mt-4 text-lg leading-8 text-[#3F4944]">{t}</p></section>)}
-    <section className={`${card} mt-12`}><h2 className="text-xl font-semibold">Piyasa fiyatı mı?</h2><p className="mt-3 leading-7 text-[#3F4944]">Hayır. KaçaYapayım başka işletmelerin fiyatlarını tahmin etmez; şehir veya meslek için ortalama ücret iddiasında bulunmaz. Hesap senin işine ve girdilerine aittir.</p>
-      <div className="mt-4 flex flex-wrap gap-x-6"><Link className={link} href="/rehber/kar-marji-nasil-hesaplanir">Kâr marjını örnekle öğren</Link><Link className={link} href="/hesaplama-araclari/kar-marji">Kâr marjı hesaplama aracı</Link></div></section>
-  </article></PageShell>;
+    <Band>
+      <div className="mx-auto max-w-[68ch]">
+        <EdCrumbs items={[{ name: "Ana Sayfa", href: "/" }, { name: "Metodoloji" }]} />
+        <div className="mt-6"><Eyebrow>Metodoloji</Eyebrow></div>
+        <Display>KaçaYapayım fiyatları nasıl hesaplar?</Display>
+        <Byline updatedLabel="Son güncelleme" modified={siteContentModified} formatted={formatDateTr(siteContentModified)} />
+        <p className={`mt-8 ${body} text-[1.1875rem] font-medium sm:text-[1.375rem] sm:leading-[1.5]`}>Önerilen fiyat, senin girdiğin maliyetler ve hedeflediğin satış kâr marjı üzerinden üretilir: fiyat = maliyet ÷ (1 − marj). KaçaYapayım piyasa fiyatı veya resmi ücret tarifesi vermez.</p>
+        <div className="mt-8 flex flex-wrap gap-3"><Link href="/hesaplama-araclari/kar-marji" className={pill}>Kâr marjı hesaplama aracı</Link><Link href="/rehber/kar-marji-nasil-hesaplanir" className={pillOutline}>Kâr marjı rehberi</Link></div>
+      </div>
+    </Band>
+    <Band tone="gray" narrow>
+      {sections.map(([h, t], i) => <section key={h} className={i ? "mt-12" : ""}><h2 className={h2}>{h}</h2><p className={`mt-4 ${body}`}>{t}</p></section>)}
+      <h2 className={`${h2} mt-12`}>Kâr marjı ve markup farkı</h2>
+      <p className={`mt-4 ${body}`}>Uygulama marjı kullanır, markup'ı değil. İkisi aynı kârdan farklı yüzdeler çıkarır.</p>
+      <Table caption={marjMarkupTable.caption} head={marjMarkupTable.head} rows={marjMarkupTable.rows} />
+    </Band>
+    <Band narrow>
+      <Callout tone="warn" title="Sınırlar: piyasa fiyatı mı?"><p>Hayır. KaçaYapayım başka işletmelerin fiyatlarını tahmin etmez; şehir veya meslek için ortalama ücret iddiasında bulunmaz. Hesap senin işine ve girdilerine aittir. Örneklerdeki rakamlar açıklama amaçlıdır.</p></Callout>
+      <h2 className={`${h2} mt-12`}>Kim yazar, nasıl düzeltilir?</h2>
+      <p className={`mt-4 ${body} ${muted}`}>Yazım, hesap kontrolü ve düzeltme süreci <Link href="/yayin-politikasi" className={proseLink}>yayın politikasında</Link> anlatılır.</p>
+    </Band>
+  </article>;
 }

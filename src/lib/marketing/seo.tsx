@@ -25,10 +25,22 @@ export const isProductionLike = productionLike;
 export const siteName = "KaçaYapayım";
 export const siteSummary = "KaçaYapayım, Türkiye'de usta bulmayı ve ustaların maliyete dayalı teklif hazırlamasını kolaylaştıran bir platformdur.";
 
-type MetaOptions = { type?: "website" | "article"; publishedTime?: string; modifiedTime?: string };
+export type OgImageKey = "hero" | "painter" | "electrician" | "plumber" | "hvac" | "tadilat" | "teklif" | "randevu";
+type MetaOptions = { type?: "website" | "article"; publishedTime?: string; modifiedTime?: string; image?: OgImageKey };
+
+// Default photo per section so every page gets a relevant OG image without each page choosing one.
+const ogImageByPath: [string, OgImageKey][] = [
+  ["/meslekler/boyaci", "painter"], ["/meslekler/elektrikci", "electrician"], ["/meslekler/tesisatci", "plumber"], ["/meslekler/klimaci", "hvac"],
+  ["/usta-bul", "randevu"], ["/ustalar-icin", "teklif"], ["/guvenli-hizmet", "randevu"], ["/nasil-calisir", "hero"], ["/hesaplama-araclari", "teklif"], ["/rehber", "tadilat"],
+];
+
+export function ogImageUrl(title: string, description: string, path = "/", image?: OgImageKey) {
+  const key = image ?? ogImageByPath.find(([prefix]) => path === prefix || path.startsWith(`${prefix}/`))?.[1] ?? "hero";
+  return `${siteOrigin}/api/og?${new URLSearchParams({ title, description, image: key }).toString()}`;
+}
 
 export function siteMetadata(title: string, description: string, path: string, options: MetaOptions = {}): Metadata {
-  const image = `${siteOrigin}/api/og?${new URLSearchParams({ title, description }).toString()}`;
+  const image = ogImageUrl(title, description, path, options.image);
   const url = `${siteOrigin}${path}`;
   const article = options.type === "article";
   return {
@@ -51,10 +63,20 @@ export function JsonLd({ data }: { data: object | object[] }) {
 export const organizationId = `${siteOrigin}/#organization`;
 export const websiteId = `${siteOrigin}/#website`;
 
+export const organizationKnowsAbout = ["ev hizmetleri", "boya badana", "elektrik", "su tesisatı", "klima", "tadilat", "maliyet hesaplama", "teklif hazırlama"];
+
+export function imageObjectNode(o: { url: string; width: number; height: number; caption?: string; id?: string }) {
+  const url = o.url.startsWith("http") ? o.url : `${siteOrigin}${o.url}`;
+  return { "@type": "ImageObject", ...(o.id ? { "@id": o.id } : {}), url, contentUrl: url, width: o.width, height: o.height, ...(o.caption ? { caption: o.caption } : {}) };
+}
+
+// No postal address, founding date or social profiles are published anywhere in the repo, so none are claimed here.
 export function organizationNode() {
   return {
     "@type": "Organization", "@id": organizationId, name: siteName, url: siteOrigin,
-    logo: `${siteOrigin}/brand/logo.png`, description: siteSummary,
+    logo: imageObjectNode({ id: `${siteOrigin}/#logo`, url: "/brand/logo.png", width: 256, height: 256, caption: `${siteName} logosu` }),
+    description: siteSummary, slogan: "İşinin maliyetini bil. Kârını koru.",
+    knowsAbout: organizationKnowsAbout, areaServed: { "@type": "Country", name: "Türkiye" },
     contactPoint: { "@type": "ContactPoint", contactType: "customer support", email: process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim() || supportEmail, availableLanguage: "tr", areaServed: "TR" },
   };
 }
@@ -92,5 +114,31 @@ export function faqNode(path: string, items: readonly (readonly [string, string]
   return {
     "@type": "FAQPage", "@id": `${siteOrigin}${path}#faq`, inLanguage: "tr-TR",
     mainEntity: items.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
+  };
+}
+
+export function itemListNode(o: { path: string; name: string; items: readonly { name: string; path: string }[] }) {
+  return {
+    "@type": "ItemList", "@id": `${siteOrigin}${o.path}#list`, name: o.name, numberOfItems: o.items.length,
+    itemListElement: o.items.map((item, i) => ({ "@type": "ListItem", position: i + 1, name: item.name, url: `${siteOrigin}${item.path}` })),
+  };
+}
+
+export function collectionPageNode(o: { path: string; name: string; description: string; listPath?: string }) {
+  return { ...webPageNode({ path: o.path, name: o.name, description: o.description, type: "CollectionPage" }), ...(o.listPath ? { mainEntity: { "@id": `${siteOrigin}${o.listPath}#list` } } : {}) };
+}
+
+export function howToNode(o: { path: string; name: string; description: string; steps: readonly (readonly [string, string])[] }) {
+  return {
+    "@type": "HowTo", "@id": `${siteOrigin}${o.path}#howto`, name: o.name, description: o.description, inLanguage: "tr-TR",
+    step: o.steps.map(([name, text], i) => ({ "@type": "HowToStep", position: i + 1, name, text })),
+  };
+}
+
+// KaçaYapayım is a marketplace: the Service node names the platform as brand, never as the provider of the work.
+export function serviceNode(o: { path: string; name: string; description: string; serviceType: string }) {
+  return {
+    "@type": "Service", "@id": `${siteOrigin}${o.path}#service`, name: o.name, description: o.description, serviceType: o.serviceType,
+    url: `${siteOrigin}${o.path}`, areaServed: { "@type": "Country", name: "Türkiye" }, inLanguage: "tr-TR", brand: { "@id": organizationId },
   };
 }

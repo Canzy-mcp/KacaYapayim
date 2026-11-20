@@ -13,8 +13,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteOrigin),
   title: { default: "KaçaYapayım | İşini doğru fiyatlandır", template: "%s | KaçaYapayım" },
   description: siteSummary,
-  openGraph: { siteName: "KaçaYapayım", locale: "tr_TR", type: "website" },
+  openGraph: { siteName: "KaçaYapayım", locale: "tr_TR", type: "website", images: [{ url: `${siteOrigin}/api/og?image=hero`, width: 1200, height: 630, alt: "KaçaYapayım" }] },
+  twitter: { card: "summary_large_image", images: [`${siteOrigin}/api/og?image=hero`] },
   applicationName: "KaçaYapayım",
+  category: "business",
+  formatDetection: { telephone: false, email: false, address: false },
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "5YHiKGyRlhZoPmBvxTmYVWfHZypE79zmrB3wgaJmciI",
     other: process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION ? { "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION } : undefined,

@@ -57,3 +57,15 @@ export function trimDescription(text: string, max = 155) {
   if (Array.from(flat).length <= max) return flat;
   return Array.from(flat).slice(0, max - 1).join("").replace(/\s+\S*$/, "") + "…";
 }
+
+export function parseDirectoryFilters(params: Record<string, string | string[] | undefined>): DirectoryFilters {
+  return Object.fromEntries(filterKeys.map((key) => [key, cleanText(params[key], key === "q" ? 100 : 80)])) as DirectoryFilters;
+}
+
+// Compare link keeps the directory filters and page so "back" returns to the same list.
+export function compareHref(ids: string[], filters: Partial<DirectoryFilters> = {}, page = 1) {
+  const query = new URLSearchParams({ ids: ids.join(",") });
+  for (const key of filterKeys) if (filters[key]) query.set(key, filters[key]!);
+  if (page > 1) query.set("page", String(page));
+  return `/usta-bul/karsilastir?${query}`;
+}
