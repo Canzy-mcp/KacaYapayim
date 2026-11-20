@@ -5,7 +5,10 @@ import { ArrowRight, BadgeCheck, Lock, Search, ShieldCheck, Flag } from "lucide-
 import { graph, JsonLd, organizationId, siteMetadata, siteOrigin, webPageNode } from "@/lib/marketing/seo";
 import { Band, CtaBand, Intro, Photo, Steps, ctaGhost, ctaLight, display, headline, lead, pillPrimary, pillSecondary, textLink, tile } from "@/components/marketing/acquisition/parts";
 
-export const metadata: Metadata = siteMetadata("Usta bul, teklif al ve işini yönet", "İşin için usta bul veya ilan açıp teklif al. Ustalar için maliyet hesabı, profesyonel teklifler ve iş takibi.", "/");
+export const metadata: Metadata = {
+  ...siteMetadata("Kaça Yapayım: usta bul, teklif al", "Kaça Yapayım (KaçaYapayım) ile işin için usta bul veya ilan açıp teklif al. Ustalar için maliyet hesabı, profesyonel teklifler ve iş takibi.", "/"),
+  title: { absolute: "Kaça Yapayım: usta bul, teklif al | KaçaYapayım" },
+};
 
 // Same slugs as the marketplace directory (private.market_categories).
 const categories = [["boya", "Boya ve badana"], ["elektrik", "Elektrik"], ["tesisat", "Su tesisatı"], ["klima", "Klima ve havalandırma"], ["isitma", "Kombi ve ısıtma"], ["mobilya", "Mobilya ve montaj"], ["tadilat", "Tadilat"], ["seramik", "Fayans ve seramik"], ["zemin", "Parke ve zemin"], ["cati", "Çatı ve yalıtım"], ["cam", "Cam ve doğrama"], ["celik", "Çilingir ve kapı"], ["bahce", "Bahçe ve peyzaj"], ["cihaz", "Beyaz eşya servisi"], ["temizlik", "Temizlik"], ["nakliye", "Nakliye"], ["diger", "Diğer"]] as const;

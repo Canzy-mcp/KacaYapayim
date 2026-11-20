@@ -26,7 +26,7 @@ const legalEntity = process.env.NEXT_PUBLIC_LEGAL_ENTITY_NAME?.trim();
 
 export function MarketingFooter() {
   return <footer className="ky-footer"><div className="marketing-container ky-footer-grid">
-    <div className="ky-footer-brand"><Link href="/" aria-label="KaçaYapayım ana sayfa"><BrandLogo size={28}/></Link><p>Yakınındaki ustayı bul, işini anlat, teklifleri karşılaştır.</p>
+    <div className="ky-footer-brand"><Link href="/" aria-label="KaçaYapayım ana sayfa"><BrandLogo size={28}/></Link><p>Kaça Yapayım ile yakınındaki ustayı bul, işini anlat, teklifleri karşılaştır.</p>
       <a href={supportHref}>{supportEmail}</a><a href={professionRequestHref}>Meslek eklenmesini iste</a></div>
     {footerGroups.map(group => <nav key={group.title} aria-label={group.title}><h2>{group.title}</h2><ul>{group.links.map(([label, href]) => <li key={href}><Link href={href}>{label}</Link></li>)}
       {group.title === "Şirket" && <li><CookieSettingsButton className="ky-footer-button" /></li>}</ul></nav>)}

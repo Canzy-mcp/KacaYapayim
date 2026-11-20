@@ -23,7 +23,9 @@ export const isStaging = process.env.DEPLOYMENT_ENV === "staging";
 export const isProductionLike = productionLike;
 
 export const siteName = "KaçaYapayım";
-export const siteSummary = "KaçaYapayım, Türkiye'de usta bulmayı ve ustaların maliyete dayalı teklif hazırlamasını kolaylaştıran bir platformdur.";
+// People search the brand as two words; say so explicitly so Google ties "kaça yapayım" to the site.
+export const brandAlternateNames = ["Kaça Yapayım", "Kaca Yapayim", "kacayapayim.com"];
+export const siteSummary = "KaçaYapayım (Kaça Yapayım), Türkiye'de usta bulmayı ve ustaların maliyete dayalı teklif hazırlamasını kolaylaştıran bir platformdur.";
 
 export type OgImageKey = "hero" | "painter" | "electrician" | "plumber" | "hvac" | "tadilat" | "teklif" | "randevu";
 type MetaOptions = { type?: "website" | "article"; publishedTime?: string; modifiedTime?: string; image?: OgImageKey };
@@ -73,7 +75,7 @@ export function imageObjectNode(o: { url: string; width: number; height: number;
 // No postal address, founding date or social profiles are published anywhere in the repo, so none are claimed here.
 export function organizationNode() {
   return {
-    "@type": "Organization", "@id": organizationId, name: siteName, url: siteOrigin,
+    "@type": "Organization", "@id": organizationId, name: siteName, alternateName: brandAlternateNames, url: siteOrigin,
     logo: imageObjectNode({ id: `${siteOrigin}/#logo`, url: "/brand/logo.png", width: 256, height: 256, caption: `${siteName} logosu` }),
     description: siteSummary, slogan: "İşinin maliyetini bil. Kârını koru.",
     knowsAbout: organizationKnowsAbout, areaServed: { "@type": "Country", name: "Türkiye" },
@@ -83,7 +85,7 @@ export function organizationNode() {
 
 export function websiteNode() {
   return {
-    "@type": "WebSite", "@id": websiteId, name: siteName, url: siteOrigin, inLanguage: "tr-TR", publisher: { "@id": organizationId },
+    "@type": "WebSite", "@id": websiteId, name: siteName, alternateName: brandAlternateNames, url: siteOrigin, inLanguage: "tr-TR", publisher: { "@id": organizationId },
     potentialAction: { "@type": "SearchAction", target: { "@type": "EntryPoint", urlTemplate: `${siteOrigin}/usta-bul?q={search_term_string}` }, "query-input": "required name=search_term_string" },
   };
 }
