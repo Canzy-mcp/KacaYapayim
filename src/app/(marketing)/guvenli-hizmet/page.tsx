@@ -3,7 +3,7 @@ import { siteMetadata } from "@/lib/marketing/seo";
 import { Band, CtaBand, Faq, Intro, PageHead, PageLd, ctaGhost, ctaLight, textLink, tile, title } from "@/components/marketing/acquisition/parts";
 import { supportEmail } from "@/lib/marketing/contact";
 
-const name = "Güvenli hizmet: adres, yorum ve bildirim kuralları";
+const name = "Güvenli hizmet: adres, yorum ve bildirim";
 const description = "KaçaYapayım'da adresin kimle ve ne zaman paylaşıldığı, yorumları kimin yazabildiği, profil bildirme, moderasyon ve ödeme hakkında bilmen gerekenler.";
 export const metadata = siteMetadata(name, description, "/guvenli-hizmet");
 const path = "/guvenli-hizmet";

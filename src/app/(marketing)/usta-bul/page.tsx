@@ -10,7 +10,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   const params = await searchParams;
   const filtered = filterKeys.some((key) => cleanText(params[key], 100));
   const page = marketPage(params.page);
-  const base = siteMetadata("Usta Bul", "İl ve ilçene hizmet veren ustaları bul, profillerini incele veya iş ilanı ver.", !filtered && page > 1 ? `/usta-bul?page=${page}` : "/usta-bul");
+  const base = siteMetadata("Usta bul: boyacı, elektrikçi, tesisatçı, klimacı", "İl ve ilçene hizmet veren boyacı, elektrikçi, tesisatçı ve klimacı ustaları bul. Profilleri karşılaştır, ücretsiz teklif iste veya iş ilanı ver.", !filtered && page > 1 ? `/usta-bul?page=${page}` : "/usta-bul");
   return filtered ? { ...base, robots: { index: false, follow: true } } : base;
 }
 
@@ -35,6 +35,7 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Pr
   const listUrl = `${siteOrigin}${directoryHref({}, { page })}`;
   const jsonLd = {
     "@context": "https://schema.org", "@type": "CollectionPage", "@id": `${listUrl}#collection`, url: listUrl, name: "Usta Bul", inLanguage: "tr-TR",
+    breadcrumb: { "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Ana Sayfa", item: `${siteOrigin}/` }, { "@type": "ListItem", position: 2, name: "Usta Bul", item: `${siteOrigin}/usta-bul` }] },
     isPartOf: { "@id": websiteId }, publisher: { "@id": organizationId },
     mainEntity: {
       "@type": "ItemList", numberOfItems: providers.length, itemListOrder: "https://schema.org/ItemListUnordered",

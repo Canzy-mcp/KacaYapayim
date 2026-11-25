@@ -1,8 +1,9 @@
 import { ProfessionRequest } from "@/components/marketing/profession-request";
-import { legalMetadata, supportEmail } from "@/lib/marketing/legal";
+import { legalReady, supportEmail } from "@/lib/marketing/legal";
+import { siteMetadata } from "@/lib/marketing/seo";
 import { Band, PageHead, PageLd, textLink, tile, title } from "@/components/marketing/acquisition/parts";
 
-export const metadata = legalMetadata("İletişim", "/iletisim");
+export const metadata = { ...siteMetadata("İletişim ve destek", "KaçaYapayım destek ekibine e-postayla ulaş: hesap, teklif, usta profili, içerik düzeltmesi ve yeni meslek önerileri için.", "/iletisim"), ...(!legalReady ? { robots: { index: false, follow: false } } : {}) };
 
 export default function Page() {
   return <>

@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { siteMetadata } from "@/lib/marketing/seo";
 import { Band, CtaBand, Faq, Intro, PageHead, PageLd, Photo, Steps, ctaGhost, ctaLight, pillPrimary, pillSecondary, textLink, tile, title } from "@/components/marketing/acquisition/parts";
 
-const name = "Nasıl çalışır: usta bul, teklif al, işi tamamla";
+const name = "Nasıl çalışır: usta bul, teklif al, işi bitir";
 const description = "KaçaYapayım'da doğrudan ustaya talep göndermek ya da açık ilan vermek, teklifleri karşılaştırmak, adresi paylaşmak ve işi değerlendirmek nasıl işler?";
 export const metadata = siteMetadata(name, description, "/nasil-calisir");
 const path = "/nasil-calisir";

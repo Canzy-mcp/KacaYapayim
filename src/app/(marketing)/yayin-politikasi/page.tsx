@@ -2,8 +2,8 @@ import Link from "next/link";
 import { siteMetadata } from "@/lib/marketing/seo";
 import { Band, Intro, PageHead, PageLd, textLink, tile, title } from "@/components/marketing/acquisition/parts";
 
-const name = "Yayın politikası: rehberleri kim yazıyor, nasıl denetleniyor?";
-const description = "KaçaYapayım rehberlerini kimin yazdığı, hesaplamaların nasıl kontrol edildiği, kaynaklar, düzeltme yolu, gözden geçirme sıklığı ve yapay zeka desteği hakkında açıklama.";
+const name = "Yayın politikası: rehberleri kim yazıyor?";
+const description = "KaçaYapayım rehberlerini kimin yazdığı, hesapların nasıl kontrol edildiği, kaynaklar, düzeltme yolu, gözden geçirme sıklığı ve yapay zeka desteği.";
 export const metadata = siteMetadata(name, description, "/yayin-politikasi");
 const path = "/yayin-politikasi";
 

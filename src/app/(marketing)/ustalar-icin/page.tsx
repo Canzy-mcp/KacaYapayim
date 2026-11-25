@@ -5,7 +5,7 @@ import { siteMetadata } from "@/lib/marketing/seo";
 import { MarginExample, ProductDemo } from "@/components/marketing/product-demo";
 import { Band, CtaBand, Faq, Intro, PageHead, PageLd, Photo, Steps, ctaGhost, ctaLight, pillPrimary, pillSecondary, textLink, tile } from "@/components/marketing/acquisition/parts";
 
-const name = "Ustalar için: profil yayınla, teklif ver, işi takip et";
+const name = "Ustalar için: profil aç, teklif ver, işi takip et";
 const description = "Usta profilini yayınla, bölgendeki taleplere maliyete dayalı teklif ver, PDF veya bağlantıyla paylaş, işleri ve ödemeleri takip et.";
 export const metadata = siteMetadata(name, description, "/ustalar-icin");
 const path = "/ustalar-icin";
