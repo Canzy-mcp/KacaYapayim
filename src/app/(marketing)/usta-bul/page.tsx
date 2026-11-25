@@ -10,7 +10,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   const params = await searchParams;
   const filtered = filterKeys.some((key) => cleanText(params[key], 100));
   const page = marketPage(params.page);
-  const base = siteMetadata("Usta bul: boyacı, elektrikçi, tesisatçı, klimacı", "İl ve ilçene hizmet veren boyacı, elektrikçi, tesisatçı ve klimacı ustaları bul. Profilleri karşılaştır, ücretsiz teklif iste veya iş ilanı ver.", !filtered && page > 1 ? `/usta-bul?page=${page}` : "/usta-bul");
+  const base = siteMetadata("Usta bul: boyacı, elektrikçi, tesisatçı", "İl ve ilçene hizmet veren boyacı, elektrikçi, tesisatçı ve klimacı ustaları bul. Profilleri karşılaştır, ücretsiz teklif iste veya iş ilanı ver.", !filtered && page > 1 ? `/usta-bul?page=${page}` : "/usta-bul");
   return filtered ? { ...base, robots: { index: false, follow: true } } : base;
 }
 
