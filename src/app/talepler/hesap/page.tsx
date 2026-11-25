@@ -18,7 +18,7 @@ export default async function MarketAccountPage() {
   const { profile } = await requireMarketViewer("/talepler/hesap");
   return <div className="mx-auto max-w-2xl"><MarketHeading title="Hesabım" />
     <section className={panel}><h2 className="text-lg font-semibold">{profile?.first_name} {profile?.last_name}</h2>
-      <p className="mt-1 break-words text-sm text-[#515154]">{profile?.email}</p>
+      <p className="mt-1 break-words text-sm text-ink-2">{profile?.email}</p>
       <form action={logout} className="mt-4"><button className={plainButton}>Çıkış yap</button></form>
     </section>
     <Mfa destination="/talepler/hesap" />

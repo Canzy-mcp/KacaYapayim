@@ -41,11 +41,11 @@ function useSubmit(action: Action) {
 }
 
 function Field({ id, label, error, ...props }: React.ComponentProps<typeof Input> & { error?: string }) {
-  return <div><Input id={id} label={label} aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined} {...props} />{error && <p id={`${id}-error`} className="mt-1.5 text-[13px] text-[#c4362e]">{error}</p>}</div>;
+  return <div><Input id={id} label={label} aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined} {...props} />{error && <p id={`${id}-error`} className="mt-1.5 text-[13px] text-danger">{error}</p>}</div>;
 }
 
 function Feedback({ message, success }: { message: string; success: boolean }) {
-  return message ? <p role="status" className={`rounded-[12px] px-4 py-3 text-[14px] leading-5 ${success ? "bg-[#eaf8ee] text-[#247544]" : "bg-[#fff0ef] text-[#b93831]"}`}>{message}</p> : null;
+  return message ? <p role="status" className={`rounded-lg px-4 py-3 text-[14px] leading-5 ${success ? "bg-success-soft text-success-ink" : "bg-danger-soft text-danger-ink"}`}>{message}</p> : null;
 }
 
 function SubmitButton({ pending, label, busy }: { pending: boolean; label: string; busy: string }) {
@@ -63,7 +63,7 @@ export function LoginForm({ notice, next }: { notice?: string; next?: string }) 
     if (emailError(String(data.get("email") || ""))) errors.email = emailError(String(data.get("email") || ""));
     if (!data.get("password")) errors.password = "Şifreni gir.";
     return errors;
-  })} {...state} label="Giriş Yap" busy="Giriş yapılıyor...">{next && <input type="hidden" name="next" value={next} />}{notice && <p role="status" className="rounded-[12px] bg-[#edf5ff] px-4 py-3 text-[13px] text-[#1265b8]">{notice}</p>}<Field id="email" name="email" label="E-posta" type="email" autoComplete="email" inputMode="email" error={state.fieldErrors.email} /><Field id="password" name="password" label="Şifre" type="password" autoComplete="current-password" error={state.fieldErrors.password} /><div className="flex items-center justify-between gap-3 text-[13px]"><label className="flex min-h-11 items-center gap-2 text-[#55555d]"><input type="checkbox" name="remember" defaultChecked className="size-4 accent-[#0071E3]" />Beni hatırla</label><Link href="/forgot-password" className="font-medium text-[#0071E3] hover:underline">Şifremi unuttum</Link></div></AuthForm>;
+  })} {...state} label="Giriş Yap" busy="Giriş yapılıyor...">{next && <input type="hidden" name="next" value={next} />}{notice && <p role="status" className="rounded-lg bg-primary-soft px-4 py-3 text-[13px] text-primary-hover">{notice}</p>}<Field id="email" name="email" label="E-posta" type="email" autoComplete="email" inputMode="email" error={state.fieldErrors.email} /><Field id="password" name="password" label="Şifre" type="password" autoComplete="current-password" error={state.fieldErrors.password} /><div className="flex items-center justify-between gap-3 text-[13px]"><label className="flex min-h-11 items-center gap-2 text-ink-2"><input type="checkbox" name="remember" defaultChecked className="size-4 accent-primary" />Beni hatırla</label><Link href="/forgot-password" className="font-medium text-primary hover:underline">Şifremi unuttum</Link></div></AuthForm>;
 }
 
 export function RegisterForm({ account, next }: { account: "customer" | "provider"; next?: string }) {
@@ -76,7 +76,7 @@ export function RegisterForm({ account, next }: { account: "customer" | "provide
     if (passwordError(String(data.get("password") || ""))) errors.password = passwordError(String(data.get("password") || ""));
     if (data.get("password") !== data.get("confirm")) errors.confirm = "Şifreler eşleşmiyor.";
     return errors;
-  })} {...state} label="Ücretsiz Hesap Oluştur" busy="Hesap oluşturuluyor...">{next && <input type="hidden" name="next" value={next} />}<fieldset className="grid grid-cols-2 gap-2"><legend className="mb-2 text-sm font-semibold">KaçaYapayım’ı nasıl kullanacaksın?</legend><label className="flex min-h-11 items-center gap-2 rounded-xl border border-[#e2e2e6] px-3 text-sm"><input type="radio" name="account" value="customer" defaultChecked={account === "customer"} />Usta arıyorum</label><label className="flex min-h-11 items-center gap-2 rounded-xl border border-[#e2e2e6] px-3 text-sm"><input type="radio" name="account" value="provider" defaultChecked={account === "provider"} />Ustayım</label></fieldset><div className="grid grid-cols-2 gap-3"><Field id="firstName" name="firstName" label="Ad" autoComplete="given-name" error={state.fieldErrors.firstName} /><Field id="lastName" name="lastName" label="Soyad" autoComplete="family-name" error={state.fieldErrors.lastName} /></div><Field id="email" name="email" label="E-posta" type="email" autoComplete="email" inputMode="email" error={state.fieldErrors.email} /><Field id="password" name="password" label="Şifre" type="password" autoComplete="new-password" error={state.fieldErrors.password} /><Field id="confirm" name="confirm" label="Şifre tekrar" type="password" autoComplete="new-password" error={state.fieldErrors.confirm} /><p className="text-[12px] text-[#77777e]">Şifren en az 8 karakter olmalı.</p></AuthForm>;
+  })} {...state} label="Ücretsiz Hesap Oluştur" busy="Hesap oluşturuluyor...">{next && <input type="hidden" name="next" value={next} />}<fieldset className="grid grid-cols-2 gap-2"><legend className="mb-2 text-sm font-semibold">KaçaYapayım’ı nasıl kullanacaksın?</legend><label className="flex min-h-11 items-center gap-2 rounded-xl border border-line px-3 text-sm"><input type="radio" name="account" value="customer" defaultChecked={account === "customer"} />Usta arıyorum</label><label className="flex min-h-11 items-center gap-2 rounded-xl border border-line px-3 text-sm"><input type="radio" name="account" value="provider" defaultChecked={account === "provider"} />Ustayım</label></fieldset><div className="grid grid-cols-2 gap-3"><Field id="firstName" name="firstName" label="Ad" autoComplete="given-name" error={state.fieldErrors.firstName} /><Field id="lastName" name="lastName" label="Soyad" autoComplete="family-name" error={state.fieldErrors.lastName} /></div><Field id="email" name="email" label="E-posta" type="email" autoComplete="email" inputMode="email" error={state.fieldErrors.email} /><Field id="password" name="password" label="Şifre" type="password" autoComplete="new-password" error={state.fieldErrors.password} /><Field id="confirm" name="confirm" label="Şifre tekrar" type="password" autoComplete="new-password" error={state.fieldErrors.confirm} /><p className="text-[12px] text-muted">Şifren en az 8 karakter olmalı.</p></AuthForm>;
 }
 
 export function ForgotPasswordForm({ notice }: { notice?: string }) {
@@ -86,7 +86,7 @@ export function ForgotPasswordForm({ notice }: { notice?: string }) {
     const errors: FieldErrors = {};
     if (error) errors.email = error;
     return errors;
-  })} {...state} label="Sıfırlama Bağlantısı Gönder" busy="Gönderiliyor..."><Field id="email" name="email" label="E-posta" type="email" autoComplete="email" inputMode="email" error={state.fieldErrors.email} />{notice && <p className="text-[13px] text-[#b93831]">{notice}</p>}</AuthForm>;
+  })} {...state} label="Sıfırlama Bağlantısı Gönder" busy="Gönderiliyor..."><Field id="email" name="email" label="E-posta" type="email" autoComplete="email" inputMode="email" error={state.fieldErrors.email} />{notice && <p className="text-[13px] text-danger-ink">{notice}</p>}</AuthForm>;
 }
 
 export function ResetPasswordForm() {

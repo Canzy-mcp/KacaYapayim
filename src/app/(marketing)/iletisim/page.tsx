@@ -9,7 +9,7 @@ export default function Page() {
     <PageLd path="/iletisim" name="İletişim" description="KaçaYapayım destek kanalı." type="ContactPage" crumbs={[{ name: "Ana Sayfa", path: "/" }, { name: "İletişim", path: "/iletisim" }]} />
     <PageHead crumbs={[{ name: "Ana Sayfa", href: "/" }, { name: "İletişim" }]} eyebrow="İletişim" h="Bize ulaş." text="Soruların, geri bildirimlerin ve içerik düzeltmelerin için destek kanalını kullanabilirsin." />
     <Band tone="gray" label="support-title"><div className="mx-auto max-w-3xl">
-      <div className={tile}><h2 id="support-title" className={title}>Destek</h2><p className="mt-3 leading-[1.6] text-[#515154]">E-posta: <a href={`mailto:${supportEmail}`} className={`${textLink} inline-flex min-h-11 items-center break-all`}>{supportEmail}</a></p><p className="mt-3 text-sm text-[#515154]">Müşteri bilgisi, teklif bağlantısı veya şifreni e-postaya ekleme.</p></div>
+      <div className={tile}><h2 id="support-title" className={title}>Destek</h2><p className="mt-3 leading-[1.6] text-ink-2">E-posta: <a href={`mailto:${supportEmail}`} className={`${textLink} inline-flex min-h-11 items-center break-all`}>{supportEmail}</a></p><p className="mt-3 text-sm text-ink-2">Müşteri bilgisi, teklif bağlantısı veya şifreni e-postaya ekleme.</p></div>
       <ProfessionRequest />
     </div></Band>
   </>;

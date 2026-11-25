@@ -21,8 +21,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect("/login");
   }
 
-  return <div className="min-h-screen bg-slate-50 text-slate-900">
-    <header className="border-b border-slate-200 bg-white">
+  return <div className="min-h-screen bg-surface-2 text-ink">
+    <header className="border-b border-line bg-white">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-5 py-3">
         <Link href="/admin" className="font-semibold">KaçaYapayım Yönetim</Link>
         <nav aria-label="Yönetim" className="flex flex-1 flex-wrap gap-x-4">

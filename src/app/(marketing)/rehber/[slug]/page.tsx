@@ -67,7 +67,7 @@ export default async function Page({ params }: Props) {
     <Band narrow>
       <h2 className={h2}>Uygulamada neye dikkat etmeli?</h2><p className={`mt-4 ${body}`}>{g.detail}</p>
       <h2 className={`${h2} mt-14`}>{checks.heading}</h2>
-      <ul className="mt-5 grid gap-3">{checks.items.map(item => <li key={item} className="flex gap-3 border-t border-[#d2d2d7] pt-4 leading-[1.6]"><span aria-hidden="true" className="mt-1 grid size-5 shrink-0 place-items-center rounded-full bg-[#e4f0ed] text-xs font-bold text-[#075d54]">✓</span><span className="min-w-0">{item}</span></li>)}</ul>
+      <ul className="mt-5 grid gap-3">{checks.items.map(item => <li key={item} className="flex gap-3 border-t border-line-strong pt-4 leading-[1.6]"><span aria-hidden="true" className="mt-1 grid size-5 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-bold text-primary">✓</span><span className="min-w-0">{item}</span></li>)}</ul>
       <Callout tone="warn" title="Sınırlar"><p>{checks.caution}</p></Callout>
       {isCustomer && <Callout tone="note" title="KaçaYapayım'da teklif al"><p>İşini tarif et, bölgendeki ustalardan teklif gelsin. Teklifleri kapsamlarıyla yan yana karşılaştır. Müşteri olarak kullanım ücretsizdir.</p><div className="mt-5 flex flex-wrap gap-3"><Link href="/talepler/yeni" className={pill}>İş ilanı ver</Link><Link href="/usta-bul" className={pillOutline}>Usta bul</Link></div></Callout>}
     </Band>

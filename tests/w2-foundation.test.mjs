@@ -1,19 +1,32 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const globals = read("src/app/globals.css");
 const marketing = read("src/app/(marketing)/marketing.css");
-const shell = read("src/components/marketing/shell.tsx");
+// The header markup lives in the island nav; header assertions read both files.
+const shell = read("src/components/marketing/shell.tsx") + read("src/components/marketing/island-nav.tsx");
 const mobile = read("src/components/marketing/mobile-navigation.tsx");
 const motion = read("src/components/marketing/motion.tsx");
 const consent = read("src/components/marketing/analytics-consent.tsx");
 const blocks = read("src/lib/marketing/blocks.tsx");
 
-test("design tokens exist", () => {
-  for (const token of ["--ky-ink: #1d1d1f", "--ky-ink-2", "--ky-caption", "--ky-line", "--ky-bg", "--ky-band: #f5f5f7", "--ky-primary: #075d54", "--ky-primary-hover: #064a43", "--ky-primary-soft", "--ky-radius: 20px"]) assert.ok(globals.includes(token), token);
-  assert.match(globals, /--ky-fs-display: clamp\(/);
+test("design tokens live in one @theme and no Apple-era tokens remain", () => {
+  for (const token of ["--color-ink:", "--color-ink-2:", "--color-muted:", "--color-line:", "--color-canvas:", "--color-surface:", "--color-primary:", "--color-primary-hover:", "--color-primary-soft:", "--color-tape:", "--color-success:", "--color-danger:", "--radius-lg: 12px", "--color-island:", "--font-display:"]) assert.ok(globals.includes(token), token);
+  assert.match(globals, /--fs-display: clamp\(/);
+  assert.doesNotMatch(globals, /--ky-|--ease-apple|#075d54|#0071e3/);
+});
+
+test("components use tokens, not raw hex colors or AI-style effects", () => {
+  const files = [];
+  const walk = (dir) => { for (const entry of readdirSync(new URL(`../${dir}`, import.meta.url), { withFileTypes: true })) { const p = `${dir}/${entry.name}`; if (entry.isDirectory()) walk(p); else if (p.endsWith(".tsx")) files.push(p); } };
+  walk("src/components"); walk("src/app");
+  for (const file of files.filter(f => !f.includes("/api/"))) {
+    const s = read(file);
+    assert.doesNotMatch(s, /(?:bg|text|border|ring|fill|stroke|from|to|via)-\[#[0-9a-fA-F]{3,8}\]/, file);
+    assert.doesNotMatch(s, /backdrop-blur-2xl|bg-clip-text|ky-gradient-text/, file);
+  }
 });
 
 test("marketing utilities exist", () => {
@@ -26,11 +39,10 @@ test("legacy class names are still styled", () => {
   for (const cls of [".marketing-header", ".marketing-container", ".ky-footer", ".profession-grid", ".ky-hero", ".pricing-intro", ".ky-faq-list", ".ky-final", ".ky-service-grid"]) assert.ok(marketing.includes(cls), cls);
 });
 
-test("header is 56px translucent with blur and opaque fallback", () => {
-  assert.match(marketing, /rgba\(255,255,255,\.85\)/);
-  assert.match(marketing, /blur\(16px\)/);
-  assert.match(marketing, /@supports not/);
-  assert.match(marketing, /\.marketing-header-inner \{[^}]*height: 56px/);
+test("header is a 64px paper bar and the footer is solid ink with a tape rule", () => {
+  assert.match(marketing, /\.marketing-header-inner \{[^}]*height: 64px/);
+  assert.match(marketing, /\.marketing-header \{ background: var\(--color-canvas\)/);
+  assert.match(marketing, /\.ky-footer \{ background: var\(--color-ink\); border-top: 4px solid var\(--color-tape\)/);
 });
 
 test("header and footer links", () => {
@@ -46,11 +58,12 @@ test("mobile menu: aria-expanded, Escape, scroll lock, focus trap", () => {
   assert.match(mobile, /event\.key !== "Tab"/);
 });
 
-test("motion is once-only, 8px/180ms, reduced-motion aware", () => {
+test("motion is once-only, spring-eased and reduced-motion aware", () => {
   assert.match(motion, /unobserve/);
   assert.match(motion, /prefers-reduced-motion/);
-  assert.match(marketing, /translateY\(8px\)/);
-  assert.match(marketing, /180ms/);
+  assert.match(marketing, /\.reveal-pending \{ opacity: 0; transform: translateY\(28px\)/);
+  assert.match(marketing, /\[data-reveal\], \.ky-reveal \{[^}]*var\(--ease-spring\)/);
+  assert.match(marketing, /prefers-reduced-motion: reduce\) \{ \.ky-island/);
 });
 
 test("consent banner keeps logic and is a compact card / bottom sheet", () => {

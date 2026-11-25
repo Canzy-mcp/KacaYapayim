@@ -35,7 +35,7 @@ test("address claims never say a direct request shares the address", () => {
 test("home links to the new destinations", () => {
   const s = read("src/app/(marketing)/page.tsx");
   for (const h of ["/nasil-calisir", "/guvenli-hizmet", "/ustalar-icin", "/hesaplama-araclari/kar-marji"]) assert.ok(s.includes(h), h);
-  assert.match(s, /aspect-\[4\/3\] .*md:aspect-\[16\/7\]/);
+  assert.match(s, /aspect-\[4\/5\].*lg:aspect-square/);
 });
 
 test("pricing uses billingAvailable, provider registration and no PreOrder", () => {

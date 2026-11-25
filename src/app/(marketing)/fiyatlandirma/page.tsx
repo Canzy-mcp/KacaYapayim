@@ -35,21 +35,21 @@ export default async function Page() {
   return <>
     <PageLd path={path} name={name} description="Usta Üyelik fiyatı: 199 ₺, tek seferlik." crumbs={crumbs} faqs={faqs} extra={offers} />
     <PageHead crumbs={[{ name: "Ana Sayfa", href: "/" }, { name: "Fiyatlandırma" }]} eyebrow="Fiyatlandırma" h="Tek ödeme, süresiz üyelik." text="Müşteriler için usta bulmak ve ilan açmak ücretsiz. Ustalar için tek seferlik 199 ₺; abonelik ve aylık ücret yok.">
-      {!paidOpen && <p role="note" className="rounded-full bg-[#f5f5f7] px-5 py-3 text-base font-semibold text-[#1d1d1f]">Ödeme çok yakında açılıyor. Şimdilik hesabını açıp hazırlanabilirsin.</p>}
+      {!paidOpen && <p role="note" className="rounded-full bg-canvas px-5 py-3 text-base font-semibold text-ink">Ödeme çok yakında açılıyor. Şimdilik hesabını açıp hazırlanabilirsin.</p>}
     </PageHead>
 
     <Band tone="gray" label="plans-title">
       <h2 id="plans-title" className="sr-only">Usta Üyelik</h2>
-      <section aria-labelledby="plan-entry" className={`${tile} mx-auto flex max-w-xl flex-col border-2 border-[#075d54]`}>
+      <section aria-labelledby="plan-entry" className={`${tile} mx-auto flex max-w-xl flex-col border-2 border-primary`}>
         <h3 id="plan-entry" className={title}>Usta Üyelik</h3>
-        <p className="mt-2 leading-[1.5] text-[#515154]">Tek seferlik ödemeyle tüm özellikler, süresiz.</p>
-        <p className="mt-6"><span className="text-5xl font-[650] tracking-[-.04em] text-[#1d1d1f]">{ENTRY_FEE_LABEL}</span><span className="ml-2 text-[#515154]">tek seferlik · süresiz</span></p>
-        <ul className="mt-6 space-y-3">{ENTRY_FEATURES.map(label => <li key={label} className="flex items-start gap-2 leading-6 text-[#1d1d1f]"><Check size={18} aria-hidden="true" className="mt-1 shrink-0 text-[#075d54]" />{label}</li>)}</ul>
+        <p className="mt-2 leading-[1.5] text-ink-2">Tek seferlik ödemeyle tüm özellikler, süresiz.</p>
+        <p className="mt-6"><span className="text-5xl font-[650] tracking-display text-ink">{ENTRY_FEE_LABEL}</span><span className="ml-2 text-ink-2">tek seferlik · süresiz</span></p>
+        <ul className="mt-6 space-y-3">{ENTRY_FEATURES.map(label => <li key={label} className="flex items-start gap-2 leading-6 text-ink"><Check size={18} aria-hidden="true" className="mt-1 shrink-0 text-primary" />{label}</li>)}</ul>
         <div className="mt-8">{paidOpen
           ? <Link href={buyHref} className={pillPrimary}>Usta olarak katıl</Link>
-          : <span className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#f5f5f7] px-5 text-center font-semibold text-[#515154]">Çok yakında</span>}</div>
+          : <span className="inline-flex min-h-12 items-center justify-center rounded-full bg-canvas px-5 text-center font-semibold text-ink-2">Çok yakında</span>}</div>
       </section>
-      <p className="mt-5 text-center text-sm text-[#515154]">Müşteriler için ücretsiz: usta aramak, talep göndermek ve ilan açmak için üyelik gerekmez. Tutar TL cinsindendir; ödeme koşulları ödeme ekranında gösterilir.</p>
+      <p className="mt-5 text-center text-sm text-ink-2">Müşteriler için ücretsiz: usta aramak, talep göndermek ve ilan açmak için üyelik gerekmez. Tutar TL cinsindendir; ödeme koşulları ödeme ekranında gösterilir.</p>
     </Band>
 
     <Band label="faq-title"><Faq items={faqs} /></Band>

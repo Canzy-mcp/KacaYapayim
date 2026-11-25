@@ -17,7 +17,7 @@ export default function Page() {
     <PageLd path={path} name={name} description={description} type="AboutPage" crumbs={[{ name: "Ana Sayfa", path: "/" }, { name: "Hakkımızda", path }]} />
     <PageHead crumbs={[{ name: "Ana Sayfa", href: "/" }, { name: "Hakkımızda" }]} eyebrow="Hakkımızda" h="KaçaYapayım nedir?" text={siteSummary} />
     <Band tone="gray" label="about-title"><h2 id="about-title" className="sr-only">Hakkımızda ayrıntılar</h2>
-      <div className="grid gap-4 md:grid-cols-3">{blocks.map(([h, t]) => <section key={h} className={tile}><h3 className={title}>{h}</h3><p className="mt-3 leading-[1.6] text-[#515154]">{t}</p></section>)}</div>
+      <div className="grid gap-4 md:grid-cols-3">{blocks.map(([h, t]) => <section key={h} className={tile}><h3 className={title}>{h}</h3><p className="mt-3 leading-[1.6] text-ink-2">{t}</p></section>)}</div>
       <p className="mt-8 flex flex-wrap gap-x-6"><Link href="/metodoloji" className={`${textLink} inline-flex min-h-11 items-center`}>Hesaplama metodolojisi</Link><Link href="/yayin-politikasi" className={`${textLink} inline-flex min-h-11 items-center`}>Yayın politikası</Link></p>
     </Band>
   </>;

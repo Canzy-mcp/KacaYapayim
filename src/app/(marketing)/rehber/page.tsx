@@ -22,9 +22,9 @@ export default function Page() {
     </Band>
     {guideGroups.map((group, gi) => <Band key={group.id} tone={gi % 2 === 0 ? "gray" : "white"} label={`g-${group.id}`}>
       <h2 id={`g-${group.id}`} className={h2}>{group.question}</h2><p className={`mt-3 max-w-[56ch] ${body} ${muted}`}>{group.intro}</p>
-      <ul className="mt-8 grid gap-4 md:grid-cols-2">{group.slugs.map(slug => { const g = guides.find(x => x.slug === slug)!; return <li key={slug} className="min-w-0"><Link href={`/rehber/${slug}`} className="block h-full rounded-[20px] border border-[#d2d2d7] bg-white p-6 no-underline transition-colors duration-150 hover:border-[#075d54]">
-        <h3 className="text-lg font-semibold tracking-[-.02em] text-[#1d1d1f]">{g.title}</h3><p className="mt-3 leading-[1.55] text-[#515154]">{g.answer}</p>
-        <p className="mt-4 text-sm text-[#6e6e73]">Son güncelleme: {formatDateTr(guideDates[slug].modified)}</p><span className="mt-2 inline-flex min-h-11 items-center font-medium text-[#075d54]">Oku →</span></Link></li>; })}</ul>
+      <ul className="mt-8 grid gap-4 md:grid-cols-2">{group.slugs.map(slug => { const g = guides.find(x => x.slug === slug)!; return <li key={slug} className="min-w-0"><Link href={`/rehber/${slug}`} className="block h-full rounded-xl border border-line-strong bg-white p-6 no-underline transition-colors duration-150 hover:border-primary">
+        <h3 className="text-lg font-semibold tracking-heading text-ink">{g.title}</h3><p className="mt-3 leading-[1.55] text-ink-2">{g.answer}</p>
+        <p className="mt-4 text-sm text-muted">Son güncelleme: {formatDateTr(guideDates[slug].modified)}</p><span className="mt-2 inline-flex min-h-11 items-center font-medium text-primary">Oku →</span></Link></li>; })}</ul>
     </Band>)}
   </>;
 }

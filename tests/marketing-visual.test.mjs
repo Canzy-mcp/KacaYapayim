@@ -6,7 +6,8 @@ const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf
 const page = read("src/app/(marketing)/page.tsx");
 const css = read("src/app/(marketing)/marketing.css");
 const globals = read("src/app/globals.css");
-const shell = read("src/components/marketing/shell.tsx");
+// The header markup lives in the island nav; header assertions read both files.
+const shell = read("src/components/marketing/shell.tsx") + read("src/components/marketing/island-nav.tsx");
 const nav = read("src/components/marketing/mobile-navigation.tsx");
 
 test("home search is a plain GET form using the directory parameter names", () => {
@@ -30,7 +31,7 @@ test("home has FAQ details and trust claims", () => {
 });
 
 test("design tokens exist and grids use shrinkable tracks", () => {
-  for (const token of ["--ky-band: #f5f5f7", "--ky-ink: #1d1d1f", "--ky-primary: #075d54", "--ky-primary-hover: #064a43"]) assert.ok(globals.includes(token), token);
+  for (const token of ["--color-canvas: #f5f2ec", "--color-ink: #1f1b16", "--color-island: #1f1b16", "--color-primary: #1554f0", "--color-tape: #f2c230"]) assert.ok(globals.includes(token), token);
   assert.ok(!/grid-template-columns:\s*(repeat\(\d+,\s*1fr\)|1fr[ ;])/.test(css), "use minmax(0, 1fr)");
   assert.match(css, /@media \(max-width: 899px\)[\s\S]*\.demo-body \{ grid-template-columns: minmax\(0, 1fr\)/);
 });

@@ -48,7 +48,7 @@ export default async function Page({ params }: Props) {
     <Band tone="gray" narrow label="how">
       <h2 id="how" className={h2}>Nasıl hesaplanır?</h2>
       <p className={`mt-4 ${body} font-medium`}>{s.formula}</p>
-      <h3 className="mt-10 text-xl font-semibold tracking-[-.02em]">Örnek hesap</h3><p className={`mt-3 ${body}`}>{s.example}</p>
+      <h3 className="mt-10 text-xl font-semibold tracking-heading">Örnek hesap</h3><p className={`mt-3 ${body}`}>{s.example}</p>
       <Callout tone="warn" title="Sınırlar"><p>Bu hesap piyasa fiyatı veya bağlayıcı teklif değildir; sonuç yalnızca girdiğin değerlere dayanır. Vergiler dahil değildir. <Link href="/metodoloji" className={proseLink}>Metodolojiyi oku</Link></p></Callout>
       {isMarj && <>
         <h2 className={`${h2} mt-14`}>Kâr marjı ve markup farkı</h2>

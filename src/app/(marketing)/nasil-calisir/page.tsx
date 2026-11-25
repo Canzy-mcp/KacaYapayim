@@ -43,8 +43,8 @@ export default function Page() {
     <Band tone="gray" label="journeys-title">
       <Intro eyebrow="Başlangıç" h="Önce yolunu seç." id="journeys-title" />
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
-        <div className={tile}><h3 className={title}>Doğrudan ustaya talep</h3><p className="mt-2 text-[#515154]">Aradığın ustayı biliyorsan.</p><div className="mt-6"><Steps items={direct} /></div><Link href="/usta-bul" className={`${pillPrimary} mt-6`}>Usta bul</Link></div>
-        <div className={tile}><h3 className={title}>Açık ilan</h3><p className="mt-2 text-[#515154]">Birkaç teklif görmek istiyorsan.</p><div className="mt-6"><Steps items={open} /></div><Link href="/talepler/yeni" className={`${pillSecondary} mt-6`}>İş ilanı ver</Link></div>
+        <div className={tile}><h3 className={title}>Doğrudan ustaya talep</h3><p className="mt-2 text-ink-2">Aradığın ustayı biliyorsan.</p><div className="mt-6"><Steps items={direct} /></div><Link href="/usta-bul" className={`${pillPrimary} mt-6`}>Usta bul</Link></div>
+        <div className={tile}><h3 className={title}>Açık ilan</h3><p className="mt-2 text-ink-2">Birkaç teklif görmek istiyorsan.</p><div className="mt-6"><Steps items={open} /></div><Link href="/talepler/yeni" className={`${pillSecondary} mt-6`}>İş ilanı ver</Link></div>
       </div>
     </Band>
 

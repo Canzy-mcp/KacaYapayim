@@ -8,9 +8,9 @@ export const quoteStatusCopy = {
 
 export function QuoteStatusBadge({ quote }: { quote: Pick<Quote, "status" | "valid_until"> }) {
   const status = effectiveQuoteStatus(quote);
-  const tone = status === "ready" || status === "accepted" ? "bg-[#eaf7ee] text-[#247344]" :
-    status === "draft" ? "bg-[#f0f0f2] text-[#62626a]" :
-    status === "rejected" || status === "cancelled" || status === "expired" ? "bg-[#fff0ee] text-[#ae4439]" :
-    "bg-[#edf4fd] text-[#2366a5]";
+  const tone = status === "ready" || status === "accepted" ? "bg-success-soft text-success-ink" :
+    status === "draft" ? "bg-line text-muted" :
+    status === "rejected" || status === "cancelled" || status === "expired" ? "bg-danger-soft text-danger-ink" :
+    "bg-primary-soft text-primary";
   return <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${tone}`}>{quoteStatusCopy[status]}</span>;
 }

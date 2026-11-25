@@ -44,7 +44,7 @@ export default function Page() {
       <Intro eyebrow="Ürünü gör" h="Hesaptan teklife, tek akışta." id="demo-title" text="Örnek bir boya işiyle maliyetin teklif fiyatına nasıl dönüştüğünü dene." />
       <ProductDemo />
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-        <figure className={`${tile} m-0 p-5`}><div className="max-h-[520px] overflow-hidden rounded-xl border border-[#d2d2d7]"><Image src="/images/marketing/quote-demo-logo.jpg" width={636} height={1279} alt="Gerçek demo teklifinden alınan önizleme: iş kapsamı, 42.500 TL örnek fiyat ve ödeme koşulları" sizes="(min-width: 1024px) 360px, 90vw" className="block h-auto w-full" /></div><figcaption className="mt-3 text-sm text-[#6e6e73]">Teklif önizlemesi. Örnek veriler.</figcaption></figure>
+        <figure className={`${tile} m-0 p-5`}><div className="max-h-[520px] overflow-hidden rounded-xl border border-line-strong"><Image src="/images/marketing/quote-demo-logo.jpg" width={636} height={1279} alt="Gerçek demo teklifinden alınan önizleme: iş kapsamı, 42.500 TL örnek fiyat ve ödeme koşulları" sizes="(min-width: 1024px) 360px, 90vw" className="block h-auto w-full" /></div><figcaption className="mt-3 text-sm text-muted">Teklif önizlemesi. Örnek veriler.</figcaption></figure>
         <MarginExample />
       </div>
       <p className="mt-8"><Link href="/hesaplama-araclari/kar-marji" className={textLink}>Kâr marjı hesaplama aracını dene</Link></p>

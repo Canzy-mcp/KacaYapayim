@@ -22,7 +22,7 @@ export default function Page() {
     <PageLd path={path} name={name} description={description} crumbs={crumbs} />
     <PageHead crumbs={[{ name: "Ana Sayfa", href: "/" }, { name: "Yayın politikası" }]} eyebrow="Yayın politikası" h="Yazdıklarımızın arkasındayız." text="Rehberlerimizi kimin yazdığını, rakamları nasıl kontrol ettiğimizi ve hatayı nasıl düzelttiğimizi açıkça anlatıyoruz." />
     <Band tone="gray" label="policy-title"><Intro h="Nasıl çalışıyoruz?" id="policy-title" />
-      <div className="mt-10 grid gap-4 md:grid-cols-2">{sections.map(s => <section key={s.h} className={tile}><h3 className={title}>{s.h}</h3><p className="mt-3 max-w-[68ch] text-[17px] leading-[1.6] text-[#515154]">{s.text}</p></section>)}</div>
+      <div className="mt-10 grid gap-4 md:grid-cols-2">{sections.map(s => <section key={s.h} className={tile}><h3 className={title}>{s.h}</h3><p className="mt-3 max-w-[68ch] text-[17px] leading-[1.6] text-ink-2">{s.text}</p></section>)}</div>
     </Band>
   </>;
 }

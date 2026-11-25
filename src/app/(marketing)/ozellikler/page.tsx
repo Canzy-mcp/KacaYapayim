@@ -15,7 +15,7 @@ export default function Page() {
       <Link href="/ustalar-icin" className={pillPrimary}>Ustalar için</Link>
     </PageHead>
     <Band tone="gray" label="features-title"><Intro h="Teklifin her aşaması için." id="features-title" />
-      <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{items.map(([t, d]) => <li key={t} className={tile}><h3 className={title}>{t}</h3><p className="mt-3 leading-[1.55] text-[#515154]">{d}</p></li>)}</ul>
+      <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{items.map(([t, d]) => <li key={t} className={tile}><h3 className={title}>{t}</h3><p className="mt-3 leading-[1.55] text-ink-2">{d}</p></li>)}</ul>
       <p className="mt-8"><Link className={textLink} href="/metodoloji">Fiyat hesabının nasıl yapıldığını öğren</Link></p>
     </Band>
     <CtaBand id="cta-title" h="Usta olarak katıl." text="Tek seferlik 199 ₺ ile tekliflerini sınırsız hazırla. Abonelik yok."><Link href="/register?hesap=usta" className={ctaLight}>Usta olarak katıl</Link><Link href="/fiyatlandirma" className={ctaGhost}>Fiyatlandırma</Link></CtaBand>

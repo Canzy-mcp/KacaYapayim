@@ -37,11 +37,11 @@ export default function Page() {
     <PageHead crumbs={[{ name: "Ana Sayfa", href: "/" }, { name: "Güvenli hizmet" }]} eyebrow="Güvenli hizmet" h="Kapını açmadan önce bilmen gerekenler." text="Adresin, yorumların, bildirimlerin ve ödemenin nasıl işlediğini açıkça yazdık." />
     <Band tone="gray" label="rules-title">
       <h2 id="rules-title" className="sr-only">Güvenlik kuralları</h2>
-      <div className="grid gap-4 md:grid-cols-2">{blocks.map((b, i) => <section key={b.id} id={b.id} aria-labelledby={`${b.id}-t`} className={`${tile} scroll-mt-28 ${i === 0 ? "md:col-span-2" : ""}`}><h3 id={`${b.id}-t`} className={title}>{b.h}</h3><p className="mt-3 max-w-[68ch] text-[17px] leading-[1.6] text-[#515154]">{b.text}</p></section>)}</div>
+      <div className="grid gap-4 md:grid-cols-2">{blocks.map((b, i) => <section key={b.id} id={b.id} aria-labelledby={`${b.id}-t`} className={`${tile} scroll-mt-28 ${i === 0 ? "md:col-span-2" : ""}`}><h3 id={`${b.id}-t`} className={title}>{b.h}</h3><p className="mt-3 max-w-[68ch] text-[17px] leading-[1.6] text-ink-2">{b.text}</p></section>)}</div>
     </Band>
     <Band label="tips-title">
       <Intro eyebrow="Müşteriler için" h="Daha güvenli bir iş için beş ipucu." id="tips-title" />
-      <ul className="mt-8 grid max-w-3xl gap-3">{tips.map(t => <li key={t} className="flex gap-3 rounded-[20px] border border-[#d2d2d7] bg-white p-5 leading-[1.55]"><span aria-hidden="true" className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-[#e4f0ed] text-xs font-bold text-[#075d54]">✓</span><span className="min-w-0">{t}</span></li>)}</ul>
+      <ul className="mt-8 grid max-w-3xl gap-3">{tips.map(t => <li key={t} className="flex gap-3 rounded-xl border border-line-strong bg-white p-5 leading-[1.55]"><span aria-hidden="true" className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-bold text-primary">✓</span><span className="min-w-0">{t}</span></li>)}</ul>
       <p className="mt-8"><Link href="/nasil-calisir" className={textLink}>Süreç nasıl işliyor?</Link></p>
     </Band>
     <Band tone="gray" label="faq-title"><Faq items={faqs} /></Band>

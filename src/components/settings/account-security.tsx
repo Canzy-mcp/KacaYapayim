@@ -6,9 +6,9 @@ import { Button, Input } from "@/components/ui";
 export function AccountSecurity() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
-  return <section className="mt-8 rounded-2xl border border-[#dedee3] bg-white p-6">
+  return <section className="mt-8 rounded-2xl border border-line-strong bg-white p-6">
     <h2 className="text-lg font-semibold">Hesap güvenliği</h2>
-    <p className="mt-2 text-sm text-[#6e6e73]">Diğer cihazlardaki oturumlarını kapatabilir veya hesabını dosyalarıyla birlikte silebilirsin. Oturum kapatıldıktan sonra mevcut erişim anahtarları süreleri dolana kadar geçerli kalabilir.</p>
+    <p className="mt-2 text-sm text-muted">Diğer cihazlardaki oturumlarını kapatabilir veya hesabını dosyalarıyla birlikte silebilirsin. Oturum kapatıldıktan sonra mevcut erişim anahtarları süreleri dolana kadar geçerli kalabilir.</p>
     <form className="mt-5 space-y-4" onSubmit={async event => {
       event.preventDefault(); if (busy) return;
       const form = new FormData(event.currentTarget);
@@ -27,7 +27,7 @@ export function AccountSecurity() {
     }}>
       <Input id="security-password" name="password" label="Güncel parolan" type="password" autoComplete="current-password" required maxLength={1024} />
       <Button type="submit" name="action" value="other-sessions" disabled={busy}>Diğer oturumları kapat</Button>
-      <details className="rounded-xl border border-[#dedee3] p-4"><summary className="cursor-pointer font-medium text-[#b42318]">Hesabımı kalıcı olarak sil</summary>
+      <details className="rounded-xl border border-line-strong p-4"><summary className="cursor-pointer font-medium text-danger-ink">Hesabımı kalıcı olarak sil</summary>
         <p className="my-3 text-sm">Bu işlem geri alınamaz. Önce gerekli kayıtlarını dışa aktar. Dosyalar temizlenirken işlem yarıda kalırsa tekrar deneyebilirsin.</p>
         <Input id="delete-confirmation" name="confirmation" label="Onaylamak için HESABIMI SIL yaz" autoComplete="off" />
         <Button type="submit" name="action" value="delete" variant="danger" disabled={busy} className="mt-4">Hesabımı sil</Button>

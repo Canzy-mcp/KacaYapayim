@@ -2,8 +2,9 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { ArrowRight, BadgeCheck, Lock, Search, ShieldCheck, Flag } from "lucide-react";
+import { LiveIsland } from "@/components/marketing/live-island";
 import { graph, JsonLd, organizationId, siteMetadata, siteOrigin, webPageNode } from "@/lib/marketing/seo";
-import { Band, CtaBand, Intro, Photo, Steps, ctaGhost, ctaLight, display, headline, lead, pillPrimary, pillSecondary, textLink, tile } from "@/components/marketing/acquisition/parts";
+import { Band, CtaBand, Eyebrow, Intro, Photo, Steps, ctaGhost, ctaLight, display, headline, lead, pillPrimary, pillSecondary, textLink, tile } from "@/components/marketing/acquisition/parts";
 
 export const metadata: Metadata = {
   ...siteMetadata("Kaça Yapayım: usta bul, teklif al", "Kaça Yapayım (KaçaYapayım) ile işin için usta bul veya ilan açıp teklif al. Ustalar için maliyet hesabı, profesyonel teklifler ve iş takibi.", "/"),
@@ -42,6 +43,8 @@ const faqs = [
   { q: "Yorumlara güvenebilir miyim?", a: "Yorumlar yalnızca tamamlanan işlerden sonra, o işi yaptıran müşteri tarafından yazılır. Talebi tamamlanmamış biri puan veremez." },
   { q: "Usta olarak nasıl katılırım?", a: "Hesap aç, hizmet alanını ve bölgeni ekle. Profilini yayınlamak ve teklif vermek için tek seferlik 199 ₺ usta üyeliği gerekir; abonelik yok, üyelik süresiz. Teklif ve maliyet araçları aynı hesapta." },
 ] as const;
+const field = "h-12 w-full min-w-0 rounded-lg border border-line-strong bg-surface px-3.5 text-[16px] text-ink outline-none transition-shadow placeholder:text-subtle focus:border-primary focus:ring-4 focus:ring-primary/15";
+const fieldLabel = "text-[13px] font-bold text-ink-2";
 const faqPairs = faqs.map(f => [f.q, f.a] as const);
 
 export default function Home() {
@@ -52,35 +55,43 @@ export default function Home() {
       { "@type": "FAQPage", "@id": `${siteOrigin}/#faq`, inLanguage: "tr-TR", mainEntity: faqPairs.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) },
     )} />
 
-    <section className="bg-white pb-10 pt-10 sm:pt-16 lg:pb-14 lg:pt-20" aria-labelledby="hero-title"><div className="mx-auto w-full min-w-0 max-w-[1180px] px-5 sm:px-8 lg:px-12">
-      <div className="mx-auto max-w-4xl text-center">
-        <p className="text-sm font-semibold text-[#075d54]">Mahallendeki ustalar</p>
-        <h1 id="hero-title" className={`mt-3 ${display}`}>Doğru ustayı bul, işini rahat teslim et.</h1>
-        <p className={`mx-auto mt-5 max-w-[48ch] ${lead}`}>Hizmeti ve ilçeni seç, ustaların profillerine bak, tek talepte teklif al.</p>
+    <section className="border-b border-line-strong bg-canvas" aria-labelledby="hero-title">
+      <div className="mx-auto grid w-full min-w-0 max-w-[1180px] items-center gap-12 px-5 pb-16 pt-10 sm:px-8 sm:pt-14 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,.95fr)] lg:gap-16 lg:px-12 lg:pb-24 lg:pt-20">
+        <div className="min-w-0">
+          <Eyebrow>Mahallendeki ustalar</Eyebrow>
+          <h1 id="hero-title" className={`mt-5 ${display}`}>Doğru ustayı bul, işini <span className="whitespace-nowrap bg-[linear-gradient(transparent_60%,var(--color-tape)_60%,var(--color-tape)_92%,transparent_92%)] px-1 [box-decoration-break:clone]">rahat</span> teslim et.</h1>
+          <p className={`mt-6 max-w-[44ch] ${lead}`}>Hizmeti ve ilçeni seç, ustaların profillerine bak, tek talepte teklif al.</p>
+          <form action="/usta-bul" method="get" aria-label="Usta ara" className="mt-8 grid gap-3 rounded-xl border border-line-strong bg-surface p-4 shadow-card sm:grid-cols-2 sm:p-5">
+            <div className="grid min-w-0 gap-1.5 sm:col-span-2"><label htmlFor="home-category" className={fieldLabel}>Hizmet</label>
+              <select id="home-category" name="category" defaultValue="" className={field}><option value="">Tüm hizmetler</option>{categories.map(([slug, name]) => <option key={slug} value={slug}>{name}</option>)}</select></div>
+            <div className="grid min-w-0 gap-1.5"><label htmlFor="home-city" className={fieldLabel}>İl</label>
+              <input id="home-city" name="city" type="text" placeholder="İstanbul" maxLength={80} autoComplete="address-level1" className={field} /></div>
+            <div className="grid min-w-0 gap-1.5"><label htmlFor="home-district" className={fieldLabel}>İlçe</label>
+              <input id="home-district" name="district" type="text" placeholder="Kadıköy" maxLength={80} autoComplete="address-level2" className={field} /></div>
+            <button type="submit" className={`${pillPrimary} sm:col-span-2`}><Search size={18} aria-hidden="true" />Usta bul</button>
+          </form>
+          <p className="mt-4 text-[15px] text-muted">Ne aradığından emin değil misin? <Link href="/talepler/yeni" className={textLink}>İş ilanı ver</Link>, teklifler sana gelsin.</p>
+          <ul className="mt-8 grid gap-2 border-t border-line-strong pt-6 text-[14px] font-medium text-ink-2 sm:flex sm:flex-wrap sm:gap-x-6">{["Müşteriler için ücretsiz", "Adresin yalnız seçtiğin ustaya", "Yorumlar tamamlanan işten"].map(t => <li key={t} className="flex items-center gap-2"><BadgeCheck size={17} className="text-success" aria-hidden="true" />{t}</li>)}</ul>
+        </div>
+        <figure className="m-0 min-w-0"><div className="relative">
+          <div className="relative aspect-[4/5] overflow-hidden rounded-xl border border-line-strong bg-neutral-soft sm:aspect-[4/3] lg:aspect-square"><Image src="/images/marketing/hero-kesif.webp" alt="Bir boyacı ve ev sahibi, salon duvarını şerit metreyle birlikte ölçüyor" fill priority sizes="(min-width: 1024px) 520px, 100vw" className="object-cover object-[78%_50%]" /><LiveIsland /></div>
+          <div aria-hidden="true" className="absolute -bottom-6 left-4 right-4 rounded-lg border border-line-strong bg-surface p-4 shadow-float sm:left-auto sm:right-6 sm:w-[290px] lg:-left-10 lg:right-auto">
+            <div className="flex items-center justify-between"><span className="text-[13px] font-bold text-ink">Salon boyası · Kadıköy</span><span className="rounded-md bg-tape px-2 py-0.5 text-[12px] font-bold text-ink">3 teklif</span></div>
+            <div className="mt-3 divide-y divide-line">{[["Usta A · 4,9 ★", "18.200 ₺"], ["Usta B · 4,8 ★", "19.500 ₺"]].map(([n, p]) => <div key={n} className="flex items-center justify-between py-2 text-[13px]"><span className="text-ink-2">{n}</span><span className="font-bold text-ink tabular-nums">{p}</span></div>)}</div>
+          </div>
+          </div>
+          <figcaption className="mt-10 text-[13px] text-muted lg:text-right">Keşifte duvarı birlikte ölçmek. Görsel ve teklif kartı temsilidir.</figcaption>
+        </figure>
       </div>
-      <form action="/usta-bul" method="get" aria-label="Usta ara" className="mx-auto mt-10 grid max-w-4xl gap-4 rounded-[20px] border border-[#d2d2d7] bg-[#f5f5f7] p-4 sm:grid-cols-2 sm:p-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
-        <div className="grid min-w-0 gap-1.5"><label htmlFor="home-category" className="text-sm font-semibold text-[#1d1d1f]">Hizmet</label>
-          <select id="home-category" name="category" defaultValue="" className="min-h-12 w-full min-w-0 rounded-xl border border-[#d2d2d7] bg-white px-3 text-base text-[#1d1d1f] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#075d54]"><option value="">Tüm hizmetler</option>{categories.map(([slug, name]) => <option key={slug} value={slug}>{name}</option>)}</select></div>
-        <div className="grid min-w-0 gap-1.5"><label htmlFor="home-city" className="text-sm font-semibold text-[#1d1d1f]">İl</label>
-          <input id="home-city" name="city" type="text" placeholder="Örn. İstanbul" maxLength={80} autoComplete="address-level1" className="min-h-12 w-full min-w-0 rounded-xl border border-[#d2d2d7] bg-white px-3 text-base text-[#1d1d1f] placeholder:text-[#6e6e73] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#075d54]" /></div>
-        <div className="grid min-w-0 gap-1.5"><label htmlFor="home-district" className="text-sm font-semibold text-[#1d1d1f]">İlçe</label>
-          <input id="home-district" name="district" type="text" placeholder="Örn. Kadıköy" maxLength={80} autoComplete="address-level2" className="min-h-12 w-full min-w-0 rounded-xl border border-[#d2d2d7] bg-white px-3 text-base text-[#1d1d1f] placeholder:text-[#6e6e73] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#075d54]" /></div>
-        <button type="submit" className={`${pillPrimary} sm:col-span-2 lg:col-span-1`}><Search size={18} aria-hidden="true" />Usta bul</button>
-      </form>
-      <p className="mt-5 text-center text-base text-[#515154]">Ne aradığından emin değil misin? <Link href="/talepler/yeni" className={textLink}>İş ilanı ver</Link> ve teklifler sana gelsin.</p>
-    </div></section>
-
-    <section className="bg-white pb-14 sm:pb-20 lg:pb-28" aria-label="Keşifte ev sahibi ve usta">
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#e8e8ed] md:aspect-[16/7]"><Image src="/images/marketing/hero-kesif.webp" alt="Bir boyacı ve ev sahibi, salon duvarını şerit metreyle birlikte ölçüyor" fill priority sizes="100vw" className="object-cover" /></div>
-      <p className="mx-auto mt-3 w-full max-w-[1180px] px-5 text-[13px] text-[#6e6e73] sm:px-8 sm:text-sm lg:px-12">Keşifte duvarı birlikte ölçmek. Temsili görsel.</p>
     </section>
+
 
     <Band tone="gray" label="services-title">
       <div className="flex flex-wrap items-end justify-between gap-4"><Intro eyebrow="Popüler hizmetler" h="Evinin her işi için usta." id="services-title" /><Link href="/meslekler" className={`${textLink} inline-flex min-h-11 items-center gap-1`}>Tüm meslekler <ArrowRight size={17} aria-hidden="true" /></Link></div>
-      <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{services.map(s => <li key={s.name} className="min-w-0"><Link href={s.slug ? `/usta-bul?category=${s.slug}` : "/usta-bul"} className="group block h-full overflow-hidden rounded-[20px] border border-[#d2d2d7] bg-white no-underline transition-colors duration-150 hover:border-[#075d54] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#075d54]">
-        <span className="relative block aspect-[4/3] bg-[#e8e8ed]"><Image src={`/images/marketing/${s.image}.webp`} alt={s.alt} fill sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw" className="object-cover" /></span>
-        <span className="grid gap-0.5 p-5"><strong className="text-lg font-semibold text-[#1d1d1f]">{s.name}</strong><span className="text-[15px] text-[#515154]">{s.text}</span></span></Link></li>)}</ul>
-      <p className="mt-5 text-sm text-[#6e6e73]">Hizmet görselleri temsilidir. Usta profillerinde ustaların kendi işleri yer alır.</p>
+      <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{services.map(s => <li key={s.name} className="min-w-0"><Link href={s.slug ? `/usta-bul?category=${s.slug}` : "/usta-bul"} className="group block h-full overflow-hidden rounded-xl border border-line bg-surface no-underline shadow-xs transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-line-strong hover:shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+        <span className="relative block aspect-[16/10] overflow-hidden bg-neutral-soft"><Image src={`/images/marketing/${s.image}.webp`} alt={s.alt} fill sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" /></span>
+        <span className="flex items-center justify-between gap-3 p-5"><span className="grid gap-0.5"><strong className="text-[17px] font-semibold text-ink">{s.name}</strong><span className="text-[14px] text-muted">{s.text}</span></span><ArrowRight size={18} aria-hidden="true" className="shrink-0 text-subtle transition-colors group-hover:text-primary" /></span></Link></li>)}</ul>
+      <p className="mt-5 text-sm text-muted">Hizmet görselleri temsilidir. Usta profillerinde ustaların kendi işleri yer alır.</p>
     </Band>
 
     <Band label="how-title" id="nasil-calisir">
@@ -91,7 +102,7 @@ export default function Home() {
 
     <Band tone="gray" label="trust-title">
       <Intro eyebrow="Güven" h="Kime kapını açtığını bil." id="trust-title" />
-      <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{trust.map(({ icon: Icon, title: t, text }) => <li key={t} className={`${tile} p-6`}><span className="grid size-11 place-items-center rounded-full bg-[#e4f0ed] text-[#075d54]"><Icon size={22} aria-hidden="true" /></span><h3 className={`mt-5 text-xl font-semibold leading-[1.25] tracking-[-.02em] text-[#1d1d1f]`}>{t}</h3><p className="mt-3 leading-[1.55] text-[#515154]">{text}</p></li>)}</ul>
+      <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{trust.map(({ icon: Icon, title: t, text }) => <li key={t} className={`${tile} p-6`}><span className="grid size-10 place-items-center rounded-lg bg-primary-soft text-primary"><Icon size={20} aria-hidden="true" /></span><h3 className="mt-5 text-[17px] font-semibold leading-[1.3] tracking-heading text-ink">{t}</h3><p className="mt-2 text-[15px] leading-[1.6] text-muted">{text}</p></li>)}</ul>
       <p className="mt-8"><Link href="/guvenli-hizmet" className={`${textLink} inline-flex min-h-11 items-center gap-1`}>Güvenli hizmet <ArrowRight size={17} aria-hidden="true" /></Link></p>
     </Band>
 
@@ -104,7 +115,7 @@ export default function Home() {
     </Band>
 
     <Band tone="gray" label="faq-title"><div className="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16"><h2 id="faq-title" className={headline}>Aklındaki sorular.</h2>
-      <div className="grid min-w-0 gap-3">{faqs.map(({ q, a }) => <details key={q} className="group rounded-[20px] border border-[#d2d2d7] bg-white px-6"><summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-4 text-[17px] font-semibold text-[#1d1d1f] marker:content-none focus-visible:outline-[3px] focus-visible:outline-[#075d54] [&::-webkit-details-marker]:hidden"><span className="min-w-0">{q}</span><span aria-hidden="true" className="text-2xl leading-none text-[#075d54] transition-transform duration-150 group-open:rotate-45 motion-reduce:transition-none">+</span></summary><p className="pb-5 leading-[1.6] text-[#515154]">{a}</p></details>)}</div></div>
+      <div className="grid min-w-0 gap-3">{faqs.map(({ q, a }) => <details key={q} className="group rounded-xl border border-line bg-surface px-5 shadow-xs open:border-line-strong sm:px-6"><summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-4 text-[16px] font-semibold text-ink marker:content-none focus-visible:outline-2 focus-visible:outline-primary [&::-webkit-details-marker]:hidden"><span className="min-w-0">{q}</span><span aria-hidden="true" className="grid size-7 shrink-0 place-items-center rounded-md bg-neutral-soft text-lg leading-none text-ink-2 transition-transform duration-150 group-open:rotate-45 motion-reduce:transition-none">+</span></summary><p className="pb-5 leading-[1.65] text-ink-2">{a}</p></details>)}</div></div>
     </Band>
 
     <CtaBand id="final-title" h="İşini anlat, ustalar sana yazsın." text="Bir kez yaz, bölgendeki ustalardan teklif topla. Müşteriler için ücretsiz."><Link className={ctaLight} href="/talepler/yeni">İş ilanı ver <ArrowRight size={17} aria-hidden="true" /></Link><Link className={ctaGhost} href="/usta-bul">Usta bul</Link></CtaBand>

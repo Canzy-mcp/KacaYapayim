@@ -3,15 +3,15 @@ import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 
 /* ---------- Class strings (Tailwind) kept for existing pages, restyled to the Apple-like system ---------- */
-export const btnPrimary = "inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#075d54] px-[22px] text-[17px] font-medium tracking-[-.01em] text-white no-underline transition-colors duration-150 hover:bg-[#064a43] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#075d54]";
-export const btnSecondary = "inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#075d54] bg-transparent px-[22px] text-[17px] font-medium tracking-[-.01em] text-[#075d54] no-underline transition-colors duration-150 hover:bg-[#e4f0ed] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#075d54]";
-export const chip = "inline-flex min-h-11 items-center rounded-full border border-[#d2d2d7] bg-white px-4 text-sm font-medium text-[#075d54] no-underline transition-colors duration-150 hover:border-[#075d54]";
-export const card = "rounded-[20px] border border-[#d2d2d7] bg-white p-6";
-export const h2Class = "text-[clamp(1.5rem,1.2rem+1.2vw,2.25rem)] font-semibold leading-[1.15] tracking-[-.03em] text-[#1d1d1f]";
+export const btnPrimary = "inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-[22px] text-[16px] font-semibold text-white no-underline transition-colors duration-150 hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
+export const btnSecondary = "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-line-strong bg-surface shadow-xs px-[22px] text-[16px] font-semibold text-ink no-underline transition-colors duration-150 hover:bg-primary-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
+export const chip = "inline-flex min-h-11 items-center rounded-lg border border-line-strong bg-white px-4 text-sm font-medium text-primary no-underline transition-colors duration-150 hover:border-primary";
+export const card = "rounded-xl border border-line-strong bg-white p-6";
+export const h2Class = "text-[clamp(1.5rem,1.2rem+1.2vw,2.25rem)] font-semibold leading-[1.15] tracking-heading text-ink";
 
 /* ---------- Layout primitives ---------- */
 export function PageShell({ children }: { children: ReactNode }) {
-  return <div className="bg-white text-[#1d1d1f]"><div className="mx-auto w-full max-w-5xl min-w-0 px-5 pb-20 pt-8 sm:px-8 sm:pb-24 sm:pt-12">{children}</div></div>;
+  return <div className="bg-white text-ink"><div className="mx-auto w-full max-w-5xl min-w-0 px-5 pb-20 pt-8 sm:px-8 sm:pb-24 sm:pt-12">{children}</div></div>;
 }
 
 /** Full-bleed section. tone: white (default), alt (#f5f5f7) or dark. */
@@ -46,7 +46,7 @@ export function FeatureTile({ icon, title, children, href, cta, className = "" }
 }
 
 export function StatTile({ value, label, note, className = "" }: { value: ReactNode; label: string; note?: string; className?: string }) {
-  return <div className={`ky-card ${className}`.trim()}><p className="ky-stat !mt-0 !text-[var(--ky-ink)]">{value}</p><p className="!mt-2 text-[1.0625rem] font-semibold !text-[var(--ky-ink)]">{label}</p>{note && <p className="ky-caption !mt-1">{note}</p>}</div>;
+  return <div className={`ky-card ${className}`.trim()}><p className="ky-stat !mt-0 !text-ink">{value}</p><p className="!mt-2 text-[1.0625rem] font-semibold !text-ink">{label}</p>{note && <p className="ky-caption !mt-1">{note}</p>}</div>;
 }
 
 export function Steps({ items }: { items: readonly { title: string; body: ReactNode }[] }) {
@@ -72,14 +72,14 @@ export function Eyebrow({ children }: { children: ReactNode }) {
 }
 
 export function Hero({ eyebrow, title, lead, children }: { eyebrow: string; title: string; lead: string; children?: ReactNode }) {
-  return <header className="max-w-3xl"><Eyebrow>{eyebrow}</Eyebrow><h1 className="mt-3 text-[clamp(2.25rem,1.6rem+2.8vw,4rem)] font-[650] leading-[1.08] tracking-[-.04em] text-balance">{title}</h1><p className="mt-5 text-[clamp(1.0625rem,1rem+.4vw,1.3125rem)] leading-[1.5] text-[#515154]">{lead}</p>{children}</header>;
+  return <header className="max-w-3xl"><Eyebrow>{eyebrow}</Eyebrow><h1 className="mt-3 text-[clamp(2.25rem,1.6rem+2.8vw,4rem)] font-[650] leading-[1.08] tracking-display text-balance">{title}</h1><p className="mt-5 text-[clamp(1.0625rem,1rem+.4vw,1.3125rem)] leading-[1.5] text-ink-2">{lead}</p>{children}</header>;
 }
 
 export function DataTable({ caption, head, rows }: { caption: string; head: readonly string[]; rows: readonly (readonly string[])[] }) {
-  return <div className="relative mt-5 overflow-x-auto rounded-[20px] border border-[#d2d2d7] bg-white"><table className="w-full min-w-0 border-collapse text-left text-[15px] leading-6">
-    <caption className="border-b border-[#d2d2d7] bg-[#f5f5f7] px-4 py-3 text-left text-sm font-semibold">{caption}</caption>
-    <thead><tr>{head.map((h) => <th key={h} scope="col" className="border-b border-[#d2d2d7] px-4 py-3 font-semibold">{h}</th>)}</tr></thead>
-    <tbody>{rows.map((r, i) => <tr key={i} className="border-b border-[#e8e8ed] last:border-0">{r.map((c, j) => j === 0 ? <th key={j} scope="row" className="px-4 py-3 align-top font-semibold">{c}</th> : <td key={j} className="px-4 py-3 align-top text-[#515154]">{c}</td>)}</tr>)}</tbody>
+  return <div className="relative mt-5 overflow-x-auto rounded-xl border border-line-strong bg-white"><table className="w-full min-w-0 border-collapse text-left text-[15px] leading-6">
+    <caption className="border-b border-line-strong bg-canvas px-4 py-3 text-left text-sm font-semibold">{caption}</caption>
+    <thead><tr>{head.map((h) => <th key={h} scope="col" className="border-b border-line-strong px-4 py-3 font-semibold">{h}</th>)}</tr></thead>
+    <tbody>{rows.map((r, i) => <tr key={i} className="border-b border-line last:border-0">{r.map((c, j) => j === 0 ? <th key={j} scope="row" className="px-4 py-3 align-top font-semibold">{c}</th> : <td key={j} className="px-4 py-3 align-top text-ink-2">{c}</td>)}</tr>)}</tbody>
   </table></div>;
 }
 
@@ -88,9 +88,9 @@ export function Faq({ items, title = "Sık sorulan sorular" }: { items: readonly
 }
 
 export function Checklist({ items }: { items: readonly string[] }) {
-  return <ul className="mt-5 grid gap-3 sm:grid-cols-2">{items.map((item) => <li key={item} className="flex min-w-0 gap-3 rounded-[20px] border border-[#d2d2d7] bg-white p-4 leading-7"><span aria-hidden="true" className="mt-1 grid size-5 shrink-0 place-items-center rounded-full bg-[#e4f0ed] text-xs font-bold text-[#075d54]">✓</span><span className="min-w-0">{item}</span></li>)}</ul>;
+  return <ul className="mt-5 grid gap-3 sm:grid-cols-2">{items.map((item) => <li key={item} className="flex min-w-0 gap-3 rounded-xl border border-line-strong bg-white p-4 leading-7"><span aria-hidden="true" className="mt-1 grid size-5 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-bold text-primary">✓</span><span className="min-w-0">{item}</span></li>)}</ul>;
 }
 
 export function Sources({ items }: { items: readonly { label: string; url: string; note: string }[] }) {
-  return <section className="mt-12" aria-labelledby="sources-title"><h2 id="sources-title" className="text-xl font-semibold">Kaynaklar</h2><ul className="mt-4 grid gap-3">{items.map((s) => <li key={s.url} className="leading-7"><a href={s.url} className="font-medium text-[#075d54] underline underline-offset-4" {...(s.url.startsWith("http") ? { rel: "noopener noreferrer", target: "_blank" } : {})}>{s.label}</a><span className="block text-sm text-[#6e6e73]">{s.note}</span></li>)}</ul></section>;
+  return <section className="mt-12" aria-labelledby="sources-title"><h2 id="sources-title" className="text-xl font-semibold">Kaynaklar</h2><ul className="mt-4 grid gap-3">{items.map((s) => <li key={s.url} className="leading-7"><a href={s.url} className="font-medium text-primary underline underline-offset-4" {...(s.url.startsWith("http") ? { rel: "noopener noreferrer", target: "_blank" } : {})}>{s.label}</a><span className="block text-sm text-muted">{s.note}</span></li>)}</ul></section>;
 }

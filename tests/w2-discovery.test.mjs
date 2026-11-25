@@ -36,8 +36,8 @@ test("robots arama ve egitim tarayicilarini ayirir, /api/og acik", () => {
 
 test("manifest marka renkleri ve ikonlar", () => {
   const s = read("src/app/manifest.ts");
-  assert.match(s, /theme_color: "#075d54"/);
-  assert.match(s, /background_color: "#ffffff"/);
+  assert.match(s, /theme_color: "#1554f0"/);
+  assert.match(s, /background_color: "#f5f2ec"/);
   assert.match(s, /short_name: "KaçaYapayım"/);
 });
 

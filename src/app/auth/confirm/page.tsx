@@ -14,7 +14,7 @@ export default async function ConfirmPage({ searchParams }: { searchParams: Prom
       <input type="hidden" name="token_hash" value={token_hash} />
       <input type="hidden" name="type" value={type} />
       <input type="hidden" name="next" value={typeof next === "string" ? next : ""} />
-      <p className="rounded-xl bg-[#F5F5F7] px-4 py-3 text-[14px] leading-6 text-[#6E6E73]">Bu e-postayı sen istemediysen devam etme.</p>
+      <p className="rounded-xl bg-canvas px-4 py-3 text-[14px] leading-6 text-muted">Bu e-postayı sen istemediysen devam etme.</p>
       <Button type="submit" className="min-h-12 w-full">{recovery ? "Şifre sıfırlamaya devam et" : "E-posta bağlantını onayla"}</Button>
     </form>
   </AuthShell>;

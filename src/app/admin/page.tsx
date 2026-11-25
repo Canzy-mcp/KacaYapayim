@@ -29,10 +29,10 @@ function BreakdownList({ heading, rows }: { heading: string; rows: { name: strin
   const max = Math.max(1, ...rows.map(({ hits }) => hits));
   return <section className={panel}>
     <h2 className="text-lg font-semibold">{heading}</h2>
-    {rows.length === 0 ? <p className="mt-3 text-sm text-slate-600">Bu dönemde ölçüm kaydı yok.</p> :
+    {rows.length === 0 ? <p className="mt-3 text-sm text-muted">Bu dönemde ölçüm kaydı yok.</p> :
       <ol className="mt-4 space-y-4">{rows.map(({ name, hits }) => <li key={name}>
         <div className="flex items-start justify-between gap-4 text-sm"><span className="break-all">{name}</span><strong className="tabular-nums">{format.format(hits)}</strong></div>
-        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-100" aria-hidden="true"><div className="h-full rounded-full bg-[#075fc7]" style={{ width: `${hits / max * 100}%` }} /></div>
+        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-neutral-soft" aria-hidden="true"><div className="h-full rounded-full bg-primary-hover" style={{ width: `${hits / max * 100}%` }} /></div>
       </li>)}</ol>}
   </section>;
 }
@@ -60,13 +60,13 @@ export default async function OperatorPage({ searchParams }: { searchParams: Pro
   return <main className="mx-auto max-w-6xl px-5 py-10 sm:py-14">
     <header className="mb-7 flex flex-wrap items-end justify-between gap-4">
       <div><h1 className="text-4xl font-semibold tracking-[-.045em]">Yönetim paneli</h1>
-        <p className="mt-2 text-sm text-slate-600">KaçaYapayım’ın trafiği, ilanları ve hesapları.</p></div>
+        <p className="mt-2 text-sm text-muted">KaçaYapayım’ın trafiği, ilanları ve hesapları.</p></div>
       <nav aria-label="Ölçüm dönemi" className="flex flex-wrap gap-2">{[7, 30, 90].map((day) => <Link key={day} href={`/admin?gun=${day}`} aria-current={days === day ? "page" : undefined} className={days === day ? linkButton : plainButton}>{day} gün</Link>)}</nav>
     </header>
     <section aria-label="Temel ölçümler" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {indicators.map(({ label, count, icon: Icon, note }) => <article key={label} className={panel}>
-        <Icon className="mb-3 text-[#075fc7]" size={19} aria-hidden="true" /><h2 className="text-sm font-medium text-slate-700">{label}</h2>
-        <p className="mt-1 text-3xl font-semibold tracking-tight tabular-nums">{format.format(count)}</p><p className="mt-1.5 text-xs text-slate-600">{note}</p>
+        <Icon className="mb-3 text-primary-hover" size={19} aria-hidden="true" /><h2 className="text-sm font-medium text-ink-2">{label}</h2>
+        <p className="mt-1 text-3xl font-semibold tracking-tight tabular-nums">{format.format(count)}</p><p className="mt-1.5 text-xs text-muted">{note}</p>
       </article>)}
     </section>
     <div className="mt-5 grid gap-4 lg:grid-cols-2">

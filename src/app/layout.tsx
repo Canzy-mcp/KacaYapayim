@@ -3,11 +3,12 @@ import { AnalyticsConsent } from "@/components/marketing/analytics-consent";
 import { GoogleAnalytics } from "@/components/marketing/google-analytics";
 import { headers } from "next/headers";
 import Script from "next/script";
-import { Inter } from "next/font/google";
+import { Bricolage_Grotesque, Inter } from "next/font/google";
 import { siteOrigin, siteSummary } from "@/lib/marketing/seo";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin", "latin-ext"], display: "swap", variable: "--font-inter" });
+const bricolage = Bricolage_Grotesque({ subsets: ["latin", "latin-ext"], display: "swap", variable: "--font-bricolage" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteOrigin),
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const nonce = (await headers()).get("x-nonce") ?? undefined;
-  return <html lang="tr" className={inter.variable}><body><GoogleAnalytics/><AnalyticsConsent/>{children}
+  return <html lang="tr" className={`${inter.variable} ${bricolage.variable}`}><body><GoogleAnalytics/><AnalyticsConsent/>{children}
     <Script id="google-tag-consent-default" strategy="beforeInteractive" nonce={nonce}>{`
       window.dataLayer = window.dataLayer || [];
       function gtag(){window.dataLayer.push(arguments);}

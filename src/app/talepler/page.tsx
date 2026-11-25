@@ -14,7 +14,7 @@ export default async function RequestsPage({ searchParams }: { searchParams: Pro
       <Link href="/talepler/yeni" className={linkButton}><Plus size={19} /> İş İlanı Ver</Link>
     </MarketHeading>
     {rows.length > 0 || page > 1 ? <RequestList rows={rows.slice(0, 20)} categories={directory?.categories ?? []} empty="Bu sayfada talep yok." /> :
-      <MarketEmpty photo><p className="text-lg font-semibold text-[#1d1d1f]">Henüz bir talep açmadın.</p>
+      <MarketEmpty photo><p className="text-lg font-semibold text-ink">Henüz bir talep açmadın.</p>
         <p className="mt-1">İş ilanı açarak teklif alabilir veya bir ustaya doğrudan çağrı gönderebilirsin.</p>
         <div className="mt-5 flex flex-wrap gap-2"><Link href="/talepler/yeni" className={linkButton}>İş ilanı ver</Link><Link href="/usta-bul" className={plainButton}>Usta rehberine git</Link></div>
       </MarketEmpty>}

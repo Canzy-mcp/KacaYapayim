@@ -64,11 +64,11 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
     },
   ];
 
-  return <div className="bg-[#f5f5f7] text-[#1d1d1f]">
+  return <div className="bg-canvas text-ink">
     <JsonLd data={jsonLd} />
-    <div className="sticky top-14 z-30 border-b border-[#d2d2d7] bg-white/85 backdrop-blur-xl">
+    <div className="sticky top-14 z-30 border-b border-line-strong bg-white/85 backdrop-blur-xl">
       <div className="mx-auto flex min-h-14 max-w-[1180px] items-center justify-between gap-3 px-5 sm:px-8">
-        <Link href="/usta-bul" className="inline-flex min-h-11 shrink-0 items-center gap-1.5 text-sm font-semibold text-[#075d54] hover:underline"><ArrowLeft size={17} aria-hidden="true" /> <span className="hidden sm:inline">Usta rehberi</span><span className="sm:hidden">Geri</span></Link>
+        <Link href="/usta-bul" className="inline-flex min-h-11 shrink-0 items-center gap-1.5 text-sm font-semibold text-primary hover:underline"><ArrowLeft size={17} aria-hidden="true" /> <span className="hidden sm:inline">Usta rehberi</span><span className="sm:hidden">Geri</span></Link>
         <p className="min-w-0 flex-1 truncate text-center text-sm font-semibold sm:text-left">{provider.display_name}</p>
         <Link href={request} className={`${linkButton} shrink-0`}>Teklif iste</Link>
       </div>
@@ -77,10 +77,10 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
       <div className="flex flex-wrap items-start gap-5 sm:gap-6">
         <Avatar name={provider.display_name} size="lg" />
         <div className="min-w-0 flex-1">
-          <h1 className="break-words text-[clamp(2rem,5vw,3.5rem)] font-[650] leading-[1.08] tracking-[-0.04em]">{provider.display_name}</h1>
-          <p className="mt-3 flex items-start gap-2 break-words text-base text-[#515154]"><MapPin size={16} aria-hidden="true" className="mt-1 shrink-0" /> <span className="min-w-0">{provider.city} · {areas.length ? areas.join(", ") : "Tüm ilçeler"}</span></p>
+          <h1 className="break-words text-[clamp(2rem,5vw,3.5rem)] font-[650] leading-[1.08] tracking-display">{provider.display_name}</h1>
+          <p className="mt-3 flex items-start gap-2 break-words text-base text-ink-2"><MapPin size={16} aria-hidden="true" className="mt-1 shrink-0" /> <span className="min-w-0">{provider.city} · {areas.length ? areas.join(", ") : "Tüm ilçeler"}</span></p>
           <div className="mt-2"><Rating provider={provider} /></div>
-          {services.length > 0 && <ul className="mt-4 flex flex-wrap gap-2" aria-label="Hizmetler">{services.map((service) => <li key={service.slug} className="rounded-full bg-[#f5f5f7] px-3.5 py-1.5 text-sm font-medium">{service.name}</li>)}</ul>}
+          {services.length > 0 && <ul className="mt-4 flex flex-wrap gap-2" aria-label="Hizmetler">{services.map((service) => <li key={service.slug} className="rounded-full bg-canvas px-3.5 py-1.5 text-sm font-medium">{service.name}</li>)}</ul>}
         </div>
       </div>
       <div className="mt-8 flex flex-wrap items-start gap-2"><Link href={request} className={linkButton}>Bu ustadan teklif iste <ArrowRight size={17} aria-hidden="true" /></Link>
@@ -90,22 +90,22 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
     <div className="mx-auto max-w-[1180px] px-5 py-12 sm:px-8 sm:py-16">
       <div className="grid gap-6 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <section className={panel}>
-          <h2 className="text-xl font-semibold tracking-[-0.02em]">Usta hakkında</h2><p className="mt-3 whitespace-pre-wrap break-words text-base leading-7 text-[#424245]">{provider.bio || "Usta henüz tanıtım yazısı eklemedi."}</p>
+          <h2 className="text-xl font-semibold tracking-heading">Usta hakkında</h2><p className="mt-3 whitespace-pre-wrap break-words text-base leading-7 text-ink-2">{provider.bio || "Usta henüz tanıtım yazısı eklemedi."}</p>
         </section>
-        <section className={panel}><h2 className="text-xl font-semibold tracking-[-0.02em]">Hizmet bölgesi</h2>
-          <p className="mt-3 break-words text-base leading-7 text-[#424245]">{provider.city}</p>
-          <p className="break-words text-base leading-7 text-[#424245]">{areas.length ? areas.join(", ") : "Tüm ilçeler"}</p>
+        <section className={panel}><h2 className="text-xl font-semibold tracking-heading">Hizmet bölgesi</h2>
+          <p className="mt-3 break-words text-base leading-7 text-ink-2">{provider.city}</p>
+          <p className="break-words text-base leading-7 text-ink-2">{areas.length ? areas.join(", ") : "Tüm ilçeler"}</p>
         </section>
       </div>
       <section className="mt-12" aria-labelledby="reviews-title">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
-          <h2 id="reviews-title" className="text-[clamp(1.6rem,3vw,2.25rem)] font-semibold tracking-[-0.03em]">Müşteri değerlendirmeleri</h2>
-          {reviewCount > 0 && provider.rating != null && <p className="flex items-center gap-1.5 text-base font-semibold"><Star size={18} className="fill-[#c98a2b] text-[#c98a2b]" aria-hidden="true" />{provider.rating.toLocaleString("tr-TR")} / 5 <span className="font-normal text-[#515154]">· {reviewCount} değerlendirme</span></p>}
+          <h2 id="reviews-title" className="text-[clamp(1.6rem,3vw,2.25rem)] font-semibold tracking-heading">Müşteri değerlendirmeleri</h2>
+          {reviewCount > 0 && provider.rating != null && <p className="flex items-center gap-1.5 text-base font-semibold"><Star size={18} className="fill-warning text-warning" aria-hidden="true" />{provider.rating.toLocaleString("tr-TR")} / 5 <span className="font-normal text-ink-2">· {reviewCount} değerlendirme</span></p>}
         </div>
-        <p className="mb-5 flex items-start gap-2 rounded-xl bg-[#e4f0ed] px-4 py-3 text-sm text-[#064a43]"><ShieldCheck size={17} className="mt-0.5 shrink-0" aria-hidden="true" />Yalnızca tamamlanan işlerden sonra müşterinin bıraktığı değerlendirmeler gösterilir.</p>
+        <p className="mb-5 flex items-start gap-2 rounded-xl bg-primary-soft px-4 py-3 text-sm text-primary-hover"><ShieldCheck size={17} className="mt-0.5 shrink-0" aria-hidden="true" />Yalnızca tamamlanan işlerden sonra müşterinin bıraktığı değerlendirmeler gösterilir.</p>
         {directory.reviews.length ? <div className="grid gap-4">{directory.reviews.map((review, index) => <article className={panel} key={`${review.created_at}-${index}`}>
-          <p className="flex flex-wrap items-center gap-2 text-sm font-semibold"><span className="inline-flex items-center gap-1"><Star size={15} className="fill-[#c98a2b] text-[#c98a2b]" aria-hidden="true" />{review.rating} / 5</span><span className="font-normal text-[#515154]">· {marketDate(review.created_at)}</span></p>
-          <p className="mt-2 whitespace-pre-wrap break-words text-base leading-relaxed text-[#424245]">{review.body}</p>
+          <p className="flex flex-wrap items-center gap-2 text-sm font-semibold"><span className="inline-flex items-center gap-1"><Star size={15} className="fill-warning text-warning" aria-hidden="true" />{review.rating} / 5</span><span className="font-normal text-ink-2">· {marketDate(review.created_at)}</span></p>
+          <p className="mt-2 whitespace-pre-wrap break-words text-base leading-relaxed text-ink-2">{review.body}</p>
         </article>)}</div> : <MarketEmpty>Bu ustanın henüz değerlendirmesi yok. Değerlendirmeler yalnızca iş tamamlandıktan sonra eklenir.</MarketEmpty>}
       </section>
       {viewer && <details className={`mt-8 ${panel}`}><summary className="cursor-pointer text-sm font-semibold">Profili bildir</summary><div className="mt-3"><MarketForm action="report" fields={{ provider: id }} label="Bildirimi gönder" success="Bildirimin incelemeye alındı.">

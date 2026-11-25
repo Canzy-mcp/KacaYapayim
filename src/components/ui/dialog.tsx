@@ -30,9 +30,9 @@ export function Dialog({ title, children, onClose, busy = false, className = "ma
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     }}
     onClick={e => { const bounds = e.currentTarget.getBoundingClientRect(); if (e.target === e.currentTarget && !busy && (e.clientX < bounds.left || e.clientX > bounds.right || e.clientY < bounds.top || e.clientY > bounds.bottom)) close.current(); }}
-    className={`m-auto max-h-[90dvh] w-[calc(100%_-_24px)] overflow-y-auto rounded-[22px] border-0 bg-white p-6 shadow-2xl backdrop:bg-black/40 ${className}`}>
-    <div className="mb-5 flex items-center justify-between gap-4"><h2 id={id} className="text-xl font-semibold">{title}</h2>
-      <button type="button" autoFocus disabled={busy} aria-label="Kapat" onClick={onClose} className="min-h-11 min-w-11 rounded-xl hover:bg-gray-100">✕</button></div>
+    className={`m-auto max-h-[90dvh] w-[calc(100%_-_24px)] overflow-y-auto rounded-2xl border border-line bg-surface p-6 shadow-float backdrop:bg-ink/40 ${className}`}>
+    <div className="mb-5 flex items-center justify-between gap-4"><h2 id={id} className="text-lg font-semibold tracking-heading">{title}</h2>
+      <button type="button" autoFocus disabled={busy} aria-label="Kapat" onClick={onClose} className="min-h-10 min-w-10 rounded-lg text-muted hover:bg-neutral-soft hover:text-ink">✕</button></div>
     {children}
   </dialog>, document.body);
 }

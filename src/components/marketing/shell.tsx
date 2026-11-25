@@ -2,17 +2,14 @@ import { BrandLogo } from "@/components/brand-logo";
 import Link from "next/link";
 import { professionRequestHref, supportEmail, supportHref } from "@/lib/marketing/contact";
 import { CookieSettingsButton } from "@/components/marketing/cookie-settings-button";
-import { MarketingMobileNavigation, MarketingNavGroup, type NavGroup, type NavLink } from "@/components/marketing/mobile-navigation";
+import { type NavGroup, type NavLink } from "@/components/marketing/mobile-navigation";
+import { IslandNav } from "@/components/marketing/island-nav";
 
 const mainLinks: readonly NavLink[] = [["Usta bul", "/usta-bul"], ["Nasıl çalışır", "/nasil-calisir"], ["Hizmetler", "/meslekler"], ["Rehber", "/rehber"]];
 const professionalGroup: NavGroup = { label: "Ustalar için", href: "/ustalar-icin", links: [["Özellikler", "/ozellikler"], ["Fiyatlandırma", "/fiyatlandirma"], ["Hesaplama araçları", "/hesaplama-araclari"]] };
 
 export function MarketingHeader() {
-  return <header className="marketing-header"><div className="marketing-header-inner">
-    <Link href="/" className="marketing-brand" aria-label="KaçaYapayım ana sayfa"><BrandLogo size={30}/></Link>
-    <nav aria-label="Ana menü" className="marketing-desktop-nav">{mainLinks.map(([text, href]) => <Link key={href} href={href}>{text}</Link>)}<MarketingNavGroup group={professionalGroup} /></nav>
-    <div className="marketing-header-actions"><Link href="/login" className="marketing-login-link">Giriş yap</Link><Link href="/register" className="marketing-primary marketing-header-cta">Hesap aç</Link><MarketingMobileNavigation links={mainLinks} group={professionalGroup} /></div>
-  </div></header>;
+  return <header className="marketing-header"><IslandNav links={mainLinks} group={professionalGroup} /></header>;
 }
 
 const footerGroups: { title: string; links: readonly NavLink[] }[] = [
@@ -39,5 +36,5 @@ export function PageIntro({ eyebrow, title, description }: { eyebrow: string; ti
 }
 
 export function ContentCta() {
-  return <aside className="mt-16 rounded-[var(--ky-radius-lg)] bg-[var(--ky-primary)] p-8 text-white sm:p-12"><h2 className="ky-title !text-[clamp(1.5rem,1.2rem+1.2vw,2.25rem)] !text-white">Bu hesabı her iş için yapmak istemiyor musun?</h2><p className="mt-3 max-w-xl text-lg leading-[1.6] text-white/85">KaçaYapayım maliyetini ve kârını otomatik hesaplasın; teklifini müşterine paylaş.</p><Link href="/register" className="ky-cta-light mt-6">Hesap aç</Link></aside>;
+  return <aside className="mt-16 rounded-2xl bg-primary p-8 text-white sm:p-12"><h2 className="ky-title !text-[clamp(1.5rem,1.2rem+1.2vw,2.25rem)] !text-white">Bu hesabı her iş için yapmak istemiyor musun?</h2><p className="mt-3 max-w-xl text-lg leading-[1.6] text-white/85">KaçaYapayım maliyetini ve kârını otomatik hesaplasın; teklifini müşterine paylaş.</p><Link href="/register" className="ky-cta-light mt-6">Hesap aç</Link></aside>;
 }

@@ -42,13 +42,13 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Pr
     },
   };
 
-  return <div className={`min-h-[60vh] bg-white text-[#1d1d1f] ${compare.length ? "pb-24" : ""}`}>
+  return <div className={`min-h-[60vh] bg-white text-ink ${compare.length ? "pb-24" : ""}`}>
     <JsonLd data={jsonLd} />
     <section aria-labelledby="directory-title" className="bg-white">
       <div className="mx-auto max-w-[1180px] px-5 pb-8 pt-12 sm:px-8 sm:pt-16">
-        <h1 id="directory-title" className="max-w-3xl text-[clamp(2.5rem,6vw,4.5rem)] font-[650] leading-[1.08] tracking-[-0.04em] text-balance">Yakınındaki ustaları bul.</h1>
-        <p className="mt-4 max-w-xl text-lg leading-relaxed text-[#515154]">Hizmeti ve bölgeni seç, profilleri karşılaştır ve uygun ustadan teklif iste.</p>
-        <form key={pageUrl(1)} action="/usta-bul" aria-label="Usta ara" className="mt-8 grid gap-4 rounded-[20px] bg-[#f5f5f7] p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-[1.3fr_1fr_1fr_1fr_auto] lg:items-end">
+        <h1 id="directory-title" className="max-w-3xl text-[clamp(2.5rem,6vw,4.5rem)] font-[650] leading-[1.08] tracking-display text-balance">Yakınındaki ustaları bul.</h1>
+        <p className="mt-4 max-w-xl text-lg leading-relaxed text-ink-2">Hizmeti ve bölgeni seç, profilleri karşılaştır ve uygun ustadan teklif iste.</p>
+        <form key={pageUrl(1)} action="/usta-bul" aria-label="Usta ara" className="mt-8 grid gap-4 rounded-xl bg-canvas p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-[1.3fr_1fr_1fr_1fr_auto] lg:items-end">
           {compare.length > 0 && <input type="hidden" name="compare" value={compare.join(",")} />}
           <div className="grid min-w-0 gap-2 text-sm font-semibold"><label htmlFor="directory-category">Hizmet</label><select id="directory-category" className={input} name="category" defaultValue={filters.category}>
             <option value="">Tüm hizmetler</option>
@@ -61,23 +61,23 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Pr
           <button type="submit" className={`${linkButton} min-h-12`}><Search aria-hidden="true" size={17} /> Ara</button>
         </form>
         {active.length > 0 && <div className="mt-4 flex flex-wrap items-center gap-2" role="group" aria-label="Seçili filtreler">
-          <span className="text-sm text-[#515154]">Seçili filtreler:</span>
-          {active.map((key) => <Link key={key} href={without(key)} className={`${chip} hover:bg-[#d2d2d7] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#075d54]`} aria-label={`${filterNames[key]} filtresini kaldır: ${valueLabel(key)}`}>
-            <span className="text-[#515154]">{filterNames[key]}:</span> {valueLabel(key)} <X size={14} aria-hidden="true" /></Link>)}
-          <Link href={directoryHref({}, { compare })} className="inline-flex min-h-11 items-center px-2 text-sm font-semibold text-[#075d54] hover:underline">Tümünü temizle</Link>
+          <span className="text-sm text-ink-2">Seçili filtreler:</span>
+          {active.map((key) => <Link key={key} href={without(key)} className={`${chip} hover:bg-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary`} aria-label={`${filterNames[key]} filtresini kaldır: ${valueLabel(key)}`}>
+            <span className="text-ink-2">{filterNames[key]}:</span> {valueLabel(key)} <X size={14} aria-hidden="true" /></Link>)}
+          <Link href={directoryHref({}, { compare })} className="inline-flex min-h-11 items-center px-2 text-sm font-semibold text-primary hover:underline">Tümünü temizle</Link>
         </div>}
       </div>
     </section>
 
-    <section aria-labelledby="directory-results" className="bg-[#f5f5f7] py-12 sm:py-16">
+    <section aria-labelledby="directory-results" className="bg-canvas py-12 sm:py-16">
       <div className="mx-auto max-w-[1180px] px-5 sm:px-8">
-        <h2 id="directory-results" className="mb-6 text-[clamp(1.6rem,3vw,2.5rem)] font-semibold tracking-[-0.03em]">Usta profilleri</h2>
+        <h2 id="directory-results" className="mb-6 text-[clamp(1.6rem,3vw,2.5rem)] font-semibold tracking-heading">Usta profilleri</h2>
         {providers.length ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{providers.map((provider) => <ProviderCard key={provider.id} provider={provider} categories={directory.categories}
             compare={{ href: toggle(provider.id), selected: compare.includes(provider.id), full: compare.length >= maxCompare }} />)}</div>
         ) : <MarketEmpty photo>
-          <MapPin className="mb-3 text-[#075d54]" aria-hidden="true" size={23} />
-          <p className="text-lg font-semibold text-[#1d1d1f]">{page > 1 ? "Bu sayfada profil bulunamadı." : active.length ? "Bu aramaya uyan bir usta bulunamadı." : "Henüz yayımlanmış usta profili yok."}</p>
+          <MapPin className="mb-3 text-primary" aria-hidden="true" size={23} />
+          <p className="text-lg font-semibold text-ink">{page > 1 ? "Bu sayfada profil bulunamadı." : active.length ? "Bu aramaya uyan bir usta bulunamadı." : "Henüz yayımlanmış usta profili yok."}</p>
           {page === 1 && active.length > 0 && <p className="mt-2">Aramayı genişletebilir veya işini ilan olarak paylaşıp ustalardan teklif alabilirsin.</p>}
           <div className="mt-5 flex flex-wrap gap-2">
             {page === 1 && filters.district && <Link href={without("district")} className={plainButton}>İlçe filtresini kaldır</Link>}
@@ -91,10 +91,10 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Pr
     </section>
 
     <section className="bg-white py-12 sm:py-16"><div className="mx-auto max-w-[1180px] px-5 sm:px-8">
-      <aside className="flex flex-wrap items-center justify-between gap-5 rounded-[20px] bg-[#f5f5f7] p-6 sm:p-10">
+      <aside className="flex flex-wrap items-center justify-between gap-5 rounded-xl bg-canvas p-6 sm:p-10">
         <div className="flex min-w-0 items-start gap-3">
-          <span className="grid size-11 shrink-0 place-items-center rounded-full bg-[#e4f0ed] text-[#075d54]"><ClipboardList aria-hidden="true" size={21} /></span>
-          <div className="min-w-0"><h2 className="text-xl font-semibold tracking-[-0.02em] sm:text-2xl">Ustalar sana teklif versin.</h2><p className="mt-1 text-sm leading-relaxed text-[#515154]">Yapılacak işi tarif et, gelen teklifleri tek yerden karşılaştır.</p></div>
+          <span className="grid size-11 shrink-0 place-items-center rounded-full bg-primary-soft text-primary"><ClipboardList aria-hidden="true" size={21} /></span>
+          <div className="min-w-0"><h2 className="text-xl font-semibold tracking-heading sm:text-2xl">Ustalar sana teklif versin.</h2><p className="mt-1 text-sm leading-relaxed text-ink-2">Yapılacak işi tarif et, gelen teklifleri tek yerden karşılaştır.</p></div>
         </div>
         <div className="flex flex-wrap gap-2"><Link className={plainButton} href="/talepler">Taleplerim</Link><Link className={linkButton} href={request}>İş ilanı ver <ArrowRight aria-hidden="true" size={17} /></Link></div>
       </aside>

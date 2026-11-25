@@ -28,13 +28,13 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
   if (!setupProvider) return <main className="mx-auto max-w-xl px-5 py-12 sm:py-20">
     <Link href="/" aria-label="KaçaYapayım ana sayfa"><BrandLogo size={38} /></Link>
     <h1 className="mt-8 text-3xl font-semibold tracking-tight">KaçaYapayım’ı nasıl kullanacaksın?</h1>
-    <p className="mt-3 text-sm leading-relaxed text-slate-600">Bölgende usta bulabilir ya da işletme panelini kurabilirsin.</p>
-    {hata === "tercih" && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-800">Hesap tercihin kaydedilemedi. Tekrar dene.</p>}
+    <p className="mt-3 text-sm leading-relaxed text-muted">Bölgende usta bulabilir ya da işletme panelini kurabilirsin.</p>
+    {hata === "tercih" && <p role="alert" className="mt-4 rounded-xl bg-danger-soft p-3 text-sm text-danger-ink">Hesap tercihin kaydedilemedi. Tekrar dene.</p>}
     <div className="mt-6 grid gap-3">
       <form action={startCustomer}>
-        <button type="submit" className="flex min-h-12 w-full items-center justify-center rounded-2xl bg-[#0071e3] px-5 text-sm font-semibold text-white hover:bg-[#0061c4]">Usta arıyorum</button>
+        <button type="submit" className="flex min-h-12 w-full items-center justify-center rounded-2xl bg-primary px-5 text-sm font-semibold text-white hover:bg-primary-hover">Usta arıyorum</button>
       </form>
-      <Link href={providerSetupPath} className="flex min-h-12 items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-800 hover:bg-slate-50">Ustayım</Link>
+      <Link href={providerSetupPath} className="flex min-h-12 items-center justify-center rounded-2xl border border-line bg-white px-5 text-sm font-semibold text-ink hover:bg-surface-2">Ustayım</Link>
     </div>
   </main>;
 
